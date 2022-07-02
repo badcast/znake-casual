@@ -1,0 +1,35 @@
+map
+{
+	level_name			"{$level_name1}"				// level name
+	level_description 	"{$level_description1}" // description
+	level_mission		1						// mission level 
+	level_mission_text	"{$level_mission_text1}"		// mission text for apply
+	
+	level_terrain2D //Это секция предоставлена для грунта
+	{
+       
+		navScalePerNeuron 	0.18 // per nav scale 
+		//tbground1 - это не обязательное название для грунта
+		tbground01{
+			texture		"concrete"
+			source		{}
+			destination	{0, 0, 100, 100}
+		}
+	}
+
+	level_space
+	{
+		player 
+		{
+			object		"player"
+			position	{0.0,0.0}
+			angle 		0
+		}
+		obj001
+		{
+			object		"obj-concrete-1x1"
+			position    {0.24,0.1}
+			angle 		90.0			
+		}
+	}
+}                      

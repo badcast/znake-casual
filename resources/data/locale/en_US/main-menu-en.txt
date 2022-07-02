@@ -1,0 +1,12 @@
+//	@License: CC-BY-SA 
+//	@Author: Light Mister
+//		-------------
+locale 				"en"
+locale-translate    "English"
+menu_game 			"Game"
+menu_start_game 	"Play game"
+menu_settings 		"Option"
+menu_aboutus 		"About US"
+menu_quit 			"Quit"
+menu_sound_volume 	"Sound volume"
+menu_music_volume 	"Music volume"

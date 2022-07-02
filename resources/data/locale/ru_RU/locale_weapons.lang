@@ -1,0 +1,4 @@
+weapons          "оружий"
+weapons.gun      "пулемёт"
+weapons.missile  "грантамёт"
+weapons.grenade  "граната"

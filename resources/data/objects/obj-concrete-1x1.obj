@@ -1,0 +1,9 @@
+object				"concrete-1x1"			// Object name 
+object_type 		"SpriteRenderer"		// Object type
+properties			//fixed image size of original 
+{
+	sprite			"concrete"
+	fixed			true
+	size			{32.0,32.0}
+	flip			[.32,.32]
+}

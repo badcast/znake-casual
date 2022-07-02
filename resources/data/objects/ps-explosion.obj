@@ -1,0 +1,9 @@
+object				"particle-flame"			// Object name 
+object_type 		"ParticleSystem"			// Object type
+properties			//fixed image size of original 
+{
+	texture			"flame"
+	textureType		"Atlas"
+	speed			1.0
+	
+}

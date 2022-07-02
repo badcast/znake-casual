@@ -1,37 +1,36 @@
-#get max version CMAKE
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.0)
 
-project("NightFear" LANGUAGES CXX)
+project(RoninEngine LANGUAGES CXX)
 
+set(RUNTIME_OUTPUT_NAME "engine")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(SDL2 REQUIRED)
 
-message("${PROJECT_NAME}")
+add_subdirectory(src/ronin) #get sources and linking from the "Sources" directory
 
-#FUNCTIONS
-include(cmake/functions.cmake)
+add_library(RoninEngine STATIC ${RONINE_ENGINE_HEADERS} ${RONIN_ENGINE_SOURCES})
 
-set(RUNTIME_OUTPUT_NAME "NightFear")
+set_target_properties(RoninEngine PROPERTIES
+    OUTPUT_NAME ${RUNTIME_OUTPUT_NAME})
 
-if(UNIX)
-    set(OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/linux/)
+#include to #include <ronin/...>
+target_include_directories(RoninEngine INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-    # custom_log("<This is Linux Runtime>")
-    message("<This is Linux Runtime>")
-elseif(WIN32)
-    set(OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/windows/)
+#link SDL2
+target_link_libraries(RoninEngine SDL2::SDL2 SDL2_mixer SDL2_ttf SDL2_image SDL2_gfx)
 
-    # custom_log("<This is Windows Runtime>")
-    message("<This is Windows Runtime>")
+
+#create link resources "data:resources"
+file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+set(_DATA_DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data")
+
+if(NOT EXISTS "${_DATA_DESTINATION}")
+    message(STATUS "Linking data to \"${_DATA_DESTINATION}\"")
+    file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}/resources/data" "${_DATA_DESTINATION}" SYMBOLIC)
+else()
+    message(STATUS "Link exists - not required")
 endif()
-
-SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIRECTORY}")
-SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIRECTORY}")
-SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIRECTORY}")
-SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIRECTORY}")
-SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIRECTORY}")
-SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIRECTORY}")
-
-add_subdirectory(Sources) #get sources and linking from the "Sources" directory
+unset(_DATA_DESTINATION)

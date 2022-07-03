@@ -4,13 +4,13 @@
 
 namespace RoninEngine::Runtime {
 
-extern void callback_movement(Transform* transform, Vec2 lastPoint);
-
 Transform::Transform() : Transform("Transform") {}
 
 Transform::Transform(const string& name) : Component(name) {
     _parent = nullptr;
     _angle = 0;
+    // set as default
+    Level::getScene()->callback_movement(this, _p + Vec2::one);
 }
 
 Transform::~Transform() {
@@ -135,7 +135,7 @@ Vec2 Transform::position() { return _p; }
 void Transform::position(const Vec2& value) {
     Vec2 lastPoint = _p;
     _p = value;  // set the position
-    callback_movement(this, lastPoint);
+    Level::getScene()->callback_movement(this, lastPoint);
 }
 Vec2 Transform::localPosition() {
     if (this->_parent != nullptr) return this->_parent->_p - _p;
@@ -144,7 +144,7 @@ Vec2 Transform::localPosition() {
 void Transform::localPosition(const Vec2& value) {
     Vec2 lastPoint = _p;
     _p = (this->_parent != nullptr) ? _parent->_p + value : value;
-    callback_movement(this, lastPoint);
+    Level::getScene()->callback_movement(this, lastPoint);
 }
 
 float Transform::angle() { return this->_angle; }
@@ -153,6 +153,7 @@ void Transform::angle(float value) {
     if (isnan(value)) value = 0;
     this->_angle = value;
 }
+
 float Transform::localAngle() { return (this->_parent) ? this->_parent->_angle - this->_angle : this->_angle; }
 void Transform::localAngle(float value) {}
 Transform* Transform::parent() { return _parent; }

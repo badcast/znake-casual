@@ -25,11 +25,10 @@ class Camera : public Component {
     bool isFocused();
     void Focus();
 
-    const Vec2 ScreenToWorldPoint(Vec2 screenPoint);
-    const Vec2 WorldToScreenPoint(Vec2 worldPoint);
+    std::tuple<std::list<Renderer*>*, std::list<Light*>*> matrixSelection();
 
-    std::tuple<std::list<Renderer*>*, std::list<Light*>*> GetRenderersOfScreen();
-
+    static const Vec2 ScreenToWorldPoint(Vec2 screenPoint);
+    static const Vec2 WorldToScreenPoint(Vec2 worldPoint);
     static Camera* mainCamera();
 };
 

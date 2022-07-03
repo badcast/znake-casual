@@ -6,15 +6,10 @@ void Player::OnAwake() {
     playerCamera = gameObject()->Add_Component<Camera2D>();
     spriteRenderer = gameObject()->Add_Component<SpriteRenderer>();
     spotlight = gameObject()->Add_Component<Spotlight>();
-
-    spriteRenderer->transform()->position(Vec2::zero);
 }
-Vec2 movementDir;
+Vec2 movementDir = Vec2::up;
 
-void Player::OnStart() {
-    speed = 0.01f;
-    movementDir = Vec2::up;
-}
+void Player::OnStart() { speed = 0.01f; }
 
 void Player::OnUpdate() {
     float curSpeed = input::get_key(SDL_SCANCODE_LSHIFT) ? (speed * 10) : speed;
@@ -27,6 +22,8 @@ void Player::OnUpdate() {
         if (axis != Vec2::zero && axis.x != axis.y) {
             if (axis.x - movementDir.x != 0 && axis.y - movementDir.y != 0) movementDir = axis;
         }
+
+        movementDir = axis;
 
         transform()->LookAtLerp(point + movementDir, .5f);
         transform()->position(Vec2::MoveTowards(point, point + movementDir, curSpeed));

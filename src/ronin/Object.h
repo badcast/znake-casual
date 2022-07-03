@@ -6,7 +6,7 @@ namespace RoninEngine {
 namespace Runtime {
 
 extern Transform* create_empty_transform();
-extern GameObject* create_empty();
+extern GameObject* create_empty_gameobject();
 
 GameObject* CreateGameObject();
 GameObject* CreateGameObject(const std::string& name);

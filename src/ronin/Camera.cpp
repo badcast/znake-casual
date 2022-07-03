@@ -2,6 +2,7 @@
 
 RoninEngine::Runtime::Camera* _main = nullptr;
 namespace RoninEngine::Runtime {
+
 Camera::Camera() : Camera("Camera") {}
 Camera::Camera(const string& name) : Component(name) {
     if (!_main) {
@@ -16,38 +17,36 @@ Camera::~Camera() {
 }
 bool Camera::isFocused() { return _main == this; }
 void Camera::Focus() { _main = this; }
-std::tuple<list<Renderer*>*, list<Light*>*> Camera::GetRenderersOfScreen() {
+
+/*
+std::tuple<list<Renderer*>*, list<Light*>*> linearSelection() {
     constexpr std::uint8_t Nz = 2;
     list<Renderer*> layers[Nz];
     std::uint8_t zN = 0;
-    int size = 0;
-
     if (__rendererOutResults.empty()) {
-        // NOTE: Old Method from get
-        /*
-            auto res = Application::getResolution();
-            Vec2 topLeft, rightBottom, rSz;
-            topLeft = this->ScreenToWorldPoint(Vec2::zero);
-            rightBottom = this->ScreenToWorldPoint(Vec2(res.width, res.height));
+        auto res = Application::getResolution();
+        Vec2 topLeft, rightBottom, rSz;
+        topLeft = this->ScreenToWorldPoint(Vec2::zero);
+        rightBottom = this->ScreenToWorldPoint(Vec2(res.width, res.height));
 
-            for (auto render : RoninEngine::Level::getScene()->_assoc_renderers) {
-                if (render->zOrder >= Nz) throw std::out_of_range("N z range");
+        for (auto render : RoninEngine::Level::getScene()->_assoc_renderers) {
+            if (render->zOrder >= Nz) throw std::out_of_range("N z range");
 
-                rSz = render->GetSize() / squarePerPixels / 2;
+            rSz = render->GetSize() / squarePerPixels / 2;
 
-                Transform* t = render->transform();
-                if (render->zOrder >= 0 &&
-                    //	X
-                    (t->_p.x + rSz.x >= topLeft.x && t->_p.x - rSz.x <= rightBottom.x) &&
-                    //	Y
-                    (t->_p.y - rSz.y <= topLeft.y && t->_p.y + rSz.y >= rightBottom.y)) {
-                    layers[render->zOrder].emplace_front(render);
-                }
+            Transform* t = render->transform();
+            if (render->zOrder >= 0 &&
+                //	X
+                (t->_p.x + rSz.x >= topLeft.x && t->_p.x - rSz.x <= rightBottom.x) &&
+                //	Y
+                (t->_p.y - rSz.y <= topLeft.y && t->_p.y + rSz.y >= rightBottom.y)) {
+                layers[render->zOrder].emplace_front(render);
             }
-            */
-        // ordering and collect
-        list<Renderer*>* target;
-        while (target = zN < Nz ? &layers[zN++] : nullptr) {
+        }
+
+            // ordering and collect
+            list<Renderer*>* target;
+        while ((target = zN < Nz ? &layers[zN++] : nullptr)) {
             for (auto x = begin(*target); x != end(*target); ++x) {
                 __rendererOutResults.emplace_back((*x));
             }
@@ -61,8 +60,54 @@ std::tuple<list<Renderer*>*, list<Light*>*> Camera::GetRenderersOfScreen() {
 
     return make_tuple(&__rendererOutResults, &__lightsOutResults);
 }
+*/
+
+std::tuple<list<Renderer*>*, list<Light*>*> Camera::matrixSelection() {
+    constexpr std::uint8_t Nz = 2;
+    list<Renderer*> layers[Nz];
+    std::uint8_t zN = 0;
+    if (__rendererOutResults.empty()) {
+        Resolution res = Application::getResolution();
+        float magnitude;
+
+        Vec2 ray;
+        Vec2 wpLeftTop(Vec2::Round(this->ScreenToWorldPoint(Vec2::zero)));
+        Vec2 wpRightBottom(Vec2::Round(this->ScreenToWorldPoint(Vec2(res.width, res.height))));
+        float delayTime = Time::startUpTime();
+        for (ray.x = wpLeftTop.x; ray.x <= wpRightBottom.x; ++ray.x) {
+            for (ray.y = wpLeftTop.y; ray.y >= wpRightBottom.y; --ray.y) {
+                magnitude = ray.sqrMagnitude();
+
+                decltype(Level::matrixWorld)::iterator fi = Level::getScene()->matrixWorld.find(magnitude);
+                if (fi != std::end(Level::getScene()->matrixWorld)) {
+                    for (auto el : fi->second) {
+                        if (Renderer* render = el->gameObject()->Get_Component<Renderer>()) {
+                            layers[render->zOrder].emplace_front(render);
+                        }
+                    }
+                }
+            }
+        }
+        delayTime = Time::startUpTime() - delayTime;
+        // ordering and collect
+        list<Renderer*>* target;
+        while ((target = zN < Nz ? &layers[zN++] : nullptr)) {
+            for (auto x = begin(*target); x != end(*target); ++x) {
+                __rendererOutResults.emplace_back((*x));
+            }
+        }
+    }
+
+    if (__lightsOutResults.empty()) {
+        __lightsOutResults.assign(RoninEngine::Level::getScene()->_assoc_lightings.begin(),
+                                  RoninEngine::Level::getScene()->_assoc_lightings.end());
+    }
+
+    return make_tuple(&__rendererOutResults, &__lightsOutResults);
+}
+
 const Vec2 Camera::ScreenToWorldPoint(Vec2 screenPoint) {
-    Vec2 lhs = transform()->position();
+    Vec2 lhs = _main->transform()->position();
 
     // dst.x = ((rect.w - dst.w) / 2.0f - (point->x + sourcePoint->x) * squarePerPixels);
     // dst.y = ((rect.h - dst.h) / 2.0f + (point->y - sourcePoint->y) * squarePerPixels);
@@ -76,7 +121,7 @@ const Vec2 Camera::ScreenToWorldPoint(Vec2 screenPoint) {
     return screenPoint;
 }
 const Vec2 Camera::WorldToScreenPoint(Vec2 worldPoint) {
-    Vec2* point = &transform()->_p;
+    Vec2* point = &_main->transform()->_p;
     Vec2 dst;
     auto res = Application::getResolution();
     //Положение по горизонтале

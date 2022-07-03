@@ -27,15 +27,12 @@ void Application::Init(const std::uint32_t& width, const std::uint32_t& height) 
 
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 512)) fail("Fail open audio.");
 
-    window = SDL_CreateWindow("Ronin Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
-                              SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Ronin Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
 
-    if(!window)
-        fail(SDL_GetErrorMsg(errorStr, 128));
+    if (!window) fail(SDL_GetErrorMsg(errorStr, 128));
 
-    renderer = SDL_CreateRenderer(window, -1,SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if(!renderer)
-        fail(SDL_GetErrorMsg(errorStr, 128));
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer) fail(SDL_GetErrorMsg(errorStr, 128));
 
     // Brightness - Яркость
     SDL_SetWindowBrightness(window, 1);
@@ -91,7 +88,7 @@ void Application::LoadGame() {
     InitalizeControls();
 
     // Set cursor
-    //SDL_SetCursor(GC::GetCursor("cursor", {1, 1}));
+    // SDL_SetCursor(GC::GetCursor("cursor", {1, 1}));
 
     Levels::Level_Init();
 }
@@ -125,7 +122,7 @@ void Application::LoadLevel(Level* level) {
 
     if (!level->is_hierarchy()) {
         // init main object
-        level->main_object = create_empty();
+        level->main_object = create_empty_gameobject();
 
         if (level->main_object == nullptr) throw std::bad_exception();
 
@@ -165,8 +162,7 @@ SDL_DisplayMode Application::getDisplayMode() {
     return display;
 }
 
-RoninEngine::Resolution RoninEngine::Application::getResolution()
-{
+RoninEngine::Resolution RoninEngine::Application::getResolution() {
     Resolution res;
     SDL_RendererInfo rf;
     SDL_GetRendererInfo(renderer, &rf);
@@ -226,7 +222,7 @@ bool Application::Simulate() {
             }
 
             fps = SDL_ceilf(Time::frame() / (SDL_GetTicks() / 1000.f));
-            if (Time::time() > fpsRound) {
+            if (Time::startUpTime() > fpsRound) {
 #ifdef _GLIBCXX_DEBUG_ONLY
                 std::sprintf(_title,
                              "Ronin Engine (Debug) FPS:%d Memory:%luMiB, "
@@ -236,7 +232,7 @@ bool Application::Simulate() {
 
 #endif
                 SDL_SetWindowTitle(Application::GetWindow(), _title);
-                fpsRound = Time::time() + 0.15f;
+                fpsRound = Time::startUpTime() + 1;
             }
 
             Time::update();
@@ -273,4 +269,3 @@ void Application::fail(const std::string& message) {
 
 void Application::fail_OutOfMemory() { fail("Out of memory!"); }
 }  // namespace RoninEngine
-

@@ -53,7 +53,7 @@ T* factory_base(bool initInHierarchy, T* clone, const char* name) {
 }
 
 Transform* create_empty_transform() { return factory_base<Transform>(false, nullptr, nullptr); }
-GameObject* create_empty() { return factory_base<GameObject>(false, nullptr, nullptr); }
+GameObject* create_empty_gameobject() { return factory_base<GameObject>(false, nullptr, nullptr); }
 
 /*NOTE: WoW: Здесь профиксина 6 месячная проблема
 template GameObject* CreateObject<GameObject>();
@@ -88,7 +88,7 @@ void Destroy(Object* obj, float t) {
 
     auto iter = std::find_if(std::begin(*ref), std::end(*ref), [obj](pair<Object*, float> x) { return obj == x.first; });
 
-    if (iter != std::end(*ref)) std::bad_exception();
+    if (iter != std::end(*ref)) std::runtime_error("Object is destroyed state");
 
     ref->push_back(make_pair(const_cast<Object*>(obj), Time::time() + t));
 }
@@ -134,35 +134,31 @@ GameObject* Instantiate(GameObject* obj) {
     if (clone->m_name.find(_cloneStr) == std::string::npos) clone->m_name += _cloneStr;
 
     for (auto iter = begin(obj->m_components); iter != end(obj->m_components); ++iter) {
-        Component* c = *iter;
-        if (dynamic_cast<Transform*>(c)) {
-            Transform* t = ((Transform*)clone->m_components.front());
-            // TODO: сомнительно для Transform
-            *t = *dynamic_cast<Transform*>(c);
-            t->_derivedObject = clone;
-            t->setParent(nullptr);
-
-            // Clone childs
-            std::for_each(std::begin(reinterpret_cast<Transform*>(c)->hierarchy),
-                          std::end(reinterpret_cast<Transform*>(c)->hierarchy), [t](Transform* y) {
-                              // recursive
-                              GameObject* yClone = Instantiate(y->gameObject());
-                              y->setParent(t);
-                              yClone->m_name = t->gameObject()->m_name;  // put " (clone)" name
-                              yClone->m_name.shrink_to_fit();
-                          });
-            continue;
-        } else if (dynamic_cast<SpriteRenderer*>(c)) {
-            c = factory_base<SpriteRenderer>(false, reinterpret_cast<SpriteRenderer*>(c), nullptr);
+        Component* replacement = *iter;
+        if (Transform* t = dynamic_cast<Transform*>(replacement)) {
+            Transform* newT = create_empty_transform();
+            newT->_angle = t->_angle;
+            newT->position(t->position());
+            // BUG: Hierarchy cnage is bug, fix now;
+            //  Clone childs recursive
+            for (Transform* y : t->hierarchy) {
+                GameObject* yClone = Instantiate(y->gameObject());
+                yClone->transform()->setParent(newT);
+                yClone->m_name = t->gameObject()->m_name;  // put " (clone)" name
+                yClone->m_name.shrink_to_fit();
+            }
+            replacement = newT;
+        } else if (dynamic_cast<SpriteRenderer*>(replacement)) {
+            replacement = factory_base<SpriteRenderer>(false, reinterpret_cast<SpriteRenderer*>(replacement), nullptr);
         } else if (false /* dynamic_cast<Camera2D*>(c)*/) {
-            c = factory_base<Camera2D>(false, reinterpret_cast<Camera2D*>(c), nullptr);
+            replacement = factory_base<Camera2D>(false, reinterpret_cast<Camera2D*>(replacement), nullptr);
         } else {
-            static_assert("undefined type");
+            static_assert(true, "Undefined type");
             continue;
         }
 
-        c->_derivedObject = nullptr;
-        clone->Add_Component(c);
+        replacement->_derivedObject = nullptr;
+        clone->Add_Component(replacement);
     }
 
     return clone;
@@ -193,15 +189,9 @@ Object::Object(const string& name) : m_name(name) {
 
 void Object::Destroy() { RoninEngine::Runtime::Destroy(this); }
 
-std::string &Object::name(const std::string& newName)
-{
-    return (m_name=newName);
-}
+std::string& Object::name(const std::string& newName) { return (m_name = newName); }
 
-const string &Object::name()
-{
-    return m_name;
-}
+const string& Object::name() { return m_name; }
 
 Object::operator bool() { return instanced(this); }
 }  // namespace Runtime

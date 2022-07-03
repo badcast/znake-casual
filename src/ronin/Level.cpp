@@ -1,27 +1,7 @@
-#include <set>
-
 #include "framework.h"
 
 namespace RoninEngine {
 Level *pCurrentScene;
-
-std::map<float, std::set<Transform *>> matrixWorld;
-
-namespace Runtime {
-void callback_movement(Transform *transform, Vec2 lastPoint) {
-    Vec2 newPoint(Vec2::Round(transform->position()));
-    lastPoint = Vec2::Round(lastPoint);
-
-    // skip at no changed pos
-    if (newPoint == lastPoint) return;
-
-    // 1. delete last point source
-    matrixWorld[lastPoint.magnitude()].erase(transform);
-
-    // 2. add new point source
-    matrixWorld[newPoint.magnitude()].insert(transform);
-}
-}  // namespace Runtime
 
 Level::Level() : Level("Untitled scene") {}
 Level::Level(const string &name) {
@@ -79,6 +59,46 @@ Level::~Level() {
     this->_objects.clear();
 
     GC::gc_unalloc(ui);
+}
+
+//NOTE: Check game hierarchy
+std::list<Transform *> Level::hierarhy_damage_checker(){
+    std::list<Transform *> damaged;
+    for (auto x = begin(pCurrentScene->matrixWorld); x != end(pCurrentScene->matrixWorld); ++x) {
+        for (auto y = begin(x->second); y != end(x->second); ++y) {
+            float num0 = Vec2::Round((*y)->position()).sqrMagnitude();
+            if (num0 != x->first) {
+                damaged.emplace_back(*y);
+            }
+        }
+    }
+    return damaged;
+}
+
+void Level::callback_movement(Transform *target, Vec2 lastPoint) {
+    std::size_t num0;
+    Vec2 newPoint(Vec2::Round(target->_p));
+
+    lastPoint = Vec2::Round(lastPoint);
+
+    if (newPoint == lastPoint) return;
+
+    // 1. delete last point source
+    decltype(matrixWorld)::iterator iter = matrixWorld.find(lastPoint.sqrMagnitude());
+    if (std::end(matrixWorld) != iter) {
+        num0 = iter->second.size();
+        iter->second.erase(target);
+        if(iter->second.size() == num0){
+            //no changed statement
+            Application::fail("Game hierarchy is damaged");
+        }
+        // 2. erase empty matrix element
+        if (iter->second.empty())
+            matrixWorld.erase(iter);
+    }
+
+    // 3. add new point source
+    matrixWorld[newPoint.sqrMagnitude()].insert(target);
 }
 
 void Level::CC_Render_Push(Renderer *rend) { _assoc_renderers.emplace_front(rend); }

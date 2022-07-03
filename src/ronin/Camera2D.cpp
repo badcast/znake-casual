@@ -26,7 +26,7 @@ void Camera2D::render(SDL_Renderer* renderer, Rect_t rect, GameObject* root) {
         Gizmos::DrawPosition(transform()->position());
     }
 
-    auto stack = GetRenderersOfScreen();
+    auto stack = matrixSelection();
     SDL_RenderSetScale(renderer, aspectRatio.x, aspectRatio.y);
     // Render Objects
     for (auto renderSource : *std::get<std::list<Renderer*>*>(stack)) {

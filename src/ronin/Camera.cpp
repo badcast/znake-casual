@@ -71,7 +71,7 @@ std::tuple<list<Renderer*>*, list<Light*>*> Camera::matrixSelection() {
 
     if (__rendererOutResults.empty()) {
         Resolution res = Application::getResolution();
-std::unordered_map<int,int> xxx;
+
         Vec2 ray;
         Vec2 wpLeftTop(Vec2::Round(this->ScreenToWorldPoint(Vec2::zero)));
         Vec2 wpRightBottom(Vec2::Round(this->ScreenToWorldPoint(Vec2(res.width, res.height))));

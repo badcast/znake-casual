@@ -73,6 +73,8 @@ class Level {
     static int matrixRestore();
     static int matrixRestore(const std::list<Runtime::Transform*>& damaged_content);
 
+    static void render_info(int * culled, int * fullobjects);
+
     static Level* getScene();
 };
 

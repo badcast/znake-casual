@@ -2,15 +2,15 @@
 
 namespace RoninEngine {
 
-Level *pCurrentScene;
+Level *selfLevel;
 
 Level::Level() : Level("Untitled") {}
 Level::Level(const string &name) {
-    if (pCurrentScene != nullptr) {
+    if (selfLevel != nullptr) {
         static_assert("pCurrentScene replaced by new");
     }
     main_object = nullptr;
-    pCurrentScene = this;
+    selfLevel = this;
     _firstRunScripts = nullptr;
     _realtimeScripts = nullptr;
     _destructions = nullptr;
@@ -24,9 +24,9 @@ Level::~Level() {
     Transform *tr;
     list<GameObject *> stack;
 
-    if (pCurrentScene == this) {
+    if (selfLevel == this) {
         static_assert("pCurrentScene set to null");
-        pCurrentScene = nullptr;
+        selfLevel = nullptr;
     }
 
     if (_firstRunScripts) {
@@ -64,9 +64,9 @@ Level::~Level() {
 // NOTE: Check game hierarchy
 std::list<Transform *> Level::matrixCheckDamaged() {
     std::list<Transform *> damaged;
-    int mxSz = pCurrentScene->matrixWorld.size();
+    int mxSz = selfLevel->matrixWorld.size();
 
-    for (auto x = begin(pCurrentScene->matrixWorld); x != end(pCurrentScene->matrixWorld); ++x) {
+    for (auto x = begin(selfLevel->matrixWorld); x != end(selfLevel->matrixWorld); ++x) {
         for (auto y = begin(x->second); y != end(x->second); ++y) {
             if (Vec2::Round((*y)->_p) != x->first) {
                 damaged.emplace_back(*y);
@@ -85,25 +85,37 @@ int Level::matrixRestore(const std::list<Runtime::Transform *> &damaged_content)
     int restored = 0;
     for (Runtime::Transform *dam : damaged_content) {
         Vec2 find = Vec2::Round(dam->_p);
-        auto vertList = pCurrentScene->matrixWorld.find(find);
-        if (vertList == std::end(pCurrentScene->matrixWorld)) continue;
+        auto vertList = selfLevel->matrixWorld.find(find);
+        if (vertList == std::end(selfLevel->matrixWorld)) continue;
 
-        if(vertList->first != find)
-        {
-            //HASH function incorrect result
-            int xxx =0;
+        if (vertList->first != find) {
+            // HASH function incorrect result
+            int xxx = 0;
         }
         auto fl = vertList->second.find(dam);
 
-        if(fl == end(vertList->second))
-        {
-            //restore
+        if (fl == end(vertList->second)) {
+            // restore
             vertList->second.emplace(dam);
             ++restored;
         }
     }
 
     return restored;
+}
+
+void Level::render_info(int *culled, int *fullobjects) {
+    Camera *curCamera = Camera::mainCamera();
+
+    if (!curCamera) return;
+
+    if (culled) {
+        (*culled) = selfLevel->_assoc_renderers.size() - curCamera->__rendererOutResults.size();
+    }
+
+    if (fullobjects) {
+        (*fullobjects) = selfLevel->_assoc_renderers.size();
+    }
 }
 
 void Level::matrix_nature(Transform *target, Vec2 lastPoint) {
@@ -120,8 +132,7 @@ void Level::matrix_nature(Transform *target, Vec2 lastPoint) {
         iter->second.erase(target);
 
         // 2. erase empty matrix element
-        if (iter->second.empty())
-            matrixWorld.erase(iter);
+        if (iter->second.empty()) matrixWorld.erase(iter);
     }
 
     // 3. add new point source
@@ -232,5 +243,5 @@ void Level::onDrawGizmos() {}
 
 void Level::onUnloading() {}
 
-Level *Level::getScene() { return pCurrentScene; }
+Level *Level::getScene() { return selfLevel; }
 }  // namespace RoninEngine

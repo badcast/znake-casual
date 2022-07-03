@@ -1,12 +1,13 @@
 #include "framework.h"
 
 namespace RoninEngine {
+
 Level *pCurrentScene;
 
-Level::Level() : Level("Untitled scene") {}
+Level::Level() : Level("Untitled") {}
 Level::Level(const string &name) {
     if (pCurrentScene != nullptr) {
-        static_assert("pCurrentScene is and replaced by new");
+        static_assert("pCurrentScene replaced by new");
     }
     main_object = nullptr;
     pCurrentScene = this;
@@ -16,8 +17,6 @@ Level::Level(const string &name) {
     globalID = 0;
     m_isUnload = false;
     m_name = name;
-    matrixWorld.clear();
-
     GC::gc_alloc_lval(ui, this);
 }
 Level::~Level() {
@@ -39,6 +38,7 @@ Level::~Level() {
     if (_destructions) {
         GC::gc_unalloc(_destructions);
     }
+
     /*
         // free objects
         while (target) {
@@ -61,13 +61,14 @@ Level::~Level() {
     GC::gc_unalloc(ui);
 }
 
-//NOTE: Check game hierarchy
-std::list<Transform *> Level::hierarhy_damage_checker(){
+// NOTE: Check game hierarchy
+std::list<Transform *> Level::matrixCheckDamaged() {
     std::list<Transform *> damaged;
+    int mxSz = pCurrentScene->matrixWorld.size();
+
     for (auto x = begin(pCurrentScene->matrixWorld); x != end(pCurrentScene->matrixWorld); ++x) {
         for (auto y = begin(x->second); y != end(x->second); ++y) {
-            float num0 = Vec2::Round((*y)->position()).sqrMagnitude();
-            if (num0 != x->first) {
+            if (Vec2::Round((*y)->_p) != x->first) {
                 damaged.emplace_back(*y);
             }
         }
@@ -75,8 +76,37 @@ std::list<Transform *> Level::hierarhy_damage_checker(){
     return damaged;
 }
 
-void Level::callback_movement(Transform *target, Vec2 lastPoint) {
-    std::size_t num0;
+int Level::matrixRestore() {
+    auto damaged = matrixCheckDamaged();
+    return matrixRestore(damaged);
+}
+
+int Level::matrixRestore(const std::list<Runtime::Transform *> &damaged_content) {
+    int restored = 0;
+    for (Runtime::Transform *dam : damaged_content) {
+        Vec2 find = Vec2::Round(dam->_p);
+        auto vertList = pCurrentScene->matrixWorld.find(find);
+        if (vertList == std::end(pCurrentScene->matrixWorld)) continue;
+
+        if(vertList->first != find)
+        {
+            //HASH function incorrect result
+            int xxx =0;
+        }
+        auto fl = vertList->second.find(dam);
+
+        if(fl == end(vertList->second))
+        {
+            //restore
+            vertList->second.emplace(dam);
+            ++restored;
+        }
+    }
+
+    return restored;
+}
+
+void Level::matrix_nature(Transform *target, Vec2 lastPoint) {
     Vec2 newPoint(Vec2::Round(target->_p));
 
     lastPoint = Vec2::Round(lastPoint);
@@ -84,21 +114,18 @@ void Level::callback_movement(Transform *target, Vec2 lastPoint) {
     if (newPoint == lastPoint) return;
 
     // 1. delete last point source
-    decltype(matrixWorld)::iterator iter = matrixWorld.find(lastPoint.sqrMagnitude());
+    auto iter = matrixWorld.find(lastPoint);
+
     if (std::end(matrixWorld) != iter) {
-        num0 = iter->second.size();
         iter->second.erase(target);
-        if(iter->second.size() == num0){
-            //no changed statement
-            Application::fail("Game hierarchy is damaged");
-        }
+
         // 2. erase empty matrix element
         if (iter->second.empty())
             matrixWorld.erase(iter);
     }
 
     // 3. add new point source
-    matrixWorld[newPoint.sqrMagnitude()].insert(target);
+    matrixWorld[newPoint].insert(target);
 }
 
 void Level::CC_Render_Push(Renderer *rend) { _assoc_renderers.emplace_front(rend); }
@@ -186,8 +213,24 @@ void Level::RenderSceneLate(SDL_Renderer *renderer) {
     }
 }
 bool Level::is_hierarchy() { return this->main_object != nullptr; }
+
 std::string &Level::name() { return this->name(); }
+
 UI::GUI *Level::Get_GUI() { return this->ui; }
+
 void Level::Unload() { this->m_isUnload = true; }
+
+void Level::awake() {}
+
+void Level::start() {}
+
+void Level::update() {}
+
+void Level::lateUpdate() {}
+
+void Level::onDrawGizmos() {}
+
+void Level::onUnloading() {}
+
 Level *Level::getScene() { return pCurrentScene; }
 }  // namespace RoninEngine

@@ -287,7 +287,11 @@ void Vec2::Area_UnionRect(const SDL_Rect* A, const SDL_Rect* B, SDL_Rect* result
     result->h = Amax - Amin;
 }
 
-Vec2 Vec2::Round(const Vec2& lhs) { return {Mathf::round(lhs.x), Mathf::round(lhs.y)}; }
+Vec2 Vec2::Round(Vec2 lhs) {
+    lhs.x = (float)static_cast<int>(lhs.x);
+    lhs.y = (float)static_cast<int>(lhs.y);
+    return lhs;
+}
 
 bool AreaEnclosePoints(const Rectf_t* points, int count, const Rectf_t* clip, Rectf_t* result) {
     float minx = 0;

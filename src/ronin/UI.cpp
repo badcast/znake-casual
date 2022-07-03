@@ -210,6 +210,7 @@ void GUI::Register_Callback(ui_callback callback, void* userData) {
 }
 bool GUI::Remove(const uid& id) {
     // TODO: мда. Тут проблема. ID которое удаляется может задеть так же и другие. Нужно исправить и найти способ! T``T
+
     return false;
 }
 void GUI::RemoveAll() { m_Sticks.controls.clear(); }

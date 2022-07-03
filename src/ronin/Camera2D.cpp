@@ -116,10 +116,10 @@ void Camera2D::render(SDL_Renderer* renderer, Rect_t rect, GameObject* root) {
         Gizmos::color.b = 0;
         Gizmos::color.a = 255;
 
-        for (GameObject* face : Level::getScene()->_gameObjects) {
+        for (auto face : ( *std::get<std::list<Renderer*>*>(stack))) {
             Vec2 p = face->transform()->position();
             Gizmos::DrawPosition(p, 0.2f);
-            Gizmos::DrawTextOnPosition(p, face->m_name);
+            Gizmos::DrawTextOnPosition(p, face->gameObject()->m_name);
         }
     }
 }

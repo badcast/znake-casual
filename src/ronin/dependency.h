@@ -11,15 +11,17 @@
 #include <ctime>
 #include <list>
 #include <map>
-#include <set>
 #include <memory>
 #include <new>
 #include <numeric>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <tuple>
 #include <type_traits>
 #include <typeinfo>
+#include <unordered_map>
+#include <functional>
 #include <vector>
 
 #include "Static.h"

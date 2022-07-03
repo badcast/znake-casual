@@ -24,8 +24,8 @@ class Level {
     std::list<Runtime::Behaviour*>* _firstRunScripts;
     std::list<Runtime::Behaviour*>* _realtimeScripts;
     std::list<std::pair<Runtime::Object*, float>>* _destructions;
-    std::map<float, std::set<Runtime::Transform*>> matrixWorld;
 
+    std::unordered_map<Runtime::Vec2, std::set<Runtime::Transform*>> matrixWorld;
     std::list<Runtime::Renderer*> _assoc_renderers;
     std::list<Runtime::Light*> _assoc_lightings;
 
@@ -44,7 +44,7 @@ class Level {
     virtual void RenderLevel(SDL_Renderer* renderer);
     virtual void RenderUI(SDL_Renderer* renderer);
     virtual void RenderSceneLate(SDL_Renderer* renderer);
-    void callback_movement(Runtime::Transform* transform, Runtime::Vec2 lastPoint);
+    void matrix_nature(Runtime::Transform* transform, Runtime::Vec2 lastPoint);
 
    public:
     // Main or Root object
@@ -62,13 +62,17 @@ class Level {
     UI::GUI* Get_GUI();
     void Unload();
 
-    virtual void awake() {}
-    virtual void start() {}
-    virtual void update() {}
-    virtual void lateUpdate() {}
-    virtual void onDrawGizmos() {}
-    virtual void onUnloading() {}
-    static std::list<Runtime::Transform *> hierarhy_damage_checker();
+    virtual void awake();
+    virtual void start();
+    virtual void update();
+    virtual void lateUpdate();
+    virtual void onDrawGizmos();
+    virtual void onUnloading();
+
+    static std::list<Runtime::Transform*> matrixCheckDamaged();
+    static int matrixRestore();
+    static int matrixRestore(const std::list<Runtime::Transform*>& damaged_content);
+
     static Level* getScene();
 };
 

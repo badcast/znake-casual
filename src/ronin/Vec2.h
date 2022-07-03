@@ -5,7 +5,6 @@
 namespace RoninEngine {
 namespace Runtime {
 struct Vec2 {
-   public:
     float x;
     float y;
 
@@ -26,7 +25,6 @@ struct Vec2 {
     static const Vec2 infinity;
     static const Vec2 negativeInfinity;
 
-   public:
     float magnitude() const;
     float sqrMagnitude() const;
     Vec2 normalized();
@@ -47,13 +45,14 @@ struct Vec2 {
     static float Angle(const Vec2& from, const Vec2& to);
     static float SignedAngle(const Vec2& from, const Vec2& to);
     static Vec2 ClampMagnitude(Vec2 vector, float maxLength);
-    static Vec2 SmoothDamp(Vec2 current, Vec2 target, Vec2& currentVelocity, float smoothTime, float maxSpeed, float deltaTime);
+    static Vec2 SmoothDamp(Vec2 current, Vec2 target, Vec2& currentVelocity, float smoothTime, float maxSpeed,
+                              float deltaTime);
     static float Dot(const Vec2& lhs, const Vec2& rhs);
     static float SqrMagnitude(const Vec2& lhs);
     static bool AreaHasIntersection(const SDL_Rect* A, const SDL_Rect* B);
     static bool AreaIntersectRect(const SDL_FRect& A, const SDL_FRect& B, SDL_FRect& result);
     static void Area_UnionRect(const SDL_Rect* A, const SDL_Rect* B, SDL_Rect* result);
-    static Vec2 Round(const Vec2& lhs);
+    static Vec2 Round(Vec2 lhs);
     //	static bool AreaEnclosePoints(const Rectf_t* points, int count, const
     // Rectf_t* clip, Rectf_t* result);
     static bool AreaPointInRect(const Vec2& p, const SDL_FRect& r);
@@ -78,3 +77,15 @@ Vec2 operator*(const Vec2& rhs, const float& d);
 Vec2 operator/(const Vec2& rhs, const float& d);
 }  // namespace Runtime
 }  // namespace RoninEngine
+
+namespace std {
+//this for Hashtable function
+template <>
+struct hash<RoninEngine::Runtime::Vec2> {
+    std::size_t operator()(const RoninEngine::Runtime::Vec2& val) const noexcept {
+        std::int64_t fake=(*reinterpret_cast<std::int64_t*>(&const_cast<RoninEngine::Runtime::Vec2&>(val)));
+        return std::hash<std::int64_t>{}(fake);
+    }
+};
+
+}  // namespace std

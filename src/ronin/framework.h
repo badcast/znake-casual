@@ -12,7 +12,6 @@
 #include "Paths.h"
 #include "Texture.h"
 #include "Time.h"
-#include "Types.h"
 #include "inputSystem.h"
 
 // objects

@@ -15,7 +15,9 @@ Camera::Camera(const string& name) : Component(name) {
 Camera::~Camera() {
     if (_main == this) _main = nullptr;
 }
+
 bool Camera::isFocused() { return _main == this; }
+
 void Camera::Focus() { _main = this; }
 
 /*
@@ -66,21 +68,19 @@ std::tuple<list<Renderer*>*, list<Light*>*> Camera::matrixSelection() {
     constexpr std::uint8_t Nz = 2;
     list<Renderer*> layers[Nz];
     std::uint8_t zN = 0;
+
     if (__rendererOutResults.empty()) {
         Resolution res = Application::getResolution();
-        float magnitude;
-
+std::unordered_map<int,int> xxx;
         Vec2 ray;
         Vec2 wpLeftTop(Vec2::Round(this->ScreenToWorldPoint(Vec2::zero)));
         Vec2 wpRightBottom(Vec2::Round(this->ScreenToWorldPoint(Vec2(res.width, res.height))));
         float delayTime = Time::startUpTime();
         for (ray.x = wpLeftTop.x; ray.x <= wpRightBottom.x; ++ray.x) {
             for (ray.y = wpLeftTop.y; ray.y >= wpRightBottom.y; --ray.y) {
-                magnitude = ray.sqrMagnitude();
-
-                decltype(Level::matrixWorld)::iterator fi = Level::getScene()->matrixWorld.find(magnitude);
-                if (fi != std::end(Level::getScene()->matrixWorld)) {
-                    for (auto el : fi->second) {
+                auto ifine = Level::getScene()->matrixWorld.find(ray);
+                if (ifine != std::end(Level::getScene()->matrixWorld)) {
+                    for (auto el : ifine->second) {
                         if (Renderer* render = el->gameObject()->Get_Component<Renderer>()) {
                             layers[render->zOrder].emplace_front(render);
                         }
@@ -107,28 +107,21 @@ std::tuple<list<Renderer*>*, list<Light*>*> Camera::matrixSelection() {
 }
 
 const Vec2 Camera::ScreenToWorldPoint(Vec2 screenPoint) {
-    Vec2 lhs = _main->transform()->position();
-
-    // dst.x = ((rect.w - dst.w) / 2.0f - (point->x + sourcePoint->x) * squarePerPixels);
-    // dst.y = ((rect.h - dst.h) / 2.0f + (point->y - sourcePoint->y) * squarePerPixels);
-
-    auto res = Application::getResolution();
-    screenPoint.x = res.width / 2.f - (screenPoint.x);
-    screenPoint.x *= -1;
+    Resolution res = Application::getResolution();
+    Vec2 offset = _main->transform()->position();
+    screenPoint.x = (res.width / 2.f - (screenPoint.x)) * -1;
     screenPoint.y = res.height / 2.f - (screenPoint.y);
     screenPoint /= squarePerPixels;
-    screenPoint += lhs;
+    screenPoint += offset;
     return screenPoint;
 }
 const Vec2 Camera::WorldToScreenPoint(Vec2 worldPoint) {
-    Vec2* point = &_main->transform()->_p;
-    Vec2 dst;
-    auto res = Application::getResolution();
+    Resolution res = Application::getResolution();
     //Положение по горизонтале
-    dst.x = ((res.width) / 2.0f - (point->x - worldPoint.x) * squarePerPixels);
+    worldPoint.x = ((res.width) / 2.0f - (_main->transform()->_p.x - worldPoint.x) * squarePerPixels);
     //Положение по вертикале
-    dst.y = ((res.height) / 2.0f + (point->y - worldPoint.y) * squarePerPixels);
-    return dst;
+    worldPoint.y = ((res.height) / 2.0f + (_main->transform()->_p.y - worldPoint.y) * squarePerPixels);
+    return worldPoint;
 }
 Camera* Camera::mainCamera() { return _main; }
 

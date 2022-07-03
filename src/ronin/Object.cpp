@@ -113,6 +113,10 @@ void Destroy_Immediate(Object* obj) {
                 return iter != end(gObj->m_components);
             });
         }
+        else // destroy other types
+        {
+            //FIXME: destroy other types from gameobject->m_components (delete a list)
+        }
     }
 
     // todo: деструктор для этого объекта
@@ -136,21 +140,22 @@ GameObject* Instantiate(GameObject* obj) {
     for (auto iter = begin(obj->m_components); iter != end(obj->m_components); ++iter) {
         Component* replacement = *iter;
         if (Transform* t = dynamic_cast<Transform*>(replacement)) {
-            Transform* newT = create_empty_transform();
-            newT->_angle = t->_angle;
-            newT->position(t->position());
+            Transform* existent = clone->transform();
+            existent->_angle = t->_angle;
+            existent->position(t->position());
             // BUG: Hierarchy cnage is bug, fix now;
             //  Clone childs recursive
             for (Transform* y : t->hierarchy) {
                 GameObject* yClone = Instantiate(y->gameObject());
-                yClone->transform()->setParent(newT);
+                yClone->transform()->setParent(existent);
                 yClone->m_name = t->gameObject()->m_name;  // put " (clone)" name
                 yClone->m_name.shrink_to_fit();
             }
-            replacement = newT;
+            //skip transform existent component
+            continue;
         } else if (dynamic_cast<SpriteRenderer*>(replacement)) {
             replacement = factory_base<SpriteRenderer>(false, reinterpret_cast<SpriteRenderer*>(replacement), nullptr);
-        } else if (false /* dynamic_cast<Camera2D*>(c)*/) {
+        } else if (dynamic_cast<Camera2D*>(replacement)) {
             replacement = factory_base<Camera2D>(false, reinterpret_cast<Camera2D*>(replacement), nullptr);
         } else {
             static_assert(true, "Undefined type");

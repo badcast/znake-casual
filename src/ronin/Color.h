@@ -19,6 +19,13 @@ struct Color {
 
     explicit Color(const std::string& colorHex) : Color(colorHex.c_str()){}
 
+    explicit Color(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b) {
+        this->r = r;
+        this->g = g;
+        this->b = b;
+        this->a = 255;
+    }
+
     explicit Color(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b, const std::uint8_t a) {
         this->r = r;
         this->g = g;

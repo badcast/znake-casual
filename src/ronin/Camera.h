@@ -9,8 +9,8 @@ class Camera : public Component {
 
    protected:
     bool targetClear;
-    std::list<Renderer*> __rendererOutResults;
-    std::list<Light*> __lightsOutResults;
+    std::set<Renderer*> __rendererOutResults;
+    std::set<Light*> __lightsOutResults;
     virtual void render(SDL_Renderer* renderer, Rect_t rect, GameObject* root) = 0;
 
    public:
@@ -25,7 +25,7 @@ class Camera : public Component {
     bool isFocused();
     void Focus();
 
-    std::tuple<std::list<Renderer*>*, std::list<Light*>*> matrixSelection();
+    std::tuple<std::set<Renderer*>*, std::set<Light*>*> matrixSelection();
 
     static const Vec2 ScreenToWorldPoint(Vec2 screenPoint);
     static const Vec2 WorldToScreenPoint(Vec2 worldPoint);

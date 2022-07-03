@@ -42,6 +42,7 @@ void Vec2::Normalize() {
 }
 
 const Vec2 Vec2::Abs(const Vec2& value) { return {Mathf::abs(value.x), Mathf::abs(value.y)}; }
+
 const Vec2 Vec2::NAbs(const Vec2& value) { return {Mathf::nabs(value.x), Mathf::nabs(value.y)}; }
 
 Vec2 Vec2::Slerp(const Vec2& a, const Vec2& b, float t) {
@@ -54,7 +55,7 @@ Vec2 Vec2::Slerp(const Vec2& a, const Vec2& b, float t) {
     // get sine of angle between disposition (0 -> 1)
     float SinAlpha = Mathf::sin(Alpha);
     // this breaks down when SinAlpha = 0, i.e. Alpha = 0 or pi
-    float t1 = Mathf::sin((static_cast<float>(1) - t) * Alpha) / SinAlpha;
+    float t1 = Mathf::sin(1.f - t * Alpha) / SinAlpha;
     float t2 = Mathf::sin(t * Alpha) / SinAlpha;
 
     // interpolate src disposition
@@ -68,7 +69,7 @@ Vec2 Vec2::SlerpUnclamped(const Vec2& a, const Vec2& b, float t) {
     // get sine of angle between disposition (0 -> 1)
     float SinAlpha = Mathf::sin(Alpha);
     // this breaks down when SinAlpha = 0, i.e. Alpha = 0 or pi
-    float t1 = Mathf::sin((static_cast<float>(1) - t) * Alpha) / SinAlpha;
+    float t1 = Mathf::sin(1.f - t * Alpha) / SinAlpha;
     float t2 = Mathf::sin(t * Alpha) / SinAlpha;
 
     // interpolate src disposition

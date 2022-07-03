@@ -243,5 +243,5 @@ void Level::onDrawGizmos() {}
 
 void Level::onUnloading() {}
 
-Level *Level::getScene() { return selfLevel; }
+Level *Level::self() { return selfLevel; }
 }  // namespace RoninEngine

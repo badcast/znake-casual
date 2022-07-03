@@ -8,6 +8,7 @@ class Transform : public Component {
     friend class RoninEngine::Level;
     friend class Camera;
     friend class Camera2D;
+    friend class Physics2D;
     friend GameObject* Instantiate(GameObject* obj);
 
    protected:

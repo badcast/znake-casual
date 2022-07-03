@@ -10,7 +10,7 @@ Transform::Transform(const string& name) : Component(name) {
     _parent = nullptr;
     _angle = 0;
     // set as default
-    Level::getScene()->matrix_nature(this, _p + Vec2::one);
+    Level::self()->matrix_nature(this, _p + Vec2::one);
 }
 
 Transform::~Transform() {
@@ -135,7 +135,7 @@ Vec2 Transform::position() { return _p; }
 void Transform::position(const Vec2& value) {
     Vec2 lastPoint = _p;
     _p = value;  // set the position
-    Level::getScene()->matrix_nature(this, lastPoint);
+    Level::self()->matrix_nature(this, lastPoint);
 }
 Vec2 Transform::localPosition() {
     if (this->_parent != nullptr) return this->_parent->_p - _p;
@@ -144,7 +144,7 @@ Vec2 Transform::localPosition() {
 void Transform::localPosition(const Vec2& value) {
     Vec2 lastPoint = _p;
     _p = (this->_parent != nullptr) ? _parent->_p + value : value;
-    Level::getScene()->matrix_nature(this, lastPoint);
+    Level::self()->matrix_nature(this, lastPoint);
 }
 
 float Transform::angle() { return this->_angle; }
@@ -168,7 +168,7 @@ void Transform::hierarchy_parent_change(Transform* from, Transform* newParent) {
     }
 
     if (!newParent)
-        hierarchy_append(Level::getScene()->main_object->transform(),
+        hierarchy_append(Level::self()->main_object->transform(),
                          from);  // nullptr as Root
     else
         from->_parent = newParent;

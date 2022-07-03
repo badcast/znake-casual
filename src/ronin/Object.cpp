@@ -37,12 +37,12 @@ T* factory_base(bool initInHierarchy, T* clone, const char* name) {
 
     if constexpr (std::is_same<T, GameObject>()) {
         if (initInHierarchy) {
-            if (RoninEngine::Level::getScene() == nullptr) throw std::runtime_error("var pCurrentScene is null");
+            if (RoninEngine::Level::self() == nullptr) throw std::runtime_error("var pCurrentScene is null");
 
-            if (!RoninEngine::Level::getScene()->is_hierarchy())
+            if (!RoninEngine::Level::self()->is_hierarchy())
                 throw std::runtime_error("var pCurrentScene->mainObject is null");
 
-            auto mainObj = Level::getScene()->main_object;
+            auto mainObj = Level::self()->main_object;
             auto root = mainObj->transform();
             Transform* tr = ((GameObject*)clone)->transform();
             root->child_append(tr);
@@ -78,13 +78,13 @@ GameObject* CreateGameObject(const string& name) { return factory_base<GameObjec
 void Destroy(Object* obj) { Destroy(obj, 0); }
 
 void Destroy(Object* obj, float t) {
-    if (!obj || !Level::getScene()) throw std::bad_exception();
-    if (!Level::getScene()->_destructions) {
-        Level::getScene()->_destructions =
-            GC::gc_alloc<std::remove_pointer<decltype(Level::getScene()->_destructions)>::type>();
+    if (!obj || !Level::self()) throw std::bad_exception();
+    if (!Level::self()->_destructions) {
+        Level::self()->_destructions =
+            GC::gc_alloc<std::remove_pointer<decltype(Level::self()->_destructions)>::type>();
     }
 
-    auto ref = Level::getScene()->_destructions;
+    auto ref = Level::self()->_destructions;
 
     auto iter = std::find_if(std::begin(*ref), std::end(*ref), [obj](pair<Object*, float> x) { return obj == x.first; });
 
@@ -98,15 +98,15 @@ void Destroy_Immediate(Object* obj) {
 
     GameObject* gObj;
     if ((gObj = dynamic_cast<GameObject*>(obj)) != nullptr) {
-        if (Level::getScene()->_firstRunScripts) {
-            Level::getScene()->_firstRunScripts->remove_if([gObj](Behaviour* x) {
+        if (Level::self()->_firstRunScripts) {
+            Level::self()->_firstRunScripts->remove_if([gObj](Behaviour* x) {
                 auto iter = find_if(std::begin(gObj->m_components), std::end(gObj->m_components),
                                     [x](Component* c) { return (Component*)x == c; });
 
                 return iter != end(gObj->m_components);
             });
-        } else if (Level::getScene()->_realtimeScripts) {
-            Level::getScene()->_realtimeScripts->remove_if([gObj](Behaviour* x) {
+        } else if (Level::self()->_realtimeScripts) {
+            Level::self()->_realtimeScripts->remove_if([gObj](Behaviour* x) {
                 auto iter = find_if(std::begin(gObj->m_components), std::end(gObj->m_components),
                                     [x](Component* c) { return (Component*)x == c; });
 
@@ -116,20 +116,22 @@ void Destroy_Immediate(Object* obj) {
         else // destroy other types
         {
             //FIXME: destroy other types from gameobject->m_components (delete a list)
+
         }
     }
 
     // todo: деструктор для этого объекта
     SDL_Log("Object destroyed id: %lu", obj->id);
 
-    Level::getScene()->_objects.erase(obj);
+    Level::self()->_objects.erase(obj);
+
     GC::gc_unload(obj);
 }
 
 bool instanced(Object* obj) {
-    if (!obj || !Level::getScene()) throw std::bad_exception();
-    auto iter = Level::getScene()->_objects.find(obj);
-    return iter != end(Level::getScene()->_objects);
+    if (!obj || !Level::self()) throw std::bad_exception();
+    auto iter = Level::self()->_objects.find(obj);
+    return iter != end(Level::self()->_objects);
 }
 
 GameObject* Instantiate(GameObject* obj) {
@@ -188,8 +190,8 @@ Object::Object() : Object(typeid(Object).name()) {}
 
 Object::Object(const string& name) : m_name(name) {
     m_name.shrink_to_fit();
-    id = Level::getScene()->globalID++;
-    Level::getScene()->ObjectPush(this);
+    id = Level::self()->globalID++;
+    Level::self()->ObjectPush(this);
 }
 
 void Object::Destroy() { RoninEngine::Runtime::Destroy(this); }

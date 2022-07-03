@@ -77,6 +77,8 @@ class GameObject;
 class Light;
 class Renderer;
 
+class Physics2D;
+
 struct Color;
 
 // serialize

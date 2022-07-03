@@ -29,7 +29,7 @@ void Camera2D::render(SDL_Renderer* renderer, Rect_t rect, GameObject* root) {
     auto stack = matrixSelection();
     SDL_RenderSetScale(renderer, aspectRatio.x, aspectRatio.y);
     // Render Objects
-    for (auto renderSource : *std::get<std::list<Renderer*>*>(stack)) {
+    for (auto renderSource : *std::get<std::set<Renderer*>*>(stack)) {
         // drawing
         // clear
         renderInfo = {};
@@ -55,7 +55,7 @@ void Camera2D::render(SDL_Renderer* renderer, Rect_t rect, GameObject* root) {
         }
     }
     // Render Lights
-    for (auto lightSource : *std::get<std::list<Light*>*>(stack)) {
+    for (auto lightSource : *std::get<std::set<Light*>*>(stack)) {
         // drawing
         // clear
         renderInfo = {};
@@ -116,7 +116,7 @@ void Camera2D::render(SDL_Renderer* renderer, Rect_t rect, GameObject* root) {
         Gizmos::color.b = 0;
         Gizmos::color.a = 255;
 
-        for (auto face : ( *std::get<std::list<Renderer*>*>(stack))) {
+        for (auto face : ( *std::get<std::set<Renderer*>*>(stack))) {
             Vec2 p = face->transform()->position();
             Gizmos::DrawPosition(p, 0.2f);
             Gizmos::DrawTextOnPosition(p, face->gameObject()->m_name);

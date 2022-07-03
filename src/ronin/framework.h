@@ -35,6 +35,7 @@
 
 #include "NavMesh.h"
 #include "Gizmos.h"
+#include "Physics2D.h"
 
 // applications
 #include "Application.h"

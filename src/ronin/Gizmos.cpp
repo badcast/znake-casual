@@ -2,6 +2,8 @@
 
 #include "framework.h"
 
+#include <SDL2/SDL2_gfxPrimitives.h>
+
 namespace RoninEngine::Runtime {
 
 Color Gizmos::color;
@@ -142,23 +144,23 @@ void Gizmos::DrawNavMesh(AIPathFinder::NavMesh* navMesh) {
     }
 }
 
-void Gizmos::DrawTriangle(Vec2 pos, float base, float height) {
+void Gizmos::DrawTriangle(Vec2 origin, float base, float height) {
     Vec2 a, b;
-    pos.y -= height / 2;
-    a = b = pos;
+    origin.y -= height / 2;
+    a = b = origin;
     //  base /= 2.f;
     a.x -= base;
     b.x += base;
-    pos.y += height;
+    origin.y += height;
 
     // draw base
     DrawLine(std::move(a), std::move(b));
 
     // draw left side
-    DrawLine(std::move(a), std::move(pos));
+    DrawLine(std::move(a), std::move(origin));
 
     // draw right side
-    DrawLine(std::move(b), std::move(pos));
+    DrawLine(std::move(b), std::move(origin));
 }
 
 void RoninEngine::Runtime::Gizmos::DrawTextOnPosition(Vec2 origin, const std::string& text) {
@@ -170,6 +172,16 @@ void RoninEngine::Runtime::Gizmos::DrawTextOnPosition(Vec2 origin, const std::st
     r.y = static_cast<int>(origin.y);
 
     UI::Render_String(Application::GetRenderer(), r, text.c_str(), text.length(), 2);
+}
+
+void Gizmos::DrawSphere(Vec2 origin, float distance)
+{
+    origin = Camera::mainCamera()->WorldToScreenPoint(origin);
+    std::uint16_t x, y, r;
+    x = origin.x;
+    y = origin.y;
+    r = static_cast<std::uint16_t>(distance * squarePerPixels);
+    aacircleColor(Application::GetRenderer(), x, y, r, *reinterpret_cast<std::uint32_t*>(&color));
 }
 
 float Gizmos::square_triangle(float base, float height) { return base * height / 2; }

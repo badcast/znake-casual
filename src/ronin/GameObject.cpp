@@ -15,7 +15,7 @@ GameObject::GameObject() : GameObject("GameObject") {}
 GameObject::GameObject(const string& name) : Object(name) {
     m_components.push_back(create_empty_transform());
     m_components.front()->_derivedObject = this;
-    Level::getScene()->_gameObjects.emplace_back(this);
+    Level::self()->_gameObjects.emplace_back(this);
 }
 
 GameObject::~GameObject() {
@@ -48,12 +48,12 @@ Component* GameObject::Add_Component(Component* component) {
         component->_derivedObject = this;
 
         if (Behaviour* behav = dynamic_cast<Behaviour*>(component)) {
-            Level::getScene()->PinScript(behav);
+            Level::self()->PinScript(behav);
             behav->OnAwake();
         } else if (Renderer* rend = dynamic_cast<Renderer*>(component)) {
-            Level::getScene()->CC_Render_Push(rend);
+            Level::self()->CC_Render_Push(rend);
         } else if (Light* light = dynamic_cast<Light*>(component)) {
-            Level::getScene()->CC_Light_Push(light);
+            Level::self()->CC_Light_Push(light);
         }
     }
 

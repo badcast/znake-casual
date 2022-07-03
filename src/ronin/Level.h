@@ -11,6 +11,7 @@ class Level {
     friend class Runtime::Renderer;
     friend class Runtime::Camera;
     friend class Runtime::Camera2D;
+    friend class Runtime::Physics2D;
 
     friend bool Runtime::instanced(Runtime::Object* obj);
     friend void Runtime::Destroy(Runtime::Object* obj);
@@ -75,7 +76,7 @@ class Level {
 
     static void render_info(int * culled, int * fullobjects);
 
-    static Level* getScene();
+    static Level* self();
 };
 
 }  // namespace RoninEngine

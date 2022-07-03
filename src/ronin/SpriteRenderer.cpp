@@ -26,7 +26,7 @@ RoninEngine::Runtime::SpriteRenderer::SpriteRenderer(const SpriteRenderer& proto
 
 SpriteRenderer::~SpriteRenderer() {}
 
-Vec2 SpriteRenderer::GetSize() { return Vec2::Abs(this->size) * squarePerPixels; }
+Vec2 SpriteRenderer::GetSize() { return Vec2::Abs(this->size); }
 
 void SpriteRenderer::setSprite(Sprite* sprite) {
     if (this->sprite == nullptr && (!this->size.x || !this->size.y)) {
@@ -43,7 +43,7 @@ void SpriteRenderer::setSpriteFromTextureToGC(Texture* texture) {
 Sprite* SpriteRenderer::getSprite() { return this->sprite; }
 
 void SpriteRenderer::Render(Render_info* render) {
-    Rect_t&_srcRect = render->src;
+    Rect_t& _srcRect = render->src;
     Rectf_t& _dstRect = render->dst;
     uint16_t x, y;
     SDL_Rect dest;
@@ -61,15 +61,15 @@ void SpriteRenderer::Render(Render_info* render) {
 
                 break;
             case SpriteRenderType::Tile: {
-                _srcRect.w = abs(this->size.x) * squarePerPixels;
-                _srcRect.h = abs(this->size.y) * squarePerPixels;
-                _dstRect.w = this->size.x;
-                _dstRect.h = this->size.y;
+                _srcRect.w = abs(this->size.x) * sprite->width();
+                _srcRect.h = abs(this->size.y) * sprite->width();
+                _dstRect.w = sprite->width() * abs(this->size.x) / squarePerPixels;
+                _dstRect.h = sprite->height() * abs(this->size.y) / squarePerPixels;
 
-                if (this->tileRenderPresent == SpriteRenderTile::Fixed) {
-                    _srcRect.w = (_srcRect.w / sprite->width()) * sprite->width();
-                    _srcRect.h = (_srcRect.h / sprite->height()) * sprite->height();
-                }
+//                if (this->tileRenderPresent == SpriteRenderTile::Fixed) {
+//                    _srcRect.w = (_srcRect.w / sprite->width()) * sprite->width();
+//                    _srcRect.h = (_srcRect.h / sprite->height()) * sprite->height();
+//                }
 
                 if (!texture) {
                     GC::gc_alloc_texture(&texture, _srcRect.w, _srcRect.h, SDL_PIXELFORMAT_RGBA8888,

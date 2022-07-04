@@ -294,6 +294,13 @@ Vec2 Vec2::Round(Vec2 lhs) {
     return lhs;
 }
 
+Runtime::Vec2Int Vec2::RoundToInt(const Vec2& lhs) {
+    Vec2Int p;
+    p.x = static_cast<int>(lhs.x);
+    p.y = static_cast<int>(lhs.y);
+    return p;
+}
+
 bool AreaEnclosePoints(const Rectf_t* points, int count, const Rectf_t* clip, Rectf_t* result) {
     float minx = 0;
     float miny = 0;
@@ -440,6 +447,7 @@ Vec2& Vec2::operator=(const Vec2& rhs) {
 }
 
 Vec2 RoninEngine::Runtime::operator+(const Vec2& lhs, const Vec2& rhs) { return Vec2(lhs.x + rhs.x, lhs.y + rhs.y); }
+
 Vec2 RoninEngine::Runtime::operator-(const Vec2& lhs, const Vec2& rhs) { return Vec2(lhs.x - rhs.x, lhs.y - rhs.y); }
 
 bool RoninEngine::Runtime::operator==(const Vec2& lhs, const Vec2& rhs) { return (lhs - rhs).sqrMagnitude() < 9.999999E-11; }
@@ -453,3 +461,20 @@ Vec2 RoninEngine::Runtime::operator/(const float& d, const Vec2& rhs) { return V
 Vec2 RoninEngine::Runtime::operator*(const Vec2& rhs, const float& d) { return d * rhs; }
 
 Vec2 RoninEngine::Runtime::operator/(const Vec2& rhs, const float& d) { return d / rhs; }
+
+
+Vec2Int RoninEngine::Runtime::operator+(const Vec2Int& lhs, const Vec2Int& rhs) { return Vec2Int(lhs.x + rhs.x, lhs.y + rhs.y); }
+
+Vec2Int RoninEngine::Runtime::operator-(const Vec2Int& lhs, const Vec2Int& rhs) { return Vec2Int(lhs.x - rhs.x, lhs.y - rhs.y); }
+
+bool RoninEngine::Runtime::operator==(const Vec2Int& lhs, const Vec2Int& rhs) { return lhs.x == rhs.x && lhs.y == rhs.y; }
+
+bool RoninEngine::Runtime::operator!=(const Vec2Int& lhs, const Vec2Int& rhs) { return !(operator==(lhs, rhs)); }
+
+Vec2Int RoninEngine::Runtime::operator*(const float& d, const Vec2Int& rhs) { return Vec2Int(rhs.x * d, rhs.y * d); }
+
+Vec2Int RoninEngine::Runtime::operator/(const float& d, const Vec2Int& rhs) { return Vec2Int(rhs.x / d, rhs.y / d); }
+
+Vec2Int RoninEngine::Runtime::operator*(const Vec2Int& rhs, const float& d) { return d * rhs; }
+
+Vec2Int RoninEngine::Runtime::operator/(const Vec2Int& rhs, const float& d) { return d / rhs; }

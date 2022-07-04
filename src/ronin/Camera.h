@@ -16,6 +16,7 @@ class Camera : public Component {
    public:
     Vec2 aspectRatio;
     bool enabled;
+    std::uint32_t distanceEvcall;
 
     Camera();
     Camera(const std::string& name);

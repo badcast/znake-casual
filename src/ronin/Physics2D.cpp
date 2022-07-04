@@ -8,8 +8,8 @@ std::list<Transform*> Physics2D::sphereCast(Vec2 origin, float distance) {
     auto& mx = Level::self()->matrixWorld;
     std::list<Transform*> _cont;
 
-    Vec2 env;
-    Vec2 originRounded = Vec2::Round(origin);
+    Vec2Int env;
+    Vec2Int originRounded = Vec2::RoundToInt(origin);
     float distanceRounded = Mathf::ceil(distance);
     for (env.x = originRounded.x - distanceRounded; env.x <= originRounded.x + distanceRounded; ++env.x) {
         for (env.y = originRounded.y - distanceRounded; env.y <= originRounded.y + distanceRounded; ++env.y) {

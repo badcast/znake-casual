@@ -335,13 +335,13 @@ Texture *GC::GetTexture(const int w, const int h, const ::SDL_PixelFormatEnum fo
 
 //Для автоматического уничтожения ресурса, обязательно его нужно скинуть на
 // ResourceManager::Unload()
-SDL_Cursor *GC::GetCursor(const std::string &resourceName, const point_t &hotspot, bool autoUnload) {
+SDL_Cursor *GC::GetCursor(const std::string &resourceName, const Vec2Int &hotspot, bool autoUnload) {
     return GetCursor(GetSurface(resourceName), hotspot);
 }
 
 //Для автоматического уничтожения ресурса, обязательно его нужно скинуть на
 // ResourceManager::Unload()
-SDL_Cursor *GC::GetCursor(SDL_Surface *texture, const point_t &hotspot) {
+SDL_Cursor *GC::GetCursor(SDL_Surface *texture, const Vec2Int &hotspot) {
     SDL_Cursor *cur = nullptr;
     auto find = _assocCacheCursors->find(texture);
     if (texture) {

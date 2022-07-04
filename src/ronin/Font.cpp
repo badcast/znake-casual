@@ -7,7 +7,7 @@ using RoninEngine::Runtime::GC;
 struct Font_t {
     SDL_Surface *surfNormal;
     SDL_Surface *surfHilight;
-    point_t fontSize;
+    Vec2Int fontSize;
     Rect data[255];
 };
 
@@ -156,7 +156,7 @@ void Render_String(SDL_Renderer *renderer, Rect rect, const char *text, int len,
     Rect *src;
     std::uint16_t pos;
     SDL_Rect dst = *(SDL_Rect *)&rect;
-    point_t fontSize = pfont->fontSize + point_t(1, 1) * (pfontWidth - fontWidth);
+    Vec2Int fontSize = pfont->fontSize + Vec2Int(1, 1) * (pfontWidth - fontWidth);
     SDL_Texture *targetpfont = nullptr;
     int textWidth = Single_TextWidth_WithCyrilic(text, pfontWidth);
 
@@ -183,7 +183,7 @@ void Render_String(SDL_Renderer *renderer, Rect rect, const char *text, int len,
 
     char *cc = "Hello";
 
-    point_t begin = *(point_t *)&dst;
+    Vec2Int begin = *(Vec2Int *)&dst;
     int deltax;
     for (pos = 0; pos < len; ++pos) {
         memcpy(&temp, text + pos, 1);

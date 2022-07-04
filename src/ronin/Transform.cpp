@@ -10,7 +10,7 @@ Transform::Transform(const std::string& name) : Component(name) {
     _parent = nullptr;
     _angle = 0;
     // set as default
-    Level::self()->matrix_nature(this, _p + Vec2::one);
+    Level::self()->matrix_nature(this, Vec2::RoundToInt(_p + Vec2::one));
 }
 
 Transform::~Transform() {
@@ -133,7 +133,7 @@ const Vec2 Transform::rotate(Vec2 vec, Vec2 normal) {
 
 Vec2 Transform::position() { return _p; }
 void Transform::position(const Vec2& value) {
-    Vec2 lastPoint = _p;
+    Vec2Int lastPoint = Vec2::RoundToInt(_p);
     _p = value;  // set the position
     Level::self()->matrix_nature(this, lastPoint);
 }
@@ -142,7 +142,7 @@ Vec2 Transform::localPosition() {
     return _p;
 }
 void Transform::localPosition(const Vec2& value) {
-    Vec2 lastPoint = _p;
+    Vec2Int lastPoint = Vec2::RoundToInt(_p);
     _p = (this->_parent != nullptr) ? _parent->_p + value : value;
     Level::self()->matrix_nature(this, lastPoint);
 }

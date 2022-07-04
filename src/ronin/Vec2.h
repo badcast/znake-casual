@@ -4,6 +4,51 @@
 
 namespace RoninEngine {
 namespace Runtime {
+
+struct Vec2Int {
+   public:
+    int x;
+    int y;
+    Vec2Int() : x(0), y(0) {}
+    Vec2Int(int _x, int _y) : x(_x), y(_y) {}
+
+    bool operator==(const Vec2Int& rhs) { return this->x == rhs.x && this->y == rhs.y; }
+
+    bool operator!=(const Vec2Int& rhs) { return !this->operator==(rhs); }
+
+    Vec2Int operator+(const Vec2Int& rhs) { return {this->x + rhs.x, this->y + rhs.y}; }
+
+    Vec2Int operator-(const Vec2Int& rhs) { return {this->x - rhs.x, this->y + rhs.y}; }
+
+    Vec2Int operator*(const int& rhs) { return {this->x * rhs, this->y * rhs}; }
+
+    Vec2Int operator/(const int& rhs) { return {this->x / rhs, this->y / rhs}; }
+
+    Vec2Int& operator+=(const Vec2Int& rhs) {
+        this->x += rhs.x;
+        this->y += rhs.y;
+        return *this;
+    }
+
+    Vec2Int& operator-=(const Vec2Int& rhs) {
+        this->x -= rhs.x;
+        this->y -= rhs.y;
+        return *this;
+    }
+
+    Vec2Int& operator*=(const int& rhs) {
+        this->x *= rhs;
+        this->y *= rhs;
+        return *this;
+    }
+
+    Vec2Int& operator/=(const int& rhs) {
+        this->x /= rhs;
+        this->y /= rhs;
+        return *this;
+    }
+};
+
 struct Vec2 {
     float x;
     float y;
@@ -45,14 +90,14 @@ struct Vec2 {
     static float Angle(const Vec2& from, const Vec2& to);
     static float SignedAngle(const Vec2& from, const Vec2& to);
     static Vec2 ClampMagnitude(Vec2 vector, float maxLength);
-    static Vec2 SmoothDamp(Vec2 current, Vec2 target, Vec2& currentVelocity, float smoothTime, float maxSpeed,
-                              float deltaTime);
+    static Vec2 SmoothDamp(Vec2 current, Vec2 target, Vec2& currentVelocity, float smoothTime, float maxSpeed, float deltaTime);
     static float Dot(const Vec2& lhs, const Vec2& rhs);
     static float SqrMagnitude(const Vec2& lhs);
     static bool AreaHasIntersection(const SDL_Rect* A, const SDL_Rect* B);
     static bool AreaIntersectRect(const SDL_FRect& A, const SDL_FRect& B, SDL_FRect& result);
     static void Area_UnionRect(const SDL_Rect* A, const SDL_Rect* B, SDL_Rect* result);
     static Vec2 Round(Vec2 lhs);
+    static Runtime::Vec2Int RoundToInt(const Vec2& lhs);
     //	static bool AreaEnclosePoints(const Rectf_t* points, int count, const
     // Rectf_t* clip, Rectf_t* result);
     static bool AreaPointInRect(const Vec2& p, const SDL_FRect& r);
@@ -67,6 +112,16 @@ struct Vec2 {
     Vec2& operator=(const Vec2& rhs);
 };
 
+
+Vec2Int operator+(const Vec2Int &lhs, const Vec2Int &rhs);
+Vec2Int operator-(const Vec2Int &lhs, const Vec2Int &rhs);
+bool operator==(const Vec2Int &lhs, const Vec2Int &rhs);
+bool operator!=(const Vec2Int &lhs, const Vec2Int &rhs);
+Vec2Int operator*(const float &d, const Vec2Int &rhs);
+Vec2Int operator/(const float &d, const Vec2Int &rhs);
+Vec2Int operator*(const Vec2Int &rhs, const float &d);
+Vec2Int operator/(const Vec2Int &rhs, const float &d);
+
 Vec2 operator+(const Vec2& lhs, const Vec2& rhs);
 Vec2 operator-(const Vec2& lhs, const Vec2& rhs);
 bool operator==(const Vec2& lhs, const Vec2& rhs);
@@ -75,15 +130,25 @@ Vec2 operator*(const float& d, const Vec2& rhs);
 Vec2 operator/(const float& d, const Vec2& rhs);
 Vec2 operator*(const Vec2& rhs, const float& d);
 Vec2 operator/(const Vec2& rhs, const float& d);
+
+
 }  // namespace Runtime
 }  // namespace RoninEngine
 
 namespace std {
-//this for Hashtable function
+// this for Hashtable function
 template <>
 struct hash<RoninEngine::Runtime::Vec2> {
     std::size_t operator()(const RoninEngine::Runtime::Vec2& val) const noexcept {
-        std::int64_t fake=(*reinterpret_cast<std::int64_t*>(&const_cast<RoninEngine::Runtime::Vec2&>(val)));
+        std::int64_t fake = (*reinterpret_cast<std::int64_t*>(&const_cast<RoninEngine::Runtime::Vec2&>(val)));
+        return std::hash<std::int64_t>{}(fake);
+    }
+};
+
+template <>
+struct hash<RoninEngine::Runtime::Vec2Int> {
+    std::size_t operator()(const RoninEngine::Runtime::Vec2Int& val) const noexcept {
+        std::int64_t fake = (*reinterpret_cast<std::int64_t*>(&const_cast<RoninEngine::Runtime::Vec2Int&>(val)));
         return std::hash<std::int64_t>{}(fake);
     }
 };

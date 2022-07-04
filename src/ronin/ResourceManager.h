@@ -87,8 +87,8 @@ class GC {
     [[deprecate]] static Texture *GetTexture(const int w, const int h, const ::SDL_PixelFormatEnum format);
     [[deprecate]] static Texture *GetTexture(const int w, const int h, const ::SDL_PixelFormatEnum format,
                                              const ::SDL_TextureAccess access);
-    [[deprecate]] static SDL_Cursor *GetCursor(const std::string &resourceName, const point_t &hotspot, bool autoUnload = true);
-    [[deprecate]] static SDL_Cursor *GetCursor(SDL_Surface *texture, const point_t &hotspot);
+    [[deprecate]] static SDL_Cursor *GetCursor(const std::string &resourceName, const Vec2Int &hotspot, bool autoUnload = true);
+    [[deprecate]] static SDL_Cursor *GetCursor(SDL_Surface *texture, const Vec2Int &hotspot);
 
     [[deprecate]] static Atlas *GetAtlas(const std::string &atlasName);
 

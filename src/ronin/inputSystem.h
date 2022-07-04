@@ -28,7 +28,7 @@ enum KeyboardState {
 class input {
    private:
     friend class RoninEngine::Application;
-    static point_t m_mousePoint;
+    static Vec2Int m_mousePoint;
     static std::uint8_t mouseState;
     static std::uint8_t lastMouseState;
     static std::uint8_t mouseWheels;
@@ -49,7 +49,7 @@ class input {
 
     static const char wheelRadix() { return mouseWheels; }
 
-    static const point_t getMousePoint() { return m_mousePoint; }
+    static const Vec2Int getMousePoint() { return m_mousePoint; }
 
     static const Vec2 getMousePointF() { return {static_cast<float>(m_mousePoint.x), static_cast<float>(m_mousePoint.y)}; }
 

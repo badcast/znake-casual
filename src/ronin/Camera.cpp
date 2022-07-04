@@ -3,13 +3,14 @@
 RoninEngine::Runtime::Camera* _main = nullptr;
 namespace RoninEngine::Runtime {
 
-Camera::Camera() : Camera(typeid (*this).name()) {}
+Camera::Camera() : Camera(typeid(*this).name()) {}
 Camera::Camera(const std::string& name) : Component(name), aspectRatio(Vec2::one) {
     if (!_main) {
         _main = this;
     }
     targetClear = true;
     enabled = true;
+    distanceEvcall = 10;
 }
 Camera::~Camera() {
     if (_main == this) _main = nullptr;
@@ -64,8 +65,13 @@ std::tuple<list<Renderer*>*, list<Light*>*> linearSelection() {
 */
 
 std::set<Renderer*> prev;
-std::tuple<std::set<Renderer*>*, std::set<Light*>*>
-Camera::matrixSelection() {
+inline bool isRenderActive(Renderer* target, const Vec2& wpLeftTop, const Vec2& wpRightBottom) {
+    Vec2 rSz = target->GetSize();
+    Vec2 pos = target->transform()->position();
+    return (pos.x + rSz.x >= wpLeftTop.x && pos.x - rSz.x <= wpRightBottom.x) &&
+           (pos.y - rSz.y <= wpLeftTop.y && pos.y + rSz.y >= wpRightBottom.y);
+}
+std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
     /*       This is projection
             x-------------------
             |                   |      = * - is Vector2 (point)
@@ -84,41 +90,38 @@ Camera::matrixSelection() {
     std::list<Renderer*> layers[Nz];
     std::uint8_t zN = 0;
     if (__rendererOutResults.empty()) {
-        Vec2 ray;
+        Vec2Int ray;
         Resolution res = Application::getResolution();
         Vec2 wpLeftTop(Vec2::Round(this->ScreenToWorldPoint(Vec2::zero)));
         Vec2 wpRightBottom(Vec2::Round(this->ScreenToWorldPoint(Vec2(res.width, res.height))));
-        float delayTime = Time::startUpTime();
+        wpLeftTop *= distanceEvcall;
+        wpRightBottom *= distanceEvcall;
+
         for (ray.x = wpLeftTop.x; ray.x <= wpRightBottom.x; ++ray.x) {
             for (ray.y = wpLeftTop.y; ray.y >= wpRightBottom.y; --ray.y) {
                 auto ifine = Level::self()->matrixWorld.find(ray);
                 if (ifine != std::end(Level::self()->matrixWorld)) {
                     for (auto el : ifine->second) {
                         if (Renderer* render = el->gameObject()->getComponent<Renderer>()) {
-                            layers[render->zOrder].emplace_front(render);
+                            if (isRenderActive(render, wpLeftTop, wpRightBottom)) layers[render->zOrder].emplace_front(render);
                         }
                     }
                 }
             }
         }
-        delayTime = Time::startUpTime() - delayTime;
 
         std::list<Renderer*> _removes;
 
         //собираем оставшиеся которые прикреплены к видимости
         for (auto x = std::begin(prev); x != std::end(prev); ++x) {
-            Vec2 rSz = (*x)->GetSize();
-            Vec2 pos = (*x)->transform()->_p;
-            if ((pos.x + rSz.x >= wpLeftTop.x && pos.x - rSz.x <= wpRightBottom.x) &&
-                (pos.y - rSz.y <= wpLeftTop.y && pos.y + rSz.y >= wpRightBottom.y)) {
+            if (isRenderActive(*x, wpLeftTop, wpRightBottom)) {
                 __rendererOutResults.insert((*x));
             } else {
                 _removes.emplace_back((*x));
             }
         }
 
-        for (Renderer* y : _removes)
-            prev.erase(y);
+        for (Renderer* y : _removes) prev.erase(y);
 
         // ordering and collect
         std::list<Renderer*>* target;

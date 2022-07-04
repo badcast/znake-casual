@@ -1,7 +1,7 @@
 #include "framework.h"
 
 namespace RoninEngine {
-point_t input::m_mousePoint;
+Vec2Int input::m_mousePoint;
 std::uint8_t input::mouseState = 0, input::lastMouseState, input::mouseWheels = 0;
 Vec2 input::m_axis;
 

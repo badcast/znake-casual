@@ -47,7 +47,7 @@ namespace Runtime {
 
 struct Vec2;
 
-class point_t;
+struct Vec2Int;
 
 struct Render_info;
 

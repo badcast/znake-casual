@@ -5,49 +5,7 @@
 namespace RoninEngine {
 namespace Runtime {
 
-class point_t;
-
 enum Align { Left, Right, Center };
-
-class point_t {
-   public:
-    int x;
-    int y;
-    point_t() : x(0), y(0) {}
-    point_t(int _x, int _y) : x(_x), y(_y) {}
-
-    point_t operator+(const point_t& rhs) { return {this->x + rhs.x, this->y + rhs.y}; }
-
-    point_t operator-(const point_t& rhs) { return {this->x - rhs.x, this->y + rhs.y}; }
-
-    point_t operator*(const int& rhs) { return {this->x * rhs, this->y * rhs}; }
-
-    point_t operator/(const int& rhs) { return {this->x / rhs, this->y / rhs}; }
-
-    point_t& operator+=(const point_t& rhs) {
-        this->x += rhs.x;
-        this->y += rhs.y;
-        return *this;
-    }
-
-    point_t& operator-=(const point_t& rhs) {
-        this->x -= rhs.x;
-        this->y -= rhs.y;
-        return *this;
-    }
-
-    point_t& operator*=(const int& rhs) {
-        this->x *= rhs;
-        this->y *= rhs;
-        return *this;
-    }
-
-    point_t& operator/=(const int& rhs) {
-        this->x /= rhs;
-        this->y /= rhs;
-        return *this;
-    }
-};
 
 template <typename T>
 class xRect {

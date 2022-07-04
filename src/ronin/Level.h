@@ -26,7 +26,7 @@ class Level {
     std::list<Runtime::Behaviour*>* _realtimeScripts;
     std::list<std::pair<Runtime::Object*, float>>* _destructions;
 
-    std::unordered_map<Runtime::Vec2, std::set<Runtime::Transform*>> matrixWorld;
+    std::unordered_map<Runtime::Vec2Int, std::set<Runtime::Transform*>> matrixWorld;
     std::list<Runtime::Renderer*> _assoc_renderers;
     std::list<Runtime::Light*> _assoc_lightings;
 
@@ -45,7 +45,7 @@ class Level {
     virtual void RenderLevel(SDL_Renderer* renderer);
     virtual void RenderUI(SDL_Renderer* renderer);
     virtual void RenderSceneLate(SDL_Renderer* renderer);
-    void matrix_nature(Runtime::Transform* transform, Runtime::Vec2 lastPoint);
+    void matrix_nature(Runtime::Transform* transform, Runtime::Vec2Int lastPoint);
 
    public:
     // Main or Root object

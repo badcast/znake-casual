@@ -67,7 +67,7 @@ uid GUI::Push_Label(const std::string& text, const RoninEngine::Runtime::Rect& r
     data.prototype = findControl(CTEXT);
     return id;
 }
-uid GUI::Push_Label(const std::string& text, const point_t& point, const int& fontWidth, const uid& parent) {
+uid GUI::Push_Label(const std::string& text, const Vec2Int& point, const int& fontWidth, const uid& parent) {
     return Push_Label(text, {point.x, point.y, 0, 0}, fontWidth, parent);
 }
 
@@ -79,11 +79,11 @@ uid GUI::Push_Button(const std::string& text, const RoninEngine::Runtime::Rect& 
     data.text = text;
     return id;
 }
-uid GUI::Push_Button(const std::string& text, const point_t point, const uid& parent) {
+uid GUI::Push_Button(const std::string& text, const Vec2Int point, const uid& parent) {
     return Push_Button(text, {point.x, point.y, 256, 32}, parent);
 }
 
-uid GUI::Push_DisplayRandomizer(TextRandomizer_Format format, const point_t& point, const uid& parent) {
+uid GUI::Push_DisplayRandomizer(TextRandomizer_Format format, const Vec2Int& point, const uid& parent) {
     uid id = call_register_ui(parent);
 
     auto& data = ID(id);
@@ -93,9 +93,9 @@ uid GUI::Push_DisplayRandomizer(TextRandomizer_Format format, const point_t& poi
     return id;
 }
 uid GUI::Push_DisplayRandomizer(TextRandomizer_Format format, const uid& parent) {
-    return Push_DisplayRandomizer(format, point_t(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), parent);
+    return Push_DisplayRandomizer(format, Vec2Int(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), parent);
 }
-uid GUI::Push_DisplayRanomizer_Text(const std::string& text, const point_t& point, const uid& parent) {
+uid GUI::Push_DisplayRanomizer_Text(const std::string& text, const Vec2Int& point, const uid& parent) {
     uid id = Push_DisplayRandomizer(TextRandomizer_Format::OnlyText, point, parent);
     auto& data = ID(id);
 
@@ -116,7 +116,7 @@ uid GUI::Push_TextureStick(Texture* texture, const RoninEngine::Runtime::Rect& r
     data.resources = texture;
     return id;
 }
-uid GUI::Push_TextureStick(Texture* texture, const point_t point, const uid& parent) {
+uid GUI::Push_TextureStick(Texture* texture, const Vec2Int point, const uid& parent) {
     return Push_TextureStick(texture, {point.x, point.y, texture->width(), texture->height()}, parent);
 }
 uid GUI::Push_TextureAnimator(Timeline* timeline, const RoninEngine::Runtime::Rect& rect, const uid& parent) {
@@ -128,7 +128,7 @@ uid GUI::Push_TextureAnimator(Timeline* timeline, const RoninEngine::Runtime::Re
     data.resources = timeline;
     return id;
 }
-uid GUI::Push_TextureAnimator(Timeline* timeline, const point_t& point, const uid& parent) {
+uid GUI::Push_TextureAnimator(Timeline* timeline, const Vec2Int& point, const uid& parent) {
     return Push_TextureAnimator(timeline, {point.x, point.y, 0, 0}, parent);
 }
 uid GUI::Push_TextureAnimator(const std::list<Texture*>& roads, float duration, TimelineOptions option, const RoninEngine::Runtime::Rect& rect,
@@ -155,7 +155,7 @@ uid GUI::Push_TextureAnimator(const std::list<Texture*>& roads, float duration, 
     data.resources = timeline;
     return id;
 }
-uid GUI::Push_TextureAnimator(const std::list<Texture*>& roads, float duration, TimelineOptions option, const point_t& point,
+uid GUI::Push_TextureAnimator(const std::list<Texture*>& roads, float duration, TimelineOptions option, const Vec2Int& point,
                               const uid& parent) {
     return Push_TextureAnimator(roads, duration, option, {point.x, point.y, 0, 0}, parent);
 }

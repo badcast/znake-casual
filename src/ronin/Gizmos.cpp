@@ -192,7 +192,7 @@ void Gizmos::DrawTriangle(Vec2 origin, float base, float height) {
 }
 
 void RoninEngine::Runtime::Gizmos::DrawTextOnPosition(Vec2 origin, const std::string& text) {
-    Rect_t r;
+    Rect r;
     auto cam = Camera::mainCamera();
     // relative to
     origin = cam->WorldToScreenPoint(origin);

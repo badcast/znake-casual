@@ -9,7 +9,7 @@ class GUI;
 
 enum ControlType : std::uint8_t { _UC, CTEXT, CBUTTON, CEDIT, CHSLIDER, CVSLIDER, CIMAGEANIMATOR, CTEXTRAND, CIMAGE };
 struct RenderData {
-    Runtime::Rect_t rect;
+    Runtime::Rect rect;
     std::uint8_t options;
     std::int8_t id;
     std::int8_t parentId;

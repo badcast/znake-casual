@@ -19,7 +19,7 @@ namespace RoninEngine::Runtime
 
 	protected:
 		Vec2 m_center;
-		Rect_t m_rect;
+        Rect m_rect;
 
 
 	public:
@@ -27,8 +27,8 @@ namespace RoninEngine::Runtime
 
 		Sprite(const Sprite&) = default;
 
-		const Rect_t Rect();
-		void Rect(Rect_t rect);
+        const Rect rect();
+        void rect(Runtime::Rect rect);
 
 		const Vec2 Center();
 		void Center(Vec2 center);

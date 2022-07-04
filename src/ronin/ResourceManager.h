@@ -182,13 +182,13 @@ class GC {
     /// Create empty Sprite
     static int gc_alloc_sprite_empty(Sprite **spritePtr);
 
-    static int gc_alloc_sprite_empty(Sprite **spritePtr, const Rect_t &rect);
+    static int gc_alloc_sprite_empty(Sprite **spritePtr, const Rect &rect);
 
     static int gc_alloc_sprite_with(Sprite **spritePtr, Texture *texture);
 
     static int gc_alloc_sprite_with(Sprite **spritePtr, Texture *texture, const Vec2 &center);
 
-    static int gc_alloc_sprite_with(Sprite **spritePtr, Texture *texture, const Rect_t &rect, const Vec2 &center = Vec2::half);
+    static int gc_alloc_sprite_with(Sprite **spritePtr, Texture *texture, const Rect &rect, const Vec2 &center = Vec2::half);
 
     static int gc_alloc_cursor(SDL_Cursor **cursorPtr, SDL_Surface *surface, int hotspot_x, int hotspot_y);
 

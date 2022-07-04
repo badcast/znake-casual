@@ -7,10 +7,10 @@ Sprite* _empty = nullptr;
 
 namespace RoninEngine::Runtime
 {
-	const Rect_t Sprite::Rect() {
+    const RoninEngine::Runtime::Rect Sprite::rect() {
 		return this->m_rect;
 	}
-	void Sprite::Rect(Rect_t rect) {
+    void Sprite::rect(RoninEngine::Runtime::Rect rect) {
 		this->m_rect = rect;
 	}
 

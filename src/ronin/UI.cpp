@@ -49,16 +49,16 @@ RenderData& GUI::ID(const uid& id) { return m_Sticks.controls[id - 1]; }
 // public---------------------------------------
 
 bool GUI::Has_ID(const uid& id) { return m_Sticks.controls.size() >= id; }
-uid GUI::Create_Group(const Rect_t& rect) {
+uid GUI::Create_Group(const RoninEngine::Runtime::Rect& rect) {
     uid id = call_register_ui();
     auto& data = ID(id);
     data.rect = rect;
     data.options |= _mGroup;
     return id;
 }
-uid GUI::Create_Group() { return Create_Group(Rect_t::zero); }
+uid GUI::Create_Group() { return Create_Group(RoninEngine::Runtime::Rect::zero); }
 
-uid GUI::Push_Label(const string& text, const Rect_t& rect, const int& fontWidth, const uid& parent) {
+uid GUI::Push_Label(const string& text, const RoninEngine::Runtime::Rect& rect, const int& fontWidth, const uid& parent) {
     // todo: fontWidth
     uid id = call_register_ui(parent);
     auto& data = ID(id);
@@ -71,7 +71,7 @@ uid GUI::Push_Label(const string& text, const point_t& point, const int& fontWid
     return Push_Label(text, {point.x, point.y, 0, 0}, fontWidth, parent);
 }
 
-uid GUI::Push_Button(const string& text, const Rect_t& rect, const uid& parent) {
+uid GUI::Push_Button(const string& text, const RoninEngine::Runtime::Rect& rect, const uid& parent) {
     int id = call_register_ui(parent);
     auto& data = ID(id);
     data.prototype = findControl(CBUTTON);
@@ -107,7 +107,7 @@ uid GUI::Push_DisplayRanomizer_Number(const int& min, const int& max, TextAlign 
     return id;
 }
 
-uid GUI::Push_TextureStick(Texture* texture, const Rect_t& rect, const uid& parent) {
+uid GUI::Push_TextureStick(Texture* texture, const RoninEngine::Runtime::Rect& rect, const uid& parent) {
     uid id = call_register_ui(parent);
 
     auto& data = ID(id);
@@ -119,7 +119,7 @@ uid GUI::Push_TextureStick(Texture* texture, const Rect_t& rect, const uid& pare
 uid GUI::Push_TextureStick(Texture* texture, const point_t point, const uid& parent) {
     return Push_TextureStick(texture, {point.x, point.y, texture->width(), texture->height()}, parent);
 }
-uid GUI::Push_TextureAnimator(Timeline* timeline, const Rect_t& rect, const uid& parent) {
+uid GUI::Push_TextureAnimator(Timeline* timeline, const RoninEngine::Runtime::Rect& rect, const uid& parent) {
     uid id = call_register_ui(parent);
 
     auto& data = ID(id);
@@ -131,7 +131,7 @@ uid GUI::Push_TextureAnimator(Timeline* timeline, const Rect_t& rect, const uid&
 uid GUI::Push_TextureAnimator(Timeline* timeline, const point_t& point, const uid& parent) {
     return Push_TextureAnimator(timeline, {point.x, point.y, 0, 0}, parent);
 }
-uid GUI::Push_TextureAnimator(const list<Texture*>& roads, float duration, TimelineOptions option, const Rect_t& rect,
+uid GUI::Push_TextureAnimator(const list<Texture*>& roads, float duration, TimelineOptions option, const RoninEngine::Runtime::Rect& rect,
                               const uid& parent) {
     Timeline* timeline = nullptr;
     uid id = call_register_ui(parent);
@@ -162,8 +162,8 @@ uid GUI::Push_TextureAnimator(const list<Texture*>& roads, float duration, Timel
 
 void* GUI::Resources(const uid& id) { return ID(id).resources; }
 void GUI::Resources(const uid& id, void* data) { ID(id).resources = data; }
-Rect_t GUI::Rect(const uid& id) { return ID(id).rect; }
-void GUI::Rect(const uid& id, const Rect_t& rect) { ID(id).rect = rect; }
+RoninEngine::Runtime::Rect GUI::Rect(const uid& id) { return ID(id).rect; }
+void GUI::Rect(const uid& id, const RoninEngine::Runtime::Rect& rect) { ID(id).rect = rect; }
 string GUI::Text(const uid& id) { return ID(id).text; }
 void GUI::Text(const uid& id, const string& text) { ID(id).text = text; }
 

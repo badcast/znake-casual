@@ -53,7 +53,7 @@ struct Render_info;
 template <typename T>
 class xRect;
 
-typedef xRect<int> Rect_t;
+typedef xRect<int> Rect;
 typedef xRect<float> Rectf_t;
 
 class GC;

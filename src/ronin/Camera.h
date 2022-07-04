@@ -11,7 +11,7 @@ class Camera : public Component {
     bool targetClear;
     std::set<Renderer*> __rendererOutResults;
     std::set<Light*> __lightsOutResults;
-    virtual void render(SDL_Renderer* renderer, Rect_t rect, GameObject* root) = 0;
+    virtual void render(SDL_Renderer* renderer, Rect rect, GameObject* root) = 0;
 
    public:
     Vec2 aspectRatio;

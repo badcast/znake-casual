@@ -7,7 +7,7 @@ namespace RoninEngine::Runtime
 {
 	struct Render_info
 	{
-          Rect_t src;
+          Rect src;
           Rectf_t dst;
           SDL_Renderer* renderer;
           Texture* texture;

@@ -13,7 +13,7 @@ RoninEngine::Runtime::Camera2D::Camera2D(const Camera2D& proto)
       visibleGrids(proto.visibleGrids),
       visibleObjects(proto.visibleObjects) {}
 
-void Camera2D::render(SDL_Renderer* renderer, Rect_t rect, GameObject* root) {
+void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
     Render_info renderInfo;
     Rectf_t dst;
     Vec2* point;

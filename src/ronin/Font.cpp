@@ -8,7 +8,7 @@ struct Font_t {
     SDL_Surface *surfNormal;
     SDL_Surface *surfHilight;
     point_t fontSize;
-    Rect_t data[255];
+    Rect data[255];
 };
 
 Font_t *pfont = nullptr;
@@ -35,7 +35,7 @@ void Initialize_Fonts(bool optimizeDeffects) {
         uint8_t target;
         uint8_t i;
         int deltay;
-        Rect_t *p;
+        Rect *p;
         int maxWidth = pfont->surfNormal->w;
 
         // set unknown symbols
@@ -84,7 +84,7 @@ void Initialize_Fonts(bool optimizeDeffects) {
     if (optimizeDeffects && false) {
         SDL_Surface *model = pfont->surfNormal;
         int i, x, y, cx, cy;
-        Rect_t rect_point;
+        Rect rect_point;
         SDL_Color *pixel;
         for (i = 33; i != 255; ++i) {
             // TODO: оптимизация прямоугольника
@@ -141,19 +141,19 @@ int Single_TextWidth_WithCyrilic(const std::string &text, int fontSize) {
     return width;
 }
 
-Rect_t Multiline_TextWidth_WithCyrilic(const std::string &text, int fontSize) {
+Rect Multiline_TextWidth_WithCyrilic(const std::string &text, int fontSize) {
     // todo: вычисление мультистрок
-    Rect_t rect;
+    Rect rect;
     throw std::exception();
     return rect;
 }
 
-void Render_String(SDL_Renderer *renderer, Rect_t rect, const char *text, int len, int pfontWidth, TextAlign textAlign,
+void Render_String(SDL_Renderer *renderer, Rect rect, const char *text, int len, int pfontWidth, TextAlign textAlign,
                    bool textWrap, bool hilight) {
     if (len <= 0 || !pfontTexture || hilight && !pfontTextureHilight) return;
 
     std::uint8_t temp;
-    Rect_t *src;
+    Rect *src;
     std::uint16_t pos;
     SDL_Rect dst = *(SDL_Rect *)&rect;
     point_t fontSize = pfont->fontSize + point_t(1, 1) * (pfontWidth - fontWidth);

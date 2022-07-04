@@ -48,9 +48,9 @@ bool CText::render_control(GUI* gui, RenderData& data, SDL_Renderer* render, boo
 
 bool CButton::render_control(GUI* gui, RenderData& data, SDL_Renderer* render, bool* hover) {
     static uint8_t pSize = 2;  // pen size
-    static Rect_t inside = Rect_t(pSize, pSize, -pSize * 2, -pSize * 2);
+    static Rect inside = Rect(pSize, pSize, -pSize * 2, -pSize * 2);
     auto ms = input::getMousePoint();
-    Rect_t rect;
+    Rect rect;
     *hover = SDL_PointInRect((SDL_Point*)&ms, (SDL_Rect*)&data.rect);
     // border
     guiInstance->GUI_SetMainColorRGB(0xa75100);

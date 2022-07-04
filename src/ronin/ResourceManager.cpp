@@ -573,7 +573,7 @@ int GC::gc_alloc_texture_from(Texture **texturePtr, SDL_Texture *sdltexture) {
 
 int GC::gc_alloc_sprite_empty(Sprite **spritePtr) { return gc_alloc_sprite_empty(spritePtr, {0, 0, 0, 0}); }
 
-int GC::gc_alloc_sprite_empty(Sprite **spritePtr, const Rect_t &rect) {
+int GC::gc_alloc_sprite_empty(Sprite **spritePtr, const Rect &rect) {
     return gc_alloc_sprite_with(spritePtr, nullptr, rect, Vec2::half);
 }
 
@@ -582,7 +582,7 @@ int GC::gc_alloc_sprite_with(Sprite **spritePtr, Texture *texture) {
 }
 
 int GC::gc_alloc_sprite_with(Sprite **spritePtr, Texture *texture, const Vec2 &center) {
-    Rect_t rect{};
+    Rect rect{};
     if (texture == nullptr) {
         static_assert(true, "texture arg is null");
     } else {
@@ -593,7 +593,7 @@ int GC::gc_alloc_sprite_with(Sprite **spritePtr, Texture *texture, const Vec2 &c
     return gc_alloc_sprite_with(spritePtr, texture, rect, center);
 }
 
-int GC::gc_alloc_sprite_with(Sprite **spritePtr, Texture *texture, const Rect_t &rect, const Vec2 &center) {
+int GC::gc_alloc_sprite_with(Sprite **spritePtr, Texture *texture, const Rect &rect, const Vec2 &center) {
     int id;
     GCMemoryStick *ms;
 

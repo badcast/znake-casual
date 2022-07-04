@@ -4,7 +4,7 @@
 namespace RoninEngine::Runtime {
    class Camera2D final : public Camera {
       protected:
-         void render(SDL_Renderer* renderer, Rect_t rect, GameObject* root);
+         void render(SDL_Renderer* renderer, Rect rect, GameObject* root);
 
       public:
          bool visibleBorders;

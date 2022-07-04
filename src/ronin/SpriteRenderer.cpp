@@ -43,7 +43,7 @@ void SpriteRenderer::setSpriteFromTextureToGC(Texture* texture) {
 Sprite* SpriteRenderer::getSprite() { return this->sprite; }
 
 void SpriteRenderer::Render(Render_info* render) {
-    Rect_t& _srcRect = render->src;
+    Rect& _srcRect = render->src;
     Rectf_t& _dstRect = render->dst;
     uint16_t x, y;
     SDL_Rect dest;

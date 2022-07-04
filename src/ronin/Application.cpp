@@ -1,17 +1,19 @@
 
 #include "framework.h"
 
+#include <thread>
+
 using namespace UI;
 
 namespace RoninEngine {
-Level* _lastSceneToFree = nullptr;
+Level* destroyableLevel = nullptr;
 SDL_Renderer* renderer = nullptr;
 SDL_Window* window = nullptr;
 bool m_inited = false;
-bool m_sceneAccept = false;
+bool m_levelAccept = false;
 Level* m_level = nullptr;
-bool m_sceneLoaded = false;
-bool _queryQuit;
+bool m_levelLoaded = false;
+bool isQuiting;
 
 void Application::Init(const std::uint32_t& width, const std::uint32_t& height) {
     char errorStr[128];
@@ -31,7 +33,7 @@ void Application::Init(const std::uint32_t& width, const std::uint32_t& height) 
 
     if (!window) fail(SDL_GetErrorMsg(errorStr, 128));
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED /*| SDL_RENDERER_PRESENTVSYNC*/);
     if (!renderer) fail(SDL_GetErrorMsg(errorStr, 128));
 
     // Brightness - Яркость
@@ -41,10 +43,10 @@ void Application::Init(const std::uint32_t& width, const std::uint32_t& height) 
 
     LoadGame();
     m_inited = true;
-    _queryQuit = false;
+    isQuiting = false;
 }
 
-void Application::RequestQuit() { _queryQuit = true; }
+void Application::RequestQuit() { isQuiting = true; }
 
 void Application::Quit() {
     if (!m_inited) return;
@@ -72,8 +74,8 @@ void Application::LoadGame() {
     // initialize GC
     GC::gc_init();
 
-    string path = dataAt(FolderKind::LOADER);
-    string temp = path + "graphics.conf";
+    std::string path = dataAt(FolderKind::LOADER);
+    std::string temp = path + "graphics.conf";
     GC::LoadImages(temp.c_str());
 
     // load textures
@@ -94,17 +96,17 @@ void Application::LoadGame() {
 }
 
 void Application::LoadedLevel() {
-    if (_lastSceneToFree) {
-        _lastSceneToFree->onUnloading();
+    if (destroyableLevel) {
+        destroyableLevel->onUnloading();
 
-        GC::gc_unalloc(_lastSceneToFree);
+        GC::gc_unalloc(destroyableLevel);
 
-        _lastSceneToFree = nullptr;
+        destroyableLevel = nullptr;
         // GC::UnloadUnused();
         GC::gc_free_source();
     }
 
-    m_sceneLoaded = true;
+    m_levelLoaded = true;
 
     // capture memory as GC
     GC::gc_unlock();
@@ -116,7 +118,7 @@ void Application::LoadLevel(Level* level) {
     if (!level || m_level == level) throw std::bad_cast();
 
     if (m_level) {
-        _lastSceneToFree = m_level;
+        destroyableLevel = m_level;
         m_level->Unload();
     }
 
@@ -130,8 +132,8 @@ void Application::LoadLevel(Level* level) {
     }
 
     m_level = level;
-    m_sceneAccept = false;
-    m_sceneLoaded = false;
+    m_levelAccept = false;
+    m_levelLoaded = false;
 }
 
 SDL_Surface* Application::ScreenShot() {
@@ -172,40 +174,43 @@ RoninEngine::Resolution RoninEngine::Application::getResolution() {
 }
 
 bool Application::Simulate() {
-    /**/ SDL_Event e;
-    /**/ int firstStep;
-    /**/ char _title[128];
-    /**/ float fpsRound = 0;
-    /**/ float fps = 0;
+    SDL_Event e;
+    int firstStep;
+    char _title[128];
+    float fpsRound;
+    float fps;
+    int _delayed;
     SDL_WindowFlags wndFlags;
 
-    while (!_queryQuit) {
+    while (!isQuiting) {
+        // update events
         input::Reset();
+        _delayed = Time::tickMillis();
         wndFlags = static_cast<SDL_WindowFlags>(SDL_GetWindowFlags(Application::GetWindow()));
         while (SDL_PollEvent(&e)) {
             input::Update_Input(&e);
-            if (e.type == SDL_QUIT) _queryQuit = true;
+            if (e.type == SDL_QUIT) isQuiting = true;
         }
 
         if ((wndFlags & SDL_WindowFlags::SDL_WINDOW_MINIMIZED) != SDL_WindowFlags::SDL_WINDOW_MINIMIZED) {
-            // update
-            input::Late_Update();
+            // set default color
+            SDL_SetRenderDrawColor(renderer, 0x11, 0x11, 0x11, SDL_ALPHA_OPAQUE);  // back color for clear
 
-            // Updating
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);  // black clear
-            //Очистка
+            // Clearing
             SDL_RenderClear(renderer);
 
-            if (!m_sceneLoaded) {
+            input::movement_update();
+
+            if (!m_levelLoaded) {
                 // free cache
                 LoadedLevel();
-                m_sceneLoaded = true;
+                m_levelLoaded = true;
             } else {
-                //Обновляем сцену
-                if (!m_sceneAccept) {
+                // update level
+                if (!m_levelAccept) {
                     SDL_RenderFlush(renderer);  // flush renderer before first render
                     m_level->start();
-                    m_sceneAccept = true;
+                    m_levelAccept = true;
                 } else {
                     m_level->update();
                 }
@@ -214,15 +219,15 @@ bool Application::Simulate() {
                 m_level->onDrawGizmos();  // Draw gizmos
                 m_level->RenderUI(renderer);
 
-                if (!_lastSceneToFree) {
+                if (!destroyableLevel) {
                     SDL_RenderPresent(renderer);
                     m_level->lateUpdate();
                     m_level->RenderSceneLate(renderer);
                 }
             }
 
-            fps = SDL_ceilf(Time::frame() / (SDL_GetTicks() / 1000.f));
             if (Time::startUpTime() > fpsRound) {
+                fps = SDL_ceilf(Time::frame() / (SDL_GetTicks() / 1000.f));
 #ifdef _GLIBCXX_DEBUG_ONLY
                 std::sprintf(_title,
                              "Ronin Engine (Debug) FPS:%d Memory:%luMiB, "
@@ -235,11 +240,13 @@ bool Application::Simulate() {
                 fpsRound = Time::startUpTime() + 1;
             }
 
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000/60));
+
             Time::update();
         }
     }
 
-    return _queryQuit;
+    return isQuiting;
 }
 
 SDL_Window* Application::GetWindow() { return window; }
@@ -262,8 +269,10 @@ void Application::fail(const std::string& message) {
 
     fprintf(stderr, "%s", _template.data());
 
-    SDL_LogMessage(SDL_LogCategory::SDL_LOG_CATEGORY_APPLICATION, SDL_LogPriority::SDL_LOG_PRIORITY_CRITICAL, _template.c_str());
-    SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "Ronin Engine: failed", _template.c_str(), window);
+    SDL_LogMessage(SDL_LogCategory::SDL_LOG_CATEGORY_APPLICATION, SDL_LogPriority::SDL_LOG_PRIORITY_CRITICAL,
+                   _template.c_str());
+    SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "Ronin Engine: failed", _template.c_str(),
+                             window);
     back_fail();
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "dependency.h"
 
-using namespace std;
 using namespace RoninEngine;
 
 namespace RoninEngine::UI {
@@ -40,7 +39,7 @@ class GUI final {
     bool _focusedUI;
 
     ///Регистрирует хранилище для пользовательских инструментов и возвращает id
-    CI list<uid> get_groups();
+    CI std::list<uid> get_groups();
     CI uid call_register_ui(const uid &parent = NOPARENT) throw();
     CI RenderData &ID(const uid &id);
     CI bool has_action(void *outPos);
@@ -68,9 +67,9 @@ class GUI final {
     CI uid Push_TextureStick(Texture *texture, const point_t point, const uid &parent = NOPARENT);
     CI uid Push_TextureAnimator(Timeline *timeline, const RoninEngine::Runtime::Rect &rect, const uid &parent = NOPARENT);
     CI uid Push_TextureAnimator(Timeline *timeline, const point_t &point, const uid &parent = NOPARENT);
-    CI uid Push_TextureAnimator(const list<Texture *> &roads, float duration, TimelineOptions option, const RoninEngine::Runtime::Rect &rect,
+    CI uid Push_TextureAnimator(const std::list<Texture *> &roads, float duration, TimelineOptions option, const RoninEngine::Runtime::Rect &rect,
                                 const uid &parent = NOPARENT);
-    CI uid Push_TextureAnimator(const list<Texture *> &roads, float duration, TimelineOptions option, const point_t &point,
+    CI uid Push_TextureAnimator(const std::list<Texture *> &roads, float duration, TimelineOptions option, const point_t &point,
                                 const uid &parent = NOPARENT);
 
     // property-----------------------------------------------------------------------------------------------------------

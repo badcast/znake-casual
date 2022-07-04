@@ -4,7 +4,7 @@ RoninEngine::Runtime::Camera* _main = nullptr;
 namespace RoninEngine::Runtime {
 
 Camera::Camera() : Camera(typeid (*this).name()) {}
-Camera::Camera(const string& name) : Component(name), aspectRatio(Vec2::one) {
+Camera::Camera(const std::string& name) : Component(name), aspectRatio(Vec2::one) {
     if (!_main) {
         _main = this;
     }
@@ -81,7 +81,7 @@ Camera::matrixSelection() {
     */
 
     constexpr std::uint8_t Nz = 2;
-    list<Renderer*> layers[Nz];
+    std::list<Renderer*> layers[Nz];
     std::uint8_t zN = 0;
     if (__rendererOutResults.empty()) {
         Vec2 ray;
@@ -121,7 +121,7 @@ Camera::matrixSelection() {
             prev.erase(y);
 
         // ordering and collect
-        list<Renderer*>* target;
+        std::list<Renderer*>* target;
         while ((target = zN < Nz ? &layers[zN++] : nullptr)) {
             for (Renderer* el : *target) {
                 __rendererOutResults.insert(el);

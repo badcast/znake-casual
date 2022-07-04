@@ -23,9 +23,9 @@ namespace RoninEngine::UI
 		road.duration = duration;
 		AddRoad(road);
 	}
-	void Timeline::AddRoads(const list<TimelineRoad>& roads) {
-		for (auto i = begin(roads); i != end(roads); ++i)
-			_roads.emplace_back(*i);
+    void Timeline::AddRoads(const std::list<TimelineRoad>& roads) {
+
+        _roads.assign(std::begin(roads), std::end(roads));
 		Reset();
 	}
 

@@ -73,7 +73,7 @@ template SpriteRenderer* CreateObject<SpriteRenderer>(const string&);
 
 GameObject* CreateGameObject() { return factory_base<GameObject>(true, nullptr, nullptr); }
 
-GameObject* CreateGameObject(const string& name) { return factory_base<GameObject>(true, nullptr, name.data()); }
+GameObject* CreateGameObject(const std::string& name) { return factory_base<GameObject>(true, nullptr, name.data()); }
 
 void Destroy(Object* obj) { Destroy(obj, 0); }
 
@@ -86,11 +86,11 @@ void Destroy(Object* obj, float t) {
 
     auto ref = Level::self()->_destructions;
 
-    auto iter = std::find_if(std::begin(*ref), std::end(*ref), [obj](pair<Object*, float> x) { return obj == x.first; });
+    auto iter = std::find_if(std::begin(*ref), std::end(*ref), [obj](std::pair<Object*, float> x) { return obj == x.first; });
 
     if (iter != std::end(*ref)) std::runtime_error("Object is destroyed state");
 
-    ref->push_back(make_pair(const_cast<Object*>(obj), Time::time() + t));
+    ref->push_back(std::make_pair(const_cast<Object*>(obj), Time::time() + t));
 }
 
 void Destroy_Immediate(Object* obj) {
@@ -188,7 +188,7 @@ GameObject* Instantiate(GameObject* obj, Vec2 position, Transform* parent, bool 
 
 Object::Object() : Object(typeid(Object).name()) {}
 
-Object::Object(const string& name) : m_name(name) {
+Object::Object(const std::string& name) : m_name(name) {
     m_name.shrink_to_fit();
     id = Level::self()->globalID++;
     Level::self()->ObjectPush(this);
@@ -198,7 +198,7 @@ void Object::Destroy() { RoninEngine::Runtime::Destroy(this); }
 
 std::string& Object::name(const std::string& newName) { return (m_name = newName); }
 
-const string& Object::name() { return m_name; }
+const std::string& Object::name() { return m_name; }
 
 Object::operator bool() { return instanced(this); }
 }  // namespace Runtime

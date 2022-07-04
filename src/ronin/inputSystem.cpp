@@ -10,7 +10,7 @@ void input::Reset() {
     mouseWheels = 0;
 }
 
-void input::Late_Update() {
+void input::movement_update() {
     const uint8_t* s = SDL_GetKeyboardState(nullptr);
     if (s[SDL_SCANCODE_D] || s[SDL_SCANCODE_RIGHT])
         m_axis.x = 1;

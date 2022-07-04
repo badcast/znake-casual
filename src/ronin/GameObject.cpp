@@ -12,7 +12,7 @@ template Spotlight* GameObject::addComponent<Spotlight>();
 
 GameObject::GameObject() : GameObject("GameObject") {}
 
-GameObject::GameObject(const string& name) : Object(name) {
+GameObject::GameObject(const std::string& name) : Object(name) {
     m_components.push_back(create_empty_transform());
     m_components.front()->_derivedObject = this;
     Level::self()->_gameObjects.emplace_back(this);
@@ -37,7 +37,7 @@ Component* GameObject::addComponent(Component* component) {
         std::find_if(begin(m_components), end(m_components), [component](Component* ref) { return component == ref; })) {
         this->m_components.emplace_back(component);
 
-        if (component->_derivedObject) throw bad_exception();
+        if (component->_derivedObject) throw std::bad_exception();
 
         component->_derivedObject = this;
 

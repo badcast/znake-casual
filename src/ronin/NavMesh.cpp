@@ -127,14 +127,14 @@ const Vec2 NavMesh::PointToWorldPosition(const int &x, const int &y) {
     return vec2;
 }
 
-list<Vec2> NavMesh::findSpaces(const Neuron *neuron, int radiusInBlocks) {
+std::list<Vec2> NavMesh::findSpaces(const Neuron *neuron, int radiusInBlocks) {
     // TODO: Поиск пустых ячеек рядом
     return {};
 }
-list<Vec2> NavMesh::findSpaces(const int &x, const int &y, int radiusInBlocks) {
+std::list<Vec2> NavMesh::findSpaces(const int &x, const int &y, int radiusInBlocks) {
     return findSpaces(neuron(x, y), radiusInBlocks);
 }
-NavResult NavMesh::find(NavMethodRule method, Neuron *firstNeuron, Neuron *lastNeuron, list<Neuron *> *result,
+NavResult NavMesh::find(NavMethodRule method, Neuron *firstNeuron, Neuron *lastNeuron, std::list<Neuron *> *result,
                         NavAlgorithm algorithm) {
     NavResult pinfo;
     pinfo.map = this;
@@ -231,7 +231,7 @@ int AlgorithmUtils::DistancePhf(Neuron *a, Neuron *b) {
 
 int AlgorithmUtils::DistanceManht(Neuron *a, Neuron *b) { return Mathf::abs(b->x - a->x) + Mathf::abs(b->y - a->y); }
 
-auto AlgorithmUtils::GetMinCostPath(list<Neuron *> *paths) -> decltype(std::begin(*paths)) {
+auto AlgorithmUtils::GetMinCostPath(std::list<Neuron *> *paths) -> decltype(std::begin(*paths)) {
     int min = std::numeric_limits<int>::max();
     auto result = begin(*paths);
     for (auto i = result; i != std::end(*paths); ++i) {
@@ -274,7 +274,7 @@ int GetMatrixMethod(NavMethodRule method, std::int8_t **matrixH, std::int8_t **m
     return 0;
 }
 
-void AlgorithmUtils::AvailPoints(NavMesh *map, NavMethodRule method, Neuron *arrange, Neuron *target, list<Neuron *> *pathTo,
+void AlgorithmUtils::AvailPoints(NavMesh *map, NavMethodRule method, Neuron *arrange, Neuron *target, std::list<Neuron *> *pathTo,
                                  std::size_t maxCount, int filterFlag) {
     Neuron *it = nullptr;
     int i = 0, c;

@@ -8,7 +8,7 @@ namespace Runtime {
 // base component
 Component::Component() : Component(typeid(Component).name()) {}
 
-Component::Component(const string& name)
+Component::Component(const std::string& name)
     : Object(name), _derivedObject(nullptr) {}
 
 const bool Component::isBind() { return _derivedObject != nullptr; }

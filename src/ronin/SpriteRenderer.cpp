@@ -5,7 +5,7 @@
 namespace RoninEngine::Runtime {
 SpriteRenderer::SpriteRenderer() : SpriteRenderer("Sprite Renderer") {}
 
-SpriteRenderer::SpriteRenderer(const string& name) : Renderer(name) {
+SpriteRenderer::SpriteRenderer(const std::string& name) : Renderer(name) {
     sprite = nullptr;
     texture = nullptr;
     flip = Vec2::one;

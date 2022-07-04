@@ -59,8 +59,13 @@ namespace RoninEngine
 		Time::timeScale = fmin((float)fmax((float)scale, 0.F), 1);
 	}
 
-	uint32_t Time::frame() {
-		return _frames;
-	}
+    std::uint32_t Time::frame() {
+        return _frames;
+    }
+
+    std::uint32_t Time::tickMillis()
+    {
+        return SDL_GetTicks();
+    }
 
 }

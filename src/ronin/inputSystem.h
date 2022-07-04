@@ -41,7 +41,7 @@ class input {
 
     static void Update_Input(SDL_Event*);
 
-    static void Late_Update();
+    static void movement_update();
 
     static const bool isMouseUp(int button = 1);
     static const bool isMouseDown(int button = 1);

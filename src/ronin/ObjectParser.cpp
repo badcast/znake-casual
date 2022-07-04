@@ -306,21 +306,21 @@ jbool& jno_object_node::toBoolean() {
     if (!isBoolean()) throw std::bad_cast();
     return *(jbool*)this->_bits;
 }
-vector<jnumber>* jno_object_node::toNumbers() {
+std::vector<jnumber>* jno_object_node::toNumbers() {
     if (!isArray() && (valueFlag >> 2) != JNOType::JNONumber) throw std::bad_cast();
-    return (vector<jnumber>*)_bits;
+    return (std::vector<jnumber>*)_bits;
 }
-vector<jreal>* jno_object_node::toReals() {
+std::vector<jreal>* jno_object_node::toReals() {
     if (!isArray() && (valueFlag >> 2) != JNOType::JNOReal) throw std::bad_cast();
-    return (vector<jreal>*)_bits;
+    return (std::vector<jreal>*)_bits;
 }
-vector<jstring>* jno_object_node::toStrings() {
+std::vector<jstring>* jno_object_node::toStrings() {
     if (!isArray() && (valueFlag >> 2) != JNOType::JNOString) throw std::bad_cast();
-    return (vector<jstring>*)_bits;
+    return (std::vector<jstring>*)_bits;
 }
-vector<jbool>* jno_object_node::toBooleans() {
+std::vector<jbool>* jno_object_node::toBooleans() {
     if (!isArray() && (valueFlag >> 2) != JNOType::JNOBoolean) throw std::bad_cast();
-    return (vector<jbool>*)_bits;
+    return (std::vector<jbool>*)_bits;
 }
 
 jno_object_parser::jno_object_parser() {}
@@ -396,13 +396,13 @@ int jno_object_parser::avail(jno_object_parser::jstruct& entry, const char* sour
                             switch (current_block_type) {
                                 case JNOType::JNOString: {
                                     auto ref = (jstring*)memory;
-                                    ((vector<string>*)current_jno_node._bits)->emplace_back(*ref);
+                                    ((std::vector<std::string>*)current_jno_node._bits)->emplace_back(*ref);
                                     jfree(ref);
                                     break;
                                 }
                                 case JNOType::JNOBoolean: {
                                     auto ref = (jbool*)memory;
-                                    ((vector<jbool>*)current_jno_node._bits)->emplace_back(*ref);
+                                    ((std::vector<jbool>*)current_jno_node._bits)->emplace_back(*ref);
                                     jfree(ref);
                                     break;
                                 }
@@ -414,13 +414,13 @@ int jno_object_parser::avail(jno_object_parser::jstruct& entry, const char* sour
                                     } else
                                         ref = (jreal*)memory;
 
-                                    ((vector<jreal>*)current_jno_node._bits)->emplace_back(*ref);
+                                    ((std::vector<jreal>*)current_jno_node._bits)->emplace_back(*ref);
                                     jfree(ref);
                                     break;
                                 }
                                 case JNOType::JNONumber: {
                                     auto ref = (jnumber*)memory;
-                                    ((vector<int64_t>*)current_jno_node._bits)->emplace_back(*ref);
+                                    ((std::vector<int64_t>*)current_jno_node._bits)->emplace_back(*ref);
                                     jfree(ref);
                                     break;
                                 }
@@ -433,19 +433,19 @@ int jno_object_parser::avail(jno_object_parser::jstruct& entry, const char* sour
                 // shrink to fit
                 switch (current_block_type) {
                     case JNOType::JNOString: {
-                        ((vector<string>*)current_jno_node._bits)->shrink_to_fit();
+                        ((std::vector<std::string>*)current_jno_node._bits)->shrink_to_fit();
                         break;
                     }
                     case JNOType::JNOBoolean: {
-                        ((vector<jbool>*)current_jno_node._bits)->shrink_to_fit();
+                        ((std::vector<jbool>*)current_jno_node._bits)->shrink_to_fit();
                         break;
                     }
                     case JNOType::JNOReal: {
-                        ((vector<jreal>*)current_jno_node._bits)->shrink_to_fit();
+                        ((std::vector<jreal>*)current_jno_node._bits)->shrink_to_fit();
                         break;
                     }
                     case JNOType::JNONumber: {
-                        ((vector<int64_t>*)current_jno_node._bits)->shrink_to_fit();
+                        ((std::vector<int64_t>*)current_jno_node._bits)->shrink_to_fit();
                         break;
                     }
                 }
@@ -471,7 +471,7 @@ int jno_object_parser::avail(jno_object_parser::jstruct& entry, const char* sour
             current_jno_node.valueFlag = Node_ValueFlag | valueType << 2;
         }
 
-        entry.insert(make_pair(j = jno_string_to_hash(current_jno_node.propertyName.c_str()), current_jno_node));
+        entry.insert(std::make_pair(j = jno_string_to_hash(current_jno_node.propertyName.c_str()), current_jno_node));
 
 #if defined(QDEBUG) || defined(DEBUG)
         // get iter

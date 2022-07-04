@@ -20,7 +20,7 @@ struct Level_t
 
 };
 
-vector<Level_t> m_levels;
+std::vector<Level_t> m_levels;
 
 using namespace RoninEngine;
 
@@ -31,7 +31,7 @@ void RoninEngine::Levels::Level_Init() {
      jno::jno_object_parser parser;
 	Level_t levl;
      jno::jno_object_node* node;
-	filesystem::directory_iterator dirIter(dataAt(FolderKind::LEVELS));
+    std::filesystem::directory_iterator dirIter(dataAt(FolderKind::LEVELS));
 
 	for (auto file : dirIter) {
 		if (!file.is_directory() && file.path().extension() == extMAP) {
@@ -67,7 +67,7 @@ void RoninEngine::Levels::Level_Init() {
 	}
 }
 
-int RoninEngine::Levels::Load_Level(string levelName, Terrain2D* terrain2d) {
+int RoninEngine::Levels::Load_Level(std::string levelName, Terrain2D* terrain2d) {
 
 	int id = -1;
 	for (auto& v : m_levels) {

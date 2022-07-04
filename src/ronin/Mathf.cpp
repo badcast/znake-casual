@@ -1,8 +1,6 @@
 #include "framework.h"
 #include "Mathf.h"
 
-using namespace std;
-
 namespace RoninEngine {
 	//get random value
 	int getRVal() {

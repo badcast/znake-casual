@@ -113,7 +113,7 @@ namespace RoninEngine::Runtime {
 		return _n;
 	}
 
-	const string Texture::name() {
-          return string(_name.empty() ? "Unknown" : _name);
+    const std::string Texture::name() {
+          return std::string(_name.empty() ? "Unknown" : _name);
 	}
 }

@@ -30,7 +30,7 @@ const char* prefDataPath() {
 }
 
 const std::string dataPath() {
-    string s = applicationPath();
+    std::string s = applicationPath();
     s += data_path;
     return s;
 }

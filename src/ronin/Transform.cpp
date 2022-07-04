@@ -6,7 +6,7 @@ namespace RoninEngine::Runtime {
 
 Transform::Transform() : Transform("Transform") {}
 
-Transform::Transform(const string& name) : Component(name) {
+Transform::Transform(const std::string& name) : Component(name) {
     _parent = nullptr;
     _angle = 0;
     // set as default

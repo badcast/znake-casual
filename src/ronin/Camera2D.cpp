@@ -83,7 +83,7 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
 
     SDL_RenderSetScale(renderer, 1, 1);
     if (visibleBorders) {
-        float offset = 25 * max(1 - Time::deltaTime(), 0.5f);
+        float offset = 25 * std::max(1 - Time::deltaTime(), 0.5f);
         float height = 200 * Time::deltaTime();
 
         renderInfo.dst.x = ((rect.w) / 2.0f);

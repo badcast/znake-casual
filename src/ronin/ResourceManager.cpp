@@ -16,25 +16,25 @@ std::size_t gc_allocated = 0;
 MemoryCapture memoryCapture = SystemManagement;
 
 // TODO: replace vector to list for optimize memory (const size)
-vector<GCMemoryStick> gc_memory[2];
+std::vector<GCMemoryStick> gc_memory[2];
 
 // stringhash and id
-map<int, int> *gc_fast_lock;
+std::map<int, int> *gc_fast_lock;
 
-map<int, list<string>> *_assocMultiFiles;
-map<int, list<SDL_Surface *> *> *_assocMultiLoadedImages;
-map<list<SDL_Surface *> *, list<Texture *> *> *_assocMultiCacheTextures;
+std::map<int, std::list<std::string>> *_assocMultiFiles;
+std::map<int, std::list<SDL_Surface *> *> *_assocMultiLoadedImages;
+std::map<std::list<SDL_Surface *> *, std::list<Texture *> *> *_assocMultiCacheTextures;
 
-map<int, string> *_assocSingleFile;
-map<int, SDL_Surface *> *_resourceLoaded_surfaces;
-map<SDL_Surface *, Texture *> *_assocCacheTextures;
-map<SDL_Surface *, SDL_Cursor *> *_assocCacheCursors;
+std::map<int, std::string> *_assocSingleFile;
+std::map<int, SDL_Surface *> *_resourceLoaded_surfaces;
+std::map<SDL_Surface *, Texture *> *_assocCacheTextures;
+std::map<SDL_Surface *, SDL_Cursor *> *_assocCacheCursors;
 
-map<string, Mix_Music *> *_assocLoadedMusic;
+std::map<std::string, Mix_Music *> *_assocLoadedMusic;
 
 namespace RoninEngine::Runtime {
 
-template <typename T, typename X = remove_reference_t<remove_pointer_t<T>>>
+template <typename T, typename X = std::remove_reference_t<std::remove_pointer_t<T>>>
 int gc_write_memblock_runtime(GCMemoryStick **ms) {
     int id;
 
@@ -191,7 +191,7 @@ void GC::LoadImages(const char *filename) {
             continue;
         }
         if (iter->second.isArray()) {
-            list<string> __names;
+            std::list<std::string> __names;
             for (auto x = iter->second.toStrings()->begin(); x != iter->second.toStrings()->end(); ++x) {
                 __names.emplace_back(*x);
             }
@@ -244,10 +244,10 @@ void GC::CheckResources() {
 
 //Для автоматического уничтожения ресурса, обязательно его нужно скинуть на
 // ResourceManager::Unload()
-list<SDL_Surface *> *GC::LoadSurfaces(const string &packName) {
-    list<SDL_Surface *> *surfs = nullptr;
-    string path = dataAt(FolderKind::GFX);
-    string cat;
+std::list<SDL_Surface *> *GC::LoadSurfaces(const std::string &packName) {
+    std::list<SDL_Surface *> *surfs = nullptr;
+    std::string path = dataAt(FolderKind::GFX);
+    std::string cat;
     int hash = jno::jno_string_to_hash(packName.c_str());
     auto iter = _assocMultiLoadedImages->find(hash);
     if (iter == end(*_assocMultiLoadedImages)) {
@@ -270,9 +270,9 @@ list<SDL_Surface *> *GC::LoadSurfaces(const string &packName) {
 
 //Для автоматического уничтожения ресурса, обязательно его нужно скинуть на
 // ResourceManager::Unload()
-list<Texture *> *GC::LoadTextures(const string &packName, bool autoUnload) {
-    list<Texture *> *_textures = nullptr;
-    list<SDL_Surface *> *surfaces = LoadSurfaces(packName);
+std::list<Texture *> *GC::LoadTextures(const std::string &packName, bool autoUnload) {
+    std::list<Texture *> *_textures = nullptr;
+    std::list<SDL_Surface *> *surfaces = LoadSurfaces(packName);
     Texture *p;
     if (!surfaces || !surfaces->size()) return _textures;
 
@@ -293,12 +293,12 @@ list<Texture *> *GC::LoadTextures(const string &packName, bool autoUnload) {
 
 //Для автоматического уничтожения ресурса, обязательно его нужно скинуть на
 // ResourceManager::Unload()
-SDL_Surface *GC::GetSurface(const string &surfaceName, FolderKind pathOn) { return resource_bitmap(surfaceName, pathOn); }
-SDL_Surface *GC::GetSurface(const string &surfaceName) { return GetSurface(surfaceName, FolderKind::GFX); }
+SDL_Surface *GC::GetSurface(const std::string &surfaceName, FolderKind pathOn) { return resource_bitmap(surfaceName, pathOn); }
+SDL_Surface *GC::GetSurface(const std::string &surfaceName) { return GetSurface(surfaceName, FolderKind::GFX); }
 
 //Для автоматического уничтожения ресурса, обязательно его нужно скинуть на
 // ResourceManager::Unload()
-Texture *GC::GetTexture(const string &resourceName, FolderKind pathOn, bool autoUnload) {
+Texture *GC::GetTexture(const std::string &resourceName, FolderKind pathOn, bool autoUnload) {
     SDL_Surface *surf;
     Texture *texture;
 
@@ -309,14 +309,14 @@ Texture *GC::GetTexture(const string &resourceName, FolderKind pathOn, bool auto
     auto cache = _assocCacheTextures->find(surf);
     if (cache == end(*_assocCacheTextures)) {
         gc_alloc_texture_from(&texture, surf);
-        auto i = _assocCacheTextures->insert(make_pair(surf, texture));
+        auto i = _assocCacheTextures->insert(std::make_pair(surf, texture));
         texture->_name = resourceName;
     } else
         texture = cache->second;
 
     return texture;
 }
-Texture *GC::GetTexture(const string &resourceName, bool autoUnload) {
+Texture *GC::GetTexture(const std::string &resourceName, bool autoUnload) {
     return GetTexture(resourceName, FolderKind::TEXTURES, autoUnload);
 }
 
@@ -328,14 +328,14 @@ Texture *GC::GetTexture(const int w, const int h, const ::SDL_PixelFormatEnum fo
 Texture *GC::GetTexture(const int w, const int h, const ::SDL_PixelFormatEnum format, const ::SDL_TextureAccess access) {
     Texture *tex;
     gc_alloc_texture(&tex, w, h, format, access);
-    if (tex == nullptr) throw bad_alloc();
+    if (tex == nullptr) throw std::bad_alloc();
 
     return tex;
 }
 
 //Для автоматического уничтожения ресурса, обязательно его нужно скинуть на
 // ResourceManager::Unload()
-SDL_Cursor *GC::GetCursor(const string &resourceName, const point_t &hotspot, bool autoUnload) {
+SDL_Cursor *GC::GetCursor(const std::string &resourceName, const point_t &hotspot, bool autoUnload) {
     return GetCursor(GetSurface(resourceName), hotspot);
 }
 
@@ -349,7 +349,7 @@ SDL_Cursor *GC::GetCursor(SDL_Surface *texture, const point_t &hotspot) {
             return find->second;
         else {
             cur = SDL_CreateColorCursor(texture, hotspot.x, hotspot.y);
-            if (cur) _assocCacheCursors->emplace(make_pair(texture, cur));
+            if (cur) _assocCacheCursors->emplace(std::make_pair(texture, cur));
         }
     }
     return cur;
@@ -392,10 +392,10 @@ void GC::gc_unlock() { memoryCapture = MemoryCapture::GCManagement; }
 bool GC::gc_is_lock() { return memoryCapture == MemoryCapture::SystemManagement; }
 
 // GC Resources   ---------------------------------------------------
-int GC::resource_bitmap(const string &resourceName, FolderKind pathOn, SDL_Surface **sdlsurfacePtr) {
+int GC::resource_bitmap(const std::string &resourceName, FolderKind pathOn, SDL_Surface **sdlsurfacePtr) {
     SDL_Surface *surf = nullptr;
-    string path = dataAt(pathOn);
-    string cat;
+    std::string path = dataAt(pathOn);
+    std::string cat;
     GCMemoryStick *mem;
     int id;
 
@@ -408,7 +408,7 @@ int GC::resource_bitmap(const string &resourceName, FolderKind pathOn, SDL_Surfa
 
         cat = path + iBitsource->second;
 
-        if (!filesystem::exists(cat.c_str())) {
+        if (!std::filesystem::exists(cat.c_str())) {
             SDL_LogError(SDL_LOG_CATEGORY_INPUT, "Texture not found. %s", cat.c_str());
             return GCInvalidID;
         }
@@ -421,7 +421,7 @@ int GC::resource_bitmap(const string &resourceName, FolderKind pathOn, SDL_Surfa
 
         id = gc_write_memblock_runtime<SDL_Surface>(&mem);
         mem->memory = surf;
-        _resourceLoaded_surfaces->insert(make_pair(hash, surf));
+        _resourceLoaded_surfaces->insert(std::make_pair(hash, surf));
     } else {
         // finded
         surf = iter->second;
@@ -433,7 +433,7 @@ int GC::resource_bitmap(const string &resourceName, FolderKind pathOn, SDL_Surfa
     return id;
 }
 
-SDL_Surface *GC::resource_bitmap(const string &resourceName, FolderKind folderKind) {
+SDL_Surface *GC::resource_bitmap(const std::string &resourceName, FolderKind folderKind) {
     SDL_Surface *sdlsurf;
     auto gcid = resource_bitmap(resourceName, folderKind, &sdlsurf);
     if (gcid == GCInvalidID) {

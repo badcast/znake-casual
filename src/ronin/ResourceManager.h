@@ -2,8 +2,6 @@
 
 #include "dependency.h"
 
-using namespace std;
-
 namespace RoninEngine {
 namespace Runtime {
 
@@ -79,20 +77,20 @@ class GC {
     [[deprecate]] static void LoadImages(const char *filename);
     [[deprecate]] static void UnloadUnused();
 
-    [[deprecate]] static list<SDL_Surface *> *LoadSurfaces(const string &packName);
-    [[deprecate]] static list<Runtime::Texture *> *LoadTextures(const string &packName, bool autoUnload = true);
-    [[deprecate]] static SDL_Surface *GetSurface(const string &surfaceName);
-    [[deprecate]] static SDL_Surface *GetSurface(const string &surfaceName, FolderKind pathOn);
-    [[deprecate]] static Texture *GetTexture(const string &resourceName, FolderKind pathOn, bool autoUnload = true);
-    [[deprecate]] static Texture *GetTexture(const string &resourceName, bool autoUnload = true);
+    [[deprecate]] static std::list<SDL_Surface *> *LoadSurfaces(const std::string &packName);
+    [[deprecate]] static std::list<Runtime::Texture *> *LoadTextures(const std::string &packName, bool autoUnload = true);
+    [[deprecate]] static SDL_Surface *GetSurface(const std::string &surfaceName);
+    [[deprecate]] static SDL_Surface *GetSurface(const std::string &surfaceName, FolderKind pathOn);
+    [[deprecate]] static Texture *GetTexture(const std::string &resourceName, FolderKind pathOn, bool autoUnload = true);
+    [[deprecate]] static Texture *GetTexture(const std::string &resourceName, bool autoUnload = true);
     [[deprecate]] static Texture *GetTexture(const int w, const int h);
     [[deprecate]] static Texture *GetTexture(const int w, const int h, const ::SDL_PixelFormatEnum format);
     [[deprecate]] static Texture *GetTexture(const int w, const int h, const ::SDL_PixelFormatEnum format,
                                              const ::SDL_TextureAccess access);
-    [[deprecate]] static SDL_Cursor *GetCursor(const string &resourceName, const point_t &hotspot, bool autoUnload = true);
+    [[deprecate]] static SDL_Cursor *GetCursor(const std::string &resourceName, const point_t &hotspot, bool autoUnload = true);
     [[deprecate]] static SDL_Cursor *GetCursor(SDL_Surface *texture, const point_t &hotspot);
 
-    [[deprecate]] static Atlas *GetAtlas(const string &atlasName);
+    [[deprecate]] static Atlas *GetAtlas(const std::string &atlasName);
 
     static void *gc_malloc(std::size_t size);
 
@@ -148,9 +146,9 @@ class GC {
 
     static std::tuple<int, int> gc_countn();
 
-    static int resource_bitmap(const string &resourceName, FolderKind folderKind, SDL_Surface **sdlsurfacePtr);
+    static int resource_bitmap(const std::string &resourceName, FolderKind folderKind, SDL_Surface **sdlsurfacePtr);
 
-    static SDL_Surface *resource_bitmap(const string &resourceName, FolderKind folderKind);
+    static SDL_Surface *resource_bitmap(const std::string &resourceName, FolderKind folderKind);
 
     static int gc_alloc_sdl_surface(SDL_Surface **sdlsurfacePtr, const int &w, const int &h);
 

@@ -4,7 +4,7 @@ namespace RoninEngine::Runtime
 {
 	Renderer::Renderer() :Renderer("Renderer Component"){}
 
-	Renderer::Renderer(const string& name) : Component(name) {
+    Renderer::Renderer(const std::string& name) : Component(name) {
 		zOrder = 0;
 	}
 }

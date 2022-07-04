@@ -5,7 +5,7 @@ namespace RoninEngine {
 Level *selfLevel;
 
 Level::Level() : Level("Untitled") {}
-Level::Level(const string &name) {
+Level::Level(const std::string &name) {
     if (selfLevel != nullptr) {
         static_assert("pCurrentScene replaced by new");
     }
@@ -22,7 +22,7 @@ Level::Level(const string &name) {
 Level::~Level() {
     GameObject *target = main_object;  // first
     Transform *tr;
-    list<GameObject *> stack;
+    std::list<GameObject *> stack;
 
     if (selfLevel == this) {
         static_assert("pCurrentScene set to null");
@@ -143,7 +143,7 @@ void Level::CC_Render_Push(Renderer *rend) { _assoc_renderers.emplace_front(rend
 
 void Level::CC_Light_Push(Light *light) { _assoc_lightings.emplace_front(light); }
 
-void Level::ObjectPush(Object *obj) { _objects.insert(make_pair(obj, Time::time())); }
+void Level::ObjectPush(Object *obj) { _objects.insert(std::make_pair(obj, Time::time())); }
 
 std::vector<RoninEngine::Runtime::Transform *> *RoninEngine::Level::getInternalTransforms(Runtime::Transform *parent) {
     if (!parent) {
@@ -200,7 +200,7 @@ void Level::RenderLevel(SDL_Renderer *renderer) {
         if (_destructions->begin() == _destructions->end()) {
             GC::gc_unalloc(_destructions);
         } else {
-            _destructions->remove_if([](pair<Object *, float> &p) {
+            _destructions->remove_if([](std::pair<Object *, float> &p) {
                 if (p.second <= Time::time()) {
                     Destroy_Immediate(p.first);
                     return true;

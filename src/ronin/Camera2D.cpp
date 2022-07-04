@@ -111,13 +111,12 @@ void Camera2D::render(SDL_Renderer* renderer, Rect_t rect, GameObject* root) {
     }
 
     if (visibleObjects) {
-        Gizmos::color.r = 0;
-        Gizmos::color.g = 0;
-        Gizmos::color.b = 0;
-        Gizmos::color.a = 255;
-
         for (auto face : ( *std::get<std::set<Renderer*>*>(stack))) {
             Vec2 p = face->transform()->position();
+            Vec2 sz = face->GetSize()*2;
+            Gizmos::color = Color::blue;
+            Gizmos::DrawRectangleRounded(p, sz.x, sz.y, 5);
+            Gizmos::color = Color::black;
             Gizmos::DrawPosition(p, 0.2f);
             Gizmos::DrawTextOnPosition(p, face->gameObject()->m_name);
         }

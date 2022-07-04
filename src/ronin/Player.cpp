@@ -25,7 +25,7 @@ void Player::OnUpdate() {
 
         movementDir = axis;
 
-        transform()->LookAtLerp(point + movementDir, .5f);
+        //transform()->LookAtLerp(point + movementDir, .5f);
         transform()->position(Vec2::MoveTowards(point, point + movementDir, curSpeed));
     }
 }

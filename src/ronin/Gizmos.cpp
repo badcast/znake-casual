@@ -1,8 +1,8 @@
 #include "Gizmos.h"
 
-#include "framework.h"
-
 #include <SDL2/SDL2_gfxPrimitives.h>
+
+#include "framework.h"
 
 namespace RoninEngine::Runtime {
 
@@ -75,6 +75,34 @@ void Gizmos::DrawPosition(const Vec2& origin, float scalar) {
     a.y -= scalar;
     b.y += scalar;
     DrawLine(std::move(a), std::move(b));
+}
+
+void Gizmos::DrawSquare(Vec2 origin, float width) { DrawRectangle(origin, width, width); }
+
+void Gizmos::DrawRectangle(Vec2 origin, float width, float height) {
+    origin = Camera::mainCamera()->WorldToScreenPoint(origin);
+    std::uint16_t x, y;
+    width *= squarePerPixels;
+    height *= squarePerPixels;
+    x = origin.x - width / 2;
+    y = origin.y - height / 2;
+
+    rectangleColor(Application::GetRenderer(), x, y, x + width, y + height, color);
+}
+
+void Gizmos::DrawSquareRounded(Vec2 origin, float width, std::uint16_t radius) {
+    DrawRectangleRounded(origin, width, width, radius);
+}
+
+void Gizmos::DrawRectangleRounded(Vec2 origin, float width, float height, std::uint16_t radius) {
+    origin = Camera::mainCamera()->WorldToScreenPoint(origin);
+    std::uint16_t x, y;
+    width *= squarePerPixels;
+    height *= squarePerPixels;
+    x = origin.x - width / 2;
+    y = origin.y - height / 2;
+
+    roundedRectangleColor(Application::GetRenderer(), x, y, x + width, y + height, radius, color);
 }
 
 void Gizmos::Draw2DWorldSpace(const Vec2& origin, int depth) {
@@ -174,14 +202,13 @@ void RoninEngine::Runtime::Gizmos::DrawTextOnPosition(Vec2 origin, const std::st
     UI::Render_String(Application::GetRenderer(), r, text.c_str(), text.length(), 2);
 }
 
-void Gizmos::DrawSphere(Vec2 origin, float distance)
-{
+void Gizmos::DrawSphere(Vec2 origin, float distance) {
     origin = Camera::mainCamera()->WorldToScreenPoint(origin);
     std::uint16_t x, y, r;
     x = origin.x;
     y = origin.y;
     r = static_cast<std::uint16_t>(distance * squarePerPixels);
-    aacircleColor(Application::GetRenderer(), x, y, r, *reinterpret_cast<std::uint32_t*>(&color));
+    aacircleColor(Application::GetRenderer(), x, y, r, color);
 }
 
 float Gizmos::square_triangle(float base, float height) { return base * height / 2; }

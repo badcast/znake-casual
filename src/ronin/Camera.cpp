@@ -103,23 +103,29 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
         }
         delayTime = Time::startUpTime() - delayTime;
 
+        std::list<Renderer*> _removes;
+
         //собираем оставшиеся которые прикреплены к видимости
-        for (Renderer* el : prev) {
-            Vec2 rSz = el->GetSize() / 2;
-            Vec2 pos = el->transform()->_p;
+        for (auto x = std::begin(prev); x != std::end(prev); ++x) {
+            Vec2 rSz = (*x)->GetSize();
+            Vec2 pos = (*x)->transform()->_p;
             if ((pos.x + rSz.x >= wpLeftTop.x && pos.x - rSz.x <= wpRightBottom.x) &&
                 (pos.y - rSz.y <= wpLeftTop.y && pos.y + rSz.y >= wpRightBottom.y)) {
-                __rendererOutResults.insert(el);
+                __rendererOutResults.insert((*x));
             } else {
-                prev.erase(el);
+                _removes.emplace_back((*x));
             }
         }
+
+        for (Renderer* y : _removes)
+            prev.erase(y);
 
         // ordering and collect
         list<Renderer*>* target;
         while ((target = zN < Nz ? &layers[zN++] : nullptr)) {
             for (Renderer* el : *target) {
                 __rendererOutResults.insert(el);
+                prev.insert(el);
             }
         }
     }

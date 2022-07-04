@@ -9,11 +9,14 @@ class Gizmos {
 
     static void DrawLine(Vec2 a, Vec2 b);
     static void DrawPosition(const Vec2& origin, float scalar = maxWorldScalar);
+    static void DrawSquare(Vec2 origin, float width);
+    static void DrawRectangle(Vec2 origin, float width, float height);
+    static void DrawSquareRounded(Vec2 origin, float width, std::uint16_t radius);
+    static void DrawRectangleRounded(Vec2 origin, float width, float height, std::uint16_t radius);
     static void Draw2DWorldSpace(const Vec2& origin, int depth = 32);
     static void DrawNavMesh(AIPathFinder::NavMesh* map);
     static void DrawTriangle(Vec2 origin, float base, float height);
     static void DrawTextOnPosition(Vec2 origin, const std::string& text);
-
     static void DrawSphere(Vec2 origin, float distance);
 
     static float square(float x);

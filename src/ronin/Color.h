@@ -9,32 +9,36 @@ struct Color {
     std::uint8_t b;
     std::uint8_t a;
 
-    Color() { memset(this, 0, sizeof(Color)); }
+    Color();
 
-    explicit Color(const std::int32_t rgba) { memcpy(this, &rgba, sizeof(Color)); }
+    explicit Color(const std::int32_t rgba);
 
-    explicit Color(const std::uint32_t rgba) { memcpy(this, &rgba, sizeof(Color)); }
+    explicit Color(const std::uint32_t rgba);
 
-    explicit Color(const char* colorHex) {}
+    explicit Color(const char* colorHex);
 
-    explicit Color(const std::string& colorHex) : Color(colorHex.c_str()){}
+    explicit Color(const std::string& colorHex);
 
-    explicit Color(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b) {
-        this->r = r;
-        this->g = g;
-        this->b = b;
-        this->a = 255;
-    }
+    explicit Color(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b);
 
-    explicit Color(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b, const std::uint8_t a) {
-        this->r = r;
-        this->g = g;
-        this->b = b;
-        this->a = a;
-    }
+    explicit Color(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b, const std::uint8_t a);
 
-    operator int() { return *reinterpret_cast<int*>(this); }
-    operator std::uint32_t() { return *reinterpret_cast<std::uint32_t*>(this); }
+    Color operator=(const Color& rhs);
+    Color operator=(const int& rhs);
+    Color operator=(const std::uint32_t& rhs);
+
+    bool operator==(const Color& rhs);
+    bool operator!=(const Color& rhs);
+    operator int();
+    operator std::uint32_t();
+    operator SDL_Color();
+
+    static const Color transparent;
+    static const Color black;
+    static const Color white;
+    static const Color red;
+    static const Color green;
+    static const Color blue;
 };
 
 }  // namespace RoninEngine::Runtime

@@ -3,12 +3,11 @@
 RoninEngine::Runtime::Camera* _main = nullptr;
 namespace RoninEngine::Runtime {
 
-Camera::Camera() : Camera("Camera") {}
-Camera::Camera(const string& name) : Component(name) {
+Camera::Camera() : Camera(typeid (*this).name()) {}
+Camera::Camera(const string& name) : Component(name), aspectRatio(Vec2::one) {
     if (!_main) {
         _main = this;
     }
-    aspectRatio = Vec2::one;
     targetClear = true;
     enabled = true;
 }
@@ -65,7 +64,8 @@ std::tuple<list<Renderer*>*, list<Light*>*> linearSelection() {
 */
 
 std::set<Renderer*> prev;
-std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
+std::tuple<std::set<Renderer*>*, std::set<Light*>*>
+Camera::matrixSelection() {
     /*       This is projection
             x-------------------
             |                   |      = * - is Vector2 (point)

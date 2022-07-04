@@ -20,7 +20,7 @@ class SpriteRenderer : public Renderer {
 
     SpriteRenderType renderType;
     SpriteRenderTile tileRenderPresent;
-    SDL_Color color;
+    Color color;
     Vec2 size;
     Vec2 flip;
 

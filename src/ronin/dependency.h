@@ -24,6 +24,7 @@
 #include <functional>
 #include <vector>
 
+#include "Color.h"
 #include "Static.h"
 #include "Vec2.h"
 

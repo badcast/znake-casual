@@ -17,7 +17,7 @@ GameObject* Component::gameObject() { return _derivedObject; }
 
 Transform* Component::transform() {
     if (!isBind()) throw std::runtime_error("This component isn't binding");
-    return _derivedObject->Get_Component<Transform>();
+    return _derivedObject->getComponent<Transform>();
 }
 }  // namespace Runtime
 }  // namespace RoninEngine

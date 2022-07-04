@@ -11,7 +11,7 @@ SpriteRenderer::SpriteRenderer(const string& name) : Renderer(name) {
     flip = Vec2::one;
     SpriteRenderType renderType = SpriteRenderType::Simple;
     SpriteRenderTile tileRenderPresent = SpriteRenderTile::Place;
-    memset(&color, ~0, sizeof(color));
+    color = 0;
 }
 
 RoninEngine::Runtime::SpriteRenderer::SpriteRenderer(const SpriteRenderer& proto)
@@ -66,10 +66,10 @@ void SpriteRenderer::Render(Render_info* render) {
                 _dstRect.w = sprite->width() * abs(this->size.x) / squarePerPixels;
                 _dstRect.h = sprite->height() * abs(this->size.y) / squarePerPixels;
 
-//                if (this->tileRenderPresent == SpriteRenderTile::Fixed) {
-//                    _srcRect.w = (_srcRect.w / sprite->width()) * sprite->width();
-//                    _srcRect.h = (_srcRect.h / sprite->height()) * sprite->height();
-//                }
+                //                if (this->tileRenderPresent == SpriteRenderTile::Fixed) {
+                //                    _srcRect.w = (_srcRect.w / sprite->width()) * sprite->width();
+                //                    _srcRect.h = (_srcRect.h / sprite->height()) * sprite->height();
+                //                }
 
                 if (!texture) {
                     GC::gc_alloc_texture(&texture, _srcRect.w, _srcRect.h, SDL_PIXELFORMAT_RGBA8888,

@@ -5,10 +5,10 @@ using namespace RoninEngine::Runtime;
 
 using Level = RoninEngine::Level;
 
-template Player* GameObject::Add_Component<Player>();
-template SpriteRenderer* GameObject::Add_Component<SpriteRenderer>();
-template Camera2D* GameObject::Add_Component<Camera2D>();
-template Spotlight* GameObject::Add_Component<Spotlight>();
+template Player* GameObject::addComponent<Player>();
+template SpriteRenderer* GameObject::addComponent<SpriteRenderer>();
+template Camera2D* GameObject::addComponent<Camera2D>();
+template Spotlight* GameObject::addComponent<Spotlight>();
 
 GameObject::GameObject() : GameObject("GameObject") {}
 
@@ -25,18 +25,12 @@ GameObject::~GameObject() {
     }
 }
 
-Transform* GameObject::transform() {
+inline Transform* GameObject::transform() {
     // NOTE: transform всегда первый объект из контейнера m_components
     return reinterpret_cast<Transform*>(m_components.front());
 }
 
-template <typename T>
-T* AttribGetTypeHelper<T>::getComponent(GameObject* hier) {
-    // TODO: get Component at hier [arg]
-    return nullptr;
-}
-
-Component* GameObject::Add_Component(Component* component) {
+Component* GameObject::addComponent(Component* component) {
     if (!component) throw std::exception();
 
     if (end(m_components) ==
@@ -61,8 +55,13 @@ Component* GameObject::Add_Component(Component* component) {
 }
 
 template <typename T>
-std::enable_if_t<std::is_base_of<Component, T>::value, T*> GameObject::Add_Component() {
+std::enable_if_t<std::is_base_of<Component, T>::value, T*> GameObject::addComponent() {
     T* comp = GC::gc_push<T>();
-    Add_Component(reinterpret_cast<Component*>(comp));
+    addComponent(reinterpret_cast<Component*>(comp));
     return comp;
+}
+
+template <>
+Transform* GameObject::getComponent<Transform>() {
+    return transform();
 }

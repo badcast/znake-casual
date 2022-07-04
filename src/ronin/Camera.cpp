@@ -94,7 +94,7 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
                 auto ifine = Level::self()->matrixWorld.find(ray);
                 if (ifine != std::end(Level::self()->matrixWorld)) {
                     for (auto el : ifine->second) {
-                        if (Renderer* render = el->gameObject()->Get_Component<Renderer>()) {
+                        if (Renderer* render = el->gameObject()->getComponent<Renderer>()) {
                             layers[render->zOrder].emplace_front(render);
                         }
                     }

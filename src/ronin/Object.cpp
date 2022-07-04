@@ -165,7 +165,7 @@ GameObject* Instantiate(GameObject* obj) {
         }
 
         replacement->_derivedObject = nullptr;
-        clone->Add_Component(replacement);
+        clone->addComponent(replacement);
     }
 
     return clone;

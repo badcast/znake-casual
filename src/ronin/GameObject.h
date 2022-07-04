@@ -11,19 +11,17 @@ template <typename T>
 class AttribGetTypeHelper {
    public:
     static T* getType(std::list<Component*>& container) {
-        decltype(end(container)) iter =
-            find_if(begin(container), end(container), [](Component* c) { return dynamic_cast<T*>(c) != 0; });
+        auto iter = find_if(begin(container), end(container), [](Component* c) { return dynamic_cast<T*>(c) != nullptr; });
 
-        if (iter != end(container)) return dynamic_cast<T*>(*iter);
+        if (iter != end(container)) return reinterpret_cast<T*>(*iter);
 
         return nullptr;
     }
-
-    static T* getComponent(GameObject* obj);
 };
 
 class GameObject final : public Object {
     friend Camera2D;
+    friend Component;
     friend GameObject* Instantiate(GameObject* obj);
     friend GameObject* Instantiate(GameObject* obj, Vec2 position, float angle);
     friend GameObject* Instantiate(GameObject* obj, Vec2 position, Transform* parent, bool worldPositionState);
@@ -38,20 +36,29 @@ class GameObject final : public Object {
     GameObject();
 
     GameObject(const std::string&);
-    // GameObject(const GameObject&) = delete;
-    virtual ~GameObject();
+
+    GameObject(const GameObject&) = delete;
+
+    ~GameObject();
 
     Transform* transform();
 
-    Component* Add_Component(Component* component);
+    Component* addComponent(Component* component);
+
+    SpriteRenderer* spriteRenderer() { return getComponent<SpriteRenderer>(); }
+
+    Camera2D* camera2D() { return getComponent<Camera2D>(); }
+
+    Terrain2D* terraind2D() { return getComponent<Terrain2D>();}
 
     template <typename T>
-    std::enable_if_t<std::is_base_of<Component, T>::value, T*> Add_Component();
+    std::enable_if_t<std::is_base_of<Component, T>::value, T*> addComponent();
 
     template <typename T>
-    T* Get_Component() {
+    T* getComponent() {
         return AttribGetTypeHelper<T>::getType(this->m_components);
     }
 };
+
 }  // namespace Runtime
 }  // namespace RoninEngine

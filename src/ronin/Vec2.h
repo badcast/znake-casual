@@ -54,6 +54,7 @@ struct Vec2 {
     float y;
 
     Vec2();
+    explicit Vec2(const Vec2Int& rhs);
     Vec2(float x, float y);
     // extern Vec2(float && x, float && y);
     Vec2(const Vec2&) = default;

@@ -109,10 +109,8 @@ void Gizmos::Draw2DWorldSpace(const Vec2& origin, int depth) {
     int i;
     Vec2 dest1, dest2;
     dest1 = dest2 = origin;
-    color.r = 0;
-    color.g = 255;
-    color.b = 0;
-    color.a = 1;
+    Color lastColor = color;
+    color = 0x575757;
 
     // Draw H and V position
     DrawPosition(std::move(origin));
@@ -124,6 +122,8 @@ void Gizmos::Draw2DWorldSpace(const Vec2& origin, int depth) {
         dest2 += Vec2::minusOne;
         DrawPosition(std::move(dest2));
     }
+
+    color = lastColor;
 }
 
 void Gizmos::DrawNavMesh(AIPathFinder::NavMesh* navMesh) {
@@ -139,10 +139,7 @@ void Gizmos::DrawNavMesh(AIPathFinder::NavMesh* navMesh) {
 
     res = Application::getResolution();
 
-    color.r = 53;
-    color.g = 0;
-    color.b = 128;
-    color.a = 255;
+    color = 0xf6f6f723;
 
     navMesh->neuron(Camera::mainCamera()->ScreenToWorldPoint(Vec2(0, 0)), p1);
     navMesh->neuron(Camera::mainCamera()->ScreenToWorldPoint(Vec2(res.width, res.height)), p2);
@@ -208,7 +205,7 @@ void Gizmos::DrawSphere(Vec2 origin, float distance) {
     x = origin.x;
     y = origin.y;
     r = static_cast<std::uint16_t>(distance * squarePerPixels);
-    aacircleColor(Application::GetRenderer(), x, y, r, color);
+    circleRGBA(Application::GetRenderer(), x, y, r, color.r, color.g, color.b, color.a);
 }
 
 float Gizmos::square_triangle(float base, float height) { return base * height / 2; }

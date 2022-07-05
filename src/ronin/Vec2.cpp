@@ -17,6 +17,8 @@ const Vec2 Vec2::negativeInfinity = Vec2(Mathf::Infinity, Mathf::Infinity) * -1;
 
 Vec2::Vec2() : x(0), y(0) {}
 
+Vec2::Vec2(const Vec2Int& rhs) : x(rhs.x), y(rhs.y) {}
+
 Vec2::Vec2(float x, float y) {
     this->x = x;
     this->y = y;
@@ -462,17 +464,16 @@ Vec2 RoninEngine::Runtime::operator*(const Vec2& rhs, const float& d) { return d
 
 Vec2 RoninEngine::Runtime::operator/(const Vec2& rhs, const float& d) { return d / rhs; }
 
-bool RoninEngine::Runtime::operator==(const Vec2Int &lhs, const Vec2  &rhs){
-    return rhs.x == lhs.x && rhs.y == lhs.y;
+bool RoninEngine::Runtime::operator==(const Vec2Int& lhs, const Vec2& rhs) { return rhs.x == lhs.x && rhs.y == lhs.y; }
+bool RoninEngine::Runtime::operator!=(const Vec2Int& lhs, const Vec2& rhs) { return !operator==(lhs, rhs); }
+
+Vec2Int RoninEngine::Runtime::operator+(const Vec2Int& lhs, const Vec2Int& rhs) {
+    return Vec2Int(lhs.x + rhs.x, lhs.y + rhs.y);
 }
-bool RoninEngine::Runtime::operator!=(const Vec2Int &lhs, const Vec2 &rhs){
-    return !operator==(lhs,rhs);
+
+Vec2Int RoninEngine::Runtime::operator-(const Vec2Int& lhs, const Vec2Int& rhs) {
+    return Vec2Int(lhs.x - rhs.x, lhs.y - rhs.y);
 }
-
-
-Vec2Int RoninEngine::Runtime::operator+(const Vec2Int& lhs, const Vec2Int& rhs) { return Vec2Int(lhs.x + rhs.x, lhs.y + rhs.y); }
-
-Vec2Int RoninEngine::Runtime::operator-(const Vec2Int& lhs, const Vec2Int& rhs) { return Vec2Int(lhs.x - rhs.x, lhs.y - rhs.y); }
 
 bool RoninEngine::Runtime::operator==(const Vec2Int& lhs, const Vec2Int& rhs) { return lhs.x == rhs.x && lhs.y == rhs.y; }
 

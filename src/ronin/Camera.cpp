@@ -101,7 +101,7 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
     std::list<Renderer*> layers[Nz];
     std::uint8_t zN = 0;
     if (__rendererOutResults.empty()) {
-        Vec2Int ray, lastRay(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
+        Vec2Int ray, lastPlace(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
         Resolution res = Application::getResolution();
         Vec2Int wpLeftTop(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2::zero)));
         Vec2Int wpCenter(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2(res.width, res.height) / 2)));
@@ -109,21 +109,23 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
         wpLeftTop *= distanceEvcall;
         wpRightBottom *= distanceEvcall;
 
-
         // Разработака алгоритма поиска элементов - шторм
-        int step = 1;
-        int steps = 1;
-        char xDirection = 1;
-        char yDirection = -1;
+        int step = 0;          // шагий
+        int steps = 0;         // пройденные шаги
+        int turnSteps = 0;     // шагий на поворотный круг
+        int maxSteps = 0;      // шагий на полный круг
+        int dimension = 1;     // измерение
+        int xDeterminant;  // определитель для x оси (абцис)
+        int yDeterminant;      // определитель для y оси (ординат)
         bool rotate = false;
-
+        std::vector<std::string> values;
         //Первая точка, относительна отчета
         ray = wpCenter;
-        while (true) {
-            if (ray == lastRay) {
+        while (ray != wpRightBottom) {
+            if (ray == lastPlace) {
                 Application::fail("overflow is lastPosition");
             }
-            lastRay = ray;
+            lastPlace = ray;
 
             // draw current point
             auto iter = Level::self()->matrixWorld.find(ray);
@@ -134,17 +136,50 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
                     }
                 }
             }
-            //1. Шаг заканчивается (step == steps), то происходит процедура поворота
+            // 1. Шаг заканчивается (step = turnSteps) происходит поворот
+            if (step == turnSteps) {
+                //переход на новое измерение
+                if (steps == maxSteps) {
+                    maxSteps = 8 * dimension++;
+                    turnSteps = maxSteps / 4;
+                    steps = 0;
+                    yDeterminant = 0;
+                    xDeterminant = 0;
+                    rotate = true;
+                }
+                if (!yDeterminant && !xDeterminant) {
+                    xDeterminant = 0;
+                    yDeterminant = -1;
+                } else {
+                    if (yDeterminant) {
+                        xDeterminant = yDeterminant;
+                        yDeterminant = 0;
+                    } else {
+                        yDeterminant = xDeterminant * -1;
+                        xDeterminant = 0;
+                    }
+                }
 
-            if (step == steps) {
-                steps *= 2;
                 step = 0;
-                ray.y += yDirection;
-                xDirection *= -1;
-            } else {
-                ++step;
-                ray.x += xDirection;
             }
+
+            // 2. Направляем вихр ...
+            ray.x += xDeterminant;
+            ray.y += yDeterminant;
+            values.emplace_back(std::to_string(ray.x) + " " + std::to_string(ray.y));
+            if (rotate) {
+                if (yDeterminant) {
+                    xDeterminant = yDeterminant;
+                    yDeterminant = 0;
+                } else if (xDeterminant) {
+                    yDeterminant = xDeterminant;
+                    xDeterminant = 0;
+                }
+                rotate = false;
+            }
+
+            ++step;
+            ++steps;
         }
 
         /*

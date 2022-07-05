@@ -462,6 +462,13 @@ Vec2 RoninEngine::Runtime::operator*(const Vec2& rhs, const float& d) { return d
 
 Vec2 RoninEngine::Runtime::operator/(const Vec2& rhs, const float& d) { return d / rhs; }
 
+bool RoninEngine::Runtime::operator==(const Vec2Int &lhs, const Vec2  &rhs){
+    return rhs.x == lhs.x && rhs.y == lhs.y;
+}
+bool RoninEngine::Runtime::operator!=(const Vec2Int &lhs, const Vec2 &rhs){
+    return !operator==(lhs,rhs);
+}
+
 
 Vec2Int RoninEngine::Runtime::operator+(const Vec2Int& lhs, const Vec2Int& rhs) { return Vec2Int(lhs.x + rhs.x, lhs.y + rhs.y); }
 

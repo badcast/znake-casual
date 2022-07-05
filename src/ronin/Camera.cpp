@@ -10,7 +10,7 @@ Camera::Camera(const std::string& name) : Component(name), aspectRatio(Vec2::one
     }
     targetClear = true;
     enabled = true;
-    distanceEvcall = 10;
+    distanceEvcall = 3;
 }
 Camera::~Camera() {
     if (_main == this) _main = nullptr;
@@ -65,7 +65,7 @@ std::tuple<list<Renderer*>*, list<Light*>*> linearSelection() {
 */
 
 std::set<Renderer*> prev;
-inline bool isRenderActive(Renderer* target, const Vec2& wpLeftTop, const Vec2& wpRightBottom) {
+inline bool areaCast(Renderer* target, const Vec2Int& wpLeftTop, const Vec2Int& wpRightBottom) {
     Vec2 rSz = target->GetSize();
     Vec2 pos = target->transform()->position();
     return (pos.x + rSz.x >= wpLeftTop.x && pos.x - rSz.x <= wpRightBottom.x) &&
@@ -84,38 +84,98 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
             |  * * * * * * * *  |
             |                   |
              -------------------y
+
+            Method finder: Storm
+             ' * * * * * * * * *'
+             ' * * * * * * * * *'   n = 10
+             ' * * * * * * * * *'   n0 (first input point) = 0
+             ' * * * 2 3 4 * * *'   n10 (last input point) = 9
+             ' * * 9 1 0 5 * * *'
+             ' * * * 8 7 6 * * *'
+             ' * * * * * * * * *'
+             ' * * * * * * * * *'
+             ' * * * * * * * * *'
     */
 
     constexpr std::uint8_t Nz = 2;
     std::list<Renderer*> layers[Nz];
     std::uint8_t zN = 0;
     if (__rendererOutResults.empty()) {
-        Vec2Int ray;
+        Vec2Int ray, lastRay(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
         Resolution res = Application::getResolution();
-        Vec2 wpLeftTop(Vec2::Round(this->ScreenToWorldPoint(Vec2::zero)));
-        Vec2 wpRightBottom(Vec2::Round(this->ScreenToWorldPoint(Vec2(res.width, res.height))));
+        Vec2Int wpLeftTop(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2::zero)));
+        Vec2Int wpCenter(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2(res.width, res.height) / 2)));
+        Vec2Int wpRightBottom(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2(res.width, res.height))));
         wpLeftTop *= distanceEvcall;
         wpRightBottom *= distanceEvcall;
 
-        for (ray.x = wpLeftTop.x; ray.x <= wpRightBottom.x; ++ray.x) {
-            for (ray.y = wpLeftTop.y; ray.y >= wpRightBottom.y; --ray.y) {
-                auto ifine = Level::self()->matrixWorld.find(ray);
-                if (ifine != std::end(Level::self()->matrixWorld)) {
-                    for (auto el : ifine->second) {
-                        if (Renderer* render = el->gameObject()->getComponent<Renderer>()) {
-                            if (isRenderActive(render, wpLeftTop, wpRightBottom)) layers[render->zOrder].emplace_front(render);
-                        }
+
+        // Разработака алгоритма поиска элементов - шторм
+        int step = 1;
+        int steps = 1;
+        char xDirection = 1;
+        char yDirection = -1;
+        bool rotate = false;
+
+        //Первая точка, относительна отчета
+        ray = wpCenter;
+        while (true) {
+            if (ray == lastRay) {
+                Application::fail("overflow is lastPosition");
+            }
+            lastRay = ray;
+
+            // draw current point
+            auto iter = Level::self()->matrixWorld.find(ray);
+            if (iter != std::end(Level::self()->matrixWorld)) {
+                for (auto el : iter->second) {
+                    if (Renderer* render = el->gameObject()->getComponent<Renderer>()) {
+                        layers[render->zOrder].emplace_front(render);
                     }
                 }
             }
+            //1. Шаг заканчивается (step == steps), то происходит процедура поворота
+
+            if (step == steps) {
+                steps *= 2;
+                step = 0;
+                ray.y += yDirection;
+                xDirection *= -1;
+            } else {
+                ++step;
+                ray.x += xDirection;
+            }
         }
 
-        std::list<Renderer*> _removes;
+        /*
+        Vec2Int ray;
+        Resolution res = Application::getResolution();
+        Vec2Int wpLeftTop(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2::zero)));
+        Vec2Int wpRightBottom(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2(res.width, res.height))));
 
+        ray.x = wpLeftTop.x;
+        while (ray.x <= wpRightBottom.x) {
+            ray.y = wpLeftTop.y;
+            while (ray.y >= wpRightBottom.y) {
+                auto iter = Level::self()->matrixWorld.find(ray);
+                if (iter != std::end(Level::self()->matrixWorld)) {
+                    for (auto el : iter->second) {
+                        if (Renderer* render = el->gameObject()->getComponent<Renderer>()) {
+                            layers[render->zOrder].emplace_front(render);
+                        }
+                    }
+                }
+                --ray.y;
+            }
+            ++ray.x;
+        }
+        */
+
+        std::list<Renderer*> _removes;
         //собираем оставшиеся которые прикреплены к видимости
         for (auto x = std::begin(prev); x != std::end(prev); ++x) {
-            if (isRenderActive(*x, wpLeftTop, wpRightBottom)) {
-                __rendererOutResults.insert((*x));
+            if (areaCast(*x, wpLeftTop, wpRightBottom)) {
+                if (__rendererOutResults.find((*x)) == std::end(__rendererOutResults)) __rendererOutResults.insert((*x));
             } else {
                 _removes.emplace_back((*x));
             }

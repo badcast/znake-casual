@@ -122,6 +122,9 @@ Vec2Int operator/(const float &d, const Vec2Int &rhs);
 Vec2Int operator*(const Vec2Int &rhs, const float &d);
 Vec2Int operator/(const Vec2Int &rhs, const float &d);
 
+bool operator==(const Vec2Int &lhs, const Vec2 &rhs);
+bool operator!=(const Vec2Int &lhs, const Vec2 &rhs);
+
 Vec2 operator+(const Vec2& lhs, const Vec2& rhs);
 Vec2 operator-(const Vec2& lhs, const Vec2& rhs);
 bool operator==(const Vec2& lhs, const Vec2& rhs);

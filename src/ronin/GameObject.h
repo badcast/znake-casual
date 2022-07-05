@@ -11,7 +11,7 @@ template <typename T>
 class AttribGetTypeHelper {
    public:
     static T* getType(std::list<Component*>& container) {
-        auto iter = find_if(begin(container), end(container), [](Component* c) { return dynamic_cast<T*>(c) != nullptr; });
+        auto iter = find_if(++begin(container), end(container), [](Component* c) { return dynamic_cast<T*>(c) != nullptr; });
 
         if (iter != end(container)) return reinterpret_cast<T*>(*iter);
 

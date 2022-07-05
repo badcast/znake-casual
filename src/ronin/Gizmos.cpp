@@ -110,7 +110,7 @@ void Gizmos::Draw2DWorldSpace(const Vec2& origin, int depth) {
     Vec2 dest1, dest2;
     dest1 = dest2 = origin;
     Color lastColor = color;
-    color = 0x575757;
+    color = 0xaa575757;
 
     // Draw H and V position
     DrawPosition(std::move(origin));

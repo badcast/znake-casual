@@ -23,12 +23,15 @@ void Gizmos::DrawLine(Vec2 a, Vec2 b) {
 
     // scalars
 
+    Vec2 scale;
+    SDL_RenderGetScale(Application::GetRenderer(), &scale.x, &scale.y);
+    scale *= squarePerPixels;
     dst.x = res.width / 2.f;
     dst.y = res.height / 2.f;
-    a.x = dst.x - (p.x - a.x) * squarePerPixels;
-    a.y = dst.y + (p.y - a.y) * squarePerPixels;
-    b.x = dst.x - (p.x - b.x) * squarePerPixels;
-    b.y = dst.y + (p.y - b.y) * squarePerPixels;
+    a.x = dst.x - (p.x - a.x) * scale.x;
+    a.y = dst.y + (p.y - a.y) * scale.y;
+    b.x = dst.x - (p.x - b.x) * scale.x;
+    b.y = dst.y + (p.y - b.y) * scale.y;
 
     SDL_SetRenderDrawColor(Application::GetRenderer(), color.r, color.g, color.b, color.a);
     SDL_RenderDrawLineF(Application::GetRenderer(), a.x, a.y, b.x, b.y);
@@ -206,6 +209,83 @@ void Gizmos::DrawSphere(Vec2 origin, float distance) {
     y = origin.y;
     r = static_cast<std::uint16_t>(distance * squarePerPixels);
     circleRGBA(Application::GetRenderer(), x, y, r, color.r, color.g, color.b, color.a);
+}
+
+void Gizmos::DrawStorm(Vec2 ray, int edges, int delim) {
+    /*
+    Описание данных stormMember
+    Младшие 4 байта, это все для шаги
+
+    stormMember low bits == steps
+    stormMember high bits == maxSteps
+
+    stormFlags = int 4 байта (32 бита)
+    первые 3 байта (24 бита) = dimensions, от 0 до 0xFFFFFF значений
+    остаток 1 байт (8 бит) stormFlags >> 24 = determinants (определители направлений луча)
+    0xF000000    xDeterminant = stormFlags >> 24 & 0xF - горизонтальный детерминант x оси (абцис)
+    0xF0000000   yDeterminant = stormFlags >> 28       - вертикальный детерминант y оси (ординат)
+    */
+
+    Vec2 last = ray;
+    std::uint64_t stormMember = 0;
+    std::int32_t stormFlags = 1;
+
+    // draw current point
+
+    Color lastColor = Gizmos::color;
+    Gizmos::color = 0xfff6f6f7;
+    ++edges;
+    for (;;) {
+        std::uint32_t&& steps = (stormMember & const_storm_steps_flag);
+        std::uint32_t&& maxSteps = (stormMember >> 32);
+        //Шаг заканчивается (step = turnSteps) происходит поворот
+        if (steps % std::max(1u, (maxSteps / 4)) == 0) {
+            //переход на новое измерение
+            //при steps == maxsteps
+            if (steps == maxSteps) {
+
+                if (--edges <= 0) break;
+
+                stormMember = (8ul * (stormFlags = stormFlags & const_storm_dimensions)) << 32;
+                stormFlags = ((stormFlags & const_storm_dimensions) + 1) | const_storm_yDeterminant_start;
+            } else {
+                if (stormFlags >> 28) {
+                    stormFlags ^= stormFlags & const_storm_xDeterminant;                                // clear x
+                    stormFlags |= ((stormFlags & const_storm_yDeterminant) >> 4) & const_storm_xDeterminant;  // x = y
+                    stormFlags ^= stormFlags & const_storm_yDeterminant;                                // clear y
+                } else {
+                    stormFlags ^= stormFlags & const_storm_yDeterminant;                                // clear y
+                    stormFlags |= ((stormFlags & const_storm_xDeterminant) << 4) & const_storm_yDeterminant;  // y = x
+                    stormFlags ^= const_storm_yDeterminant_inverse;                                     // inverse
+                    stormFlags ^= stormFlags & const_storm_xDeterminant;                                // clear x
+                }
+            }
+        }
+
+        char&& xDeter = (stormFlags >> 24 & 0xf);
+        char&& yDeter = stormFlags >> 28;
+        ray.x += xDeter == 2 ? -1 : xDeter;
+        ray.y += yDeter == 2 ? -1 : yDeter;
+
+        DrawLine(last/delim, ray/delim);
+        last = ray;
+
+        if (!(stormMember & const_storm_steps_flag)) {
+            if (yDeter) {
+                stormFlags ^= stormFlags & const_storm_xDeterminant;                                // clear x
+                stormFlags |= ((stormFlags &const_storm_yDeterminant) >> 4) & const_storm_xDeterminant;  // x = y
+                stormFlags ^= stormFlags & const_storm_yDeterminant;                                // clear y
+            } else if (xDeter) {
+                stormFlags ^= stormFlags & const_storm_yDeterminant;                                // clear y
+                stormFlags |= ((stormFlags & const_storm_xDeterminant) << 4) & const_storm_yDeterminant;  // y = x
+                stormFlags ^= stormFlags & const_storm_xDeterminant;                                // clear x
+            }
+        }
+
+        ++(*reinterpret_cast<std::uint32_t*>(&stormMember));
+    }
+
+    Gizmos::color = lastColor;
 }
 
 float Gizmos::square_triangle(float base, float height) { return base * height / 2; }

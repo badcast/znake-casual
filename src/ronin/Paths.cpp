@@ -35,7 +35,7 @@ const std::string dataPath() {
     return s;
 }
 
-const std::string dataAt(FolderKind type) {
+const std::string getDataFrom(FolderKind type) {
     std::string p = dataPath();
     p += seperator;
     switch (type) {

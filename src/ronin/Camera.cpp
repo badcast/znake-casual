@@ -4,13 +4,13 @@ RoninEngine::Runtime::Camera* _main = nullptr;
 namespace RoninEngine::Runtime {
 
 Camera::Camera() : Camera(typeid(*this).name()) {}
-Camera::Camera(const std::string& name) : Component(name), aspectRatio(Vec2::one) {
+Camera::Camera(const std::string& name) : Component(name) {
     if (!_main) {
         _main = this;
     }
     targetClear = true;
     enabled = true;
-    distanceEvcall = 3;
+    distanceEvcall = 2;
 }
 Camera::~Camera() {
     if (_main == this) _main = nullptr;
@@ -104,10 +104,8 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
         Vec2Int ray, lastPlace(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
         Resolution res = Application::getResolution();
         Vec2Int wpLeftTop(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2::zero)));
-        Vec2Int wpCenter(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2(res.width, res.height) / 2)));
-        Vec2Int wpRightBottom(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2(res.width, res.height))));
-        wpLeftTop *= distanceEvcall;
-        wpRightBottom *= distanceEvcall;
+        Vec2Int wpCenter(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2(res.width, res.height) / 2))*distanceEvcall);
+        Vec2Int wpRightBottom(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2(res.width, res.height)))*distanceEvcall);
 
         // Разработака алгоритма поиска элементов - шторм
         int step = 0;          // шагий

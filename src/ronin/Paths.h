@@ -10,7 +10,7 @@ namespace RoninEngine::Runtime
 
 	const std::string dataPath();
 
-	const std::string dataAt(FolderKind type);
+	const std::string getDataFrom(FolderKind type);
 
     void release_sdlpaths();
 }

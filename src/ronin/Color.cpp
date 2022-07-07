@@ -4,6 +4,8 @@
 
 Color::Color() { memset(this, 0, sizeof(Color)); }
 
+Color::Color(const Color &assign) : r(assign.r), g(assign.g), b(assign.b), a(assign.a) { }
+
 Color::Color(const int32_t rgba) { memcpy(this, &rgba, sizeof(Color)); }
 
 Color::Color(const uint32_t rgba) { memcpy(this, &rgba, sizeof(Color)); }

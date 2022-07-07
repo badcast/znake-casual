@@ -11,6 +11,8 @@ struct Color {
 
     Color();
 
+    Color(const Color&);
+
     explicit Color(const std::int32_t rgba);
 
     explicit Color(const std::uint32_t rgba);

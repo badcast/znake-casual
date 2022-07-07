@@ -231,22 +231,21 @@ void GC::UnloadAll(bool immediate) {
 }
 
 void GC::CheckResources() {
-    /*  string p = dataPath();
+      std::string p = dataPath();
       char *membuf = (char *)GC::gc_malloc(256);
       membuf[0] = '\0';
-      if (!filesystem::exists(p)) {
+      if (!std::filesystem::exists(p)) {
           strcat(membuf, "\"Data\" is not found");
           Application::fail(membuf);
       }
       GC::gc_free(membuf);
-      */
 }
 
 //Для автоматического уничтожения ресурса, обязательно его нужно скинуть на
 // ResourceManager::Unload()
 std::list<SDL_Surface *> *GC::LoadSurfaces(const std::string &packName) {
     std::list<SDL_Surface *> *surfs = nullptr;
-    std::string path = dataAt(FolderKind::GFX);
+    std::string path = getDataFrom(FolderKind::GFX);
     std::string cat;
     int hash = jno::jno_string_to_hash(packName.c_str());
     auto iter = _assocMultiLoadedImages->find(hash);
@@ -394,7 +393,7 @@ bool GC::gc_is_lock() { return memoryCapture == MemoryCapture::SystemManagement;
 // GC Resources   ---------------------------------------------------
 int GC::resource_bitmap(const std::string &resourceName, FolderKind pathOn, SDL_Surface **sdlsurfacePtr) {
     SDL_Surface *surf = nullptr;
-    std::string path = dataAt(pathOn);
+    std::string path = getDataFrom(pathOn);
     std::string cat;
     GCMemoryStick *mem;
     int id;

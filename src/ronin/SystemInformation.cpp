@@ -1,7 +1,7 @@
 //кросплатформенный процесорный информатор
 // TODO: Оптимизировать
 
-#include "sysInfo.h"
+#include "SystemInformation.h"
 
 #include "framework.h"
 

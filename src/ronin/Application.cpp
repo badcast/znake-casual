@@ -1,7 +1,7 @@
 
-#include "framework.h"
-
 #include <thread>
+
+#include "framework.h"
 
 using namespace UI;
 
@@ -74,12 +74,12 @@ void Application::LoadGame() {
     // initialize GC
     GC::gc_init();
 
-    std::string path = dataAt(FolderKind::LOADER);
+    std::string path = getDataFrom(FolderKind::LOADER);
     std::string temp = path + "graphics.conf";
     GC::LoadImages(temp.c_str());
 
     // load textures
-    path = dataAt(FolderKind::LOADER);
+    path = getDataFrom(FolderKind::LOADER);
     temp = path + "textures.conf";
     GC::LoadImages(temp.c_str());
 
@@ -181,6 +181,7 @@ bool Application::Simulate() {
     float fps;
     int _delayed;
     SDL_WindowFlags wndFlags;
+    SDL_DisplayMode displayMode = Application::getDisplayMode();
 
     while (!isQuiting) {
         // update events
@@ -217,6 +218,10 @@ bool Application::Simulate() {
 
                 m_level->RenderLevel(renderer);
                 m_level->onDrawGizmos();  // Draw gizmos
+
+                // Set scale as default
+                SDL_RenderSetScale(renderer, 1, 1);
+
                 m_level->RenderUI(renderer);
 
                 if (!destroyableLevel) {
@@ -226,23 +231,30 @@ bool Application::Simulate() {
                 }
             }
 
+            _delayed = Time::tickMillis() - _delayed;
+
             if (Time::startUpTime() > fpsRound) {
-                fps = SDL_ceilf(Time::frame() / (SDL_GetTicks() / 1000.f));
-#ifdef _GLIBCXX_DEBUG_ONLY
+                fps = SDL_ceilf(Time::frame() / Time::tickMillis());
                 std::sprintf(_title,
                              "Ronin Engine (Debug) FPS:%d Memory:%luMiB, "
                              "GC_Allocated:%lu, SDL_Allocated:%d",
                              static_cast<int>(fps), get_process_sizeMemory() / 1024 / 1024, GC::gc_total_allocated(),
                              SDL_GetNumAllocations());
 
-#endif
                 SDL_SetWindowTitle(Application::GetWindow(), _title);
                 fpsRound = Time::startUpTime() + 1;
             }
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000/60));
+            ++Time::_frames;  // framecounter
 
-            Time::update();
+            if (Time::_deltaTime == 1.f) Time::_deltaTime = 0;
+            _delayed = Mathf::Max(0, 1000 / displayMode.refresh_rate - _delayed);
+            Time::_deltaTime = _delayed / (1000.f / displayMode.refresh_rate);
+            Time::_deltaTime = Mathf::Clamp01(Time::_deltaTime);
+
+            Time::_time += .001f * _delayed;
+
+            if (_delayed > 0) std::this_thread::sleep_for(std::chrono::milliseconds(_delayed));
         }
     }
 

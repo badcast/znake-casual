@@ -191,6 +191,7 @@ void Level::RenderLevel(SDL_Renderer *renderer) {
         if (cam->targetClear) cam->__rendererOutResults.clear();
         // Рисуем в соотношение окна...
         cam->render(renderer, {0, 0, res.width, res.height}, main_object);
+
     }
 
     // Destroy req objects

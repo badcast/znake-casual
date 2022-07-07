@@ -14,7 +14,6 @@ class Camera : public Component {
     virtual void render(SDL_Renderer* renderer, Rect rect, GameObject* root) = 0;
 
    public:
-    Vec2 aspectRatio;
     bool enabled;
     std::uint32_t distanceEvcall;
 

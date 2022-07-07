@@ -40,5 +40,5 @@
 // applications
 #include "Application.h"
 #include "ResourceManager.h"
-#include "sysInfo.h"
+#include "SystemInformation.h"
 

@@ -31,7 +31,7 @@ void RoninEngine::Levels::Level_Init() {
      jno::jno_object_parser parser;
 	Level_t levl;
      jno::jno_object_node* node;
-    std::filesystem::directory_iterator dirIter(dataAt(FolderKind::LEVELS));
+    std::filesystem::directory_iterator dirIter(getDataFrom(FolderKind::LEVELS));
 
 	for (auto file : dirIter) {
 		if (!file.is_directory() && file.path().extension() == extMAP) {

@@ -1,7 +1,7 @@
 #include "framework.h"
 
 namespace RoninEngine::Runtime {
-Camera2D::Camera2D() : Camera("Camera 2D") {
+Camera2D::Camera2D() : Camera("Camera 2D"), scale(Vec2::one) {
     this->visibleBorders = false;
     this->visibleGrids = false;
     this->visibleObjects = false;
@@ -11,13 +11,15 @@ RoninEngine::Runtime::Camera2D::Camera2D(const Camera2D& proto)
     : Camera(proto.m_name),
       visibleBorders(proto.visibleBorders),
       visibleGrids(proto.visibleGrids),
-      visibleObjects(proto.visibleObjects) {}
+      visibleObjects(proto.visibleObjects),
+      scale(proto.scale) {}
 
 void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
     Render_info renderInfo;
     Rectf_t dst;
     Vec2* point;
     Vec2* sourcePoint;
+    //Vec2 _scale;
 
     Gizmos::color = Color(0xc4c4c4);
 
@@ -27,7 +29,10 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
     }
 
     auto stack = matrixSelection();
-    SDL_RenderSetScale(renderer, aspectRatio.x, aspectRatio.y);
+    //scale.x = Mathf::Min(Mathf::Max(scale.x, 0.f), 10.f);
+    //scale.y = Mathf::Min(Mathf::Max(scale.y, 0.f), 10.f);
+    //_scale = scale*squarePerPixels;
+    SDL_RenderSetScale(renderer, scale.x, scale.y);
     // Render Objects
     for (auto renderSource : *std::get<std::set<Renderer*>*>(stack)) {
         // drawing
@@ -41,8 +46,8 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
             Vec2* point = &transform()->_p;
             Vec2* sourcePoint = &renderSource->transform()->_p;
 
-            dst.w = renderInfo.dst.w * squarePerPixels;
-            dst.h = renderInfo.dst.h * squarePerPixels;
+            dst.w = renderInfo.dst.w * squarePerPixels;//_scale.x;
+            dst.h = renderInfo.dst.h * squarePerPixels;//_scale.y;
 
             //Положение по горизонтале
             dst.x = ((rect.w - dst.w) / 2.0f - (point->x - sourcePoint->x) * squarePerPixels);
@@ -67,21 +72,20 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
             point = &transform()->_p;
             sourcePoint = &lightSource->transform()->_p;
 
-            dst.w = renderInfo.dst.w * squarePerPixels;
-            dst.h = renderInfo.dst.h * squarePerPixels;
+            dst.w = renderInfo.dst.w * squarePerPixels;;
+            dst.h = renderInfo.dst.h * squarePerPixels;;
 
             // h
             dst.x = ((rect.w - dst.w) / 2.0f - (point->x - sourcePoint->x) * squarePerPixels);
             // v
             dst.y = ((rect.h - dst.h) / 2.0f + (point->y - sourcePoint->y) * squarePerPixels);
 
-            // SDL_RenderCopyF(renderer, renderInfo.texture, (SDL_Rect*)&renderInfo.src, (SDL_FRect*)&dst);
             SDL_RenderCopyExF(renderer, renderInfo.texture->native(), (SDL_Rect*)&renderInfo.src, (SDL_FRect*)&dst,
                               lightSource->transform()->_angle - transform()->_angle, nullptr, SDL_RendererFlip::SDL_FLIP_NONE);
         }
     }
 
-    SDL_RenderSetScale(renderer, 1, 1);
+
     if (visibleBorders) {
         float offset = 25 * std::max(1 - Time::deltaTime(), 0.5f);
         float height = 200 * Time::deltaTime();
@@ -111,9 +115,9 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
     }
 
     if (visibleObjects) {
-        for (auto face : ( *std::get<std::set<Renderer*>*>(stack))) {
+        for (auto face : (*std::get<std::set<Renderer*>*>(stack))) {
             Vec2 p = face->transform()->position();
-            Vec2 sz = face->GetSize()*2;
+            Vec2 sz = face->GetSize() * 2;
             Gizmos::color = Color::blue;
             Gizmos::DrawRectangleRounded(p, sz.x, sz.y, 5);
             Gizmos::color = Color::black;

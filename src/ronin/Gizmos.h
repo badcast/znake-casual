@@ -13,11 +13,16 @@ class Gizmos {
     static void DrawRectangle(Vec2 origin, float width, float height);
     static void DrawSquareRounded(Vec2 origin, float width, std::uint16_t radius);
     static void DrawRectangleRounded(Vec2 origin, float width, float height, std::uint16_t radius);
-    static void Draw2DWorldSpace(const Vec2& origin, int depth = 32);
+    static void Draw2DWorldSpace(const Vec2& origin = Vec2::zero, int depth = 32);
     static void DrawNavMesh(AIPathFinder::NavMesh* map);
     static void DrawTriangle(Vec2 origin, float base, float height);
     static void DrawTextOnPosition(Vec2 origin, const std::string& text);
     static void DrawSphere(Vec2 origin, float distance);
+
+    //@origin offset point
+    //@edges count edge
+    //@delim delim > 1 = scale mode, for inverse use negative value
+    static void DrawStorm(Vec2 origin, int edges, int delim = -1);
 
     static float square(float x);
     static float square_rectangle(float a, float b);

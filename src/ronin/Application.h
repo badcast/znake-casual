@@ -22,7 +22,7 @@ class Application {
     static bool Simulate();
     static void ScreenShot(const char* filename);
     static SDL_Surface* ScreenShot();
-    [[deprecated]] static SDL_DisplayMode getDisplayMode();
+    static SDL_DisplayMode getDisplayMode();
     static void RequestQuit();
     static SDL_Window* GetWindow();
     static SDL_Renderer* GetRenderer();

@@ -9,8 +9,8 @@ namespace RoninEngine
 	{
         friend Application;
 	private:
-		static float timeScale, _lastTime, _time, _deltaTime;
-        static std::uint32_t _frames;
+		static float timeScale, _lastTime, m_time, m_deltaTime;
+        static std::uint32_t m_frames;
 	public:
 
 		static void Init_TimeEngine();

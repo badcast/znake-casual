@@ -108,21 +108,17 @@ Vec2 Vec2::Scale(const Vec2& a, const Vec2& b) { return Vec2(a.x * b.x, a.y * b.
 
 float Vec2::Distance(const Vec2& lhs, const Vec2& rhs) { return (lhs - rhs).magnitude(); }
 
-float Vec2::Angle(const Vec2& from, const Vec2& to) {
-    auto n1 = from;
-    auto n2 = to;
-    n1.Normalize();
-    n2.Normalize();
-    return Mathf::acos(Mathf::Clamp(Vec2::Dot(n1, n2), -1, 1));
+float Vec2::Angle(Vec2 from, Vec2 to) {
+    from.Normalize();
+    to.Normalize();
+    return Mathf::acos(Mathf::Clamp(Vec2::Dot(from, to), -1, 1));
 }
 
-float Vec2::SignedAngle(const Vec2& from, const Vec2& to) {
-    Vec2 norm = from;
-    norm.Normalize();
-    Vec2 norm2 = to;
-    norm2.Normalize();
+float Vec2::SignedAngle(Vec2 from, Vec2 to) {
     float num = Angle(from, to);
-    float num2 = Mathf::sign(norm.x * norm2.y - norm.y * norm2.x);
+    from.Normalize();
+    to.Normalize();
+    float num2 = Mathf::sign(from.x * to.y - from.y * to.x);
 
     return num * num2;
 }
@@ -296,7 +292,7 @@ Vec2 Vec2::Round(Vec2 lhs) {
     return lhs;
 }
 
-Runtime::Vec2Int Vec2::RoundToInt(const Vec2& lhs) {
+Vec2Int Vec2::RoundToInt(const Vec2& lhs) {
     Vec2Int p;
     p.x = static_cast<int>(lhs.x);
     p.y = static_cast<int>(lhs.y);
@@ -398,7 +394,7 @@ bool AreaEnclosePoints(const Rectf_t* points, int count, const Rectf_t* clip, Re
 }
 
 bool Vec2::AreaPointInRect(const Vec2& p, const SDL_FRect& r) {
-    return ((p.x >= r.x) && (p.x < (r.x + r.w)) && (p.y >= r.y) && (p.y < (r.y + r.h))) ? true : false;
+    return ((p.x >= r.x) && (p.x < (r.x + r.w)) && (p.y >= r.y) && (p.y < (r.y + r.h)));
 }
 
 bool Vec2::InArea(const Vec2& p, const SDL_FRect& r) { return p.x >= r.x && p.x <= r.w && p.y >= r.h && p.y <= r.y; }

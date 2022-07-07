@@ -177,8 +177,8 @@ bool Application::Simulate() {
     SDL_Event e;
     int firstStep;
     char _title[128];
-    float fpsRound = 0;
     float fps;
+    float fpsRound = 0;
     int delayed;
     SDL_WindowFlags wndFlags;
     SDL_DisplayMode displayMode = Application::getDisplayMode();
@@ -234,19 +234,18 @@ bool Application::Simulate() {
 
             delayed = Time::tickMillis() - delayed;
 
+            ++Time::m_frames;  // framecounter
+            if (Time::m_frames == 0) Time::m_frames = 1;
             if (Time::startUpTime() > fpsRound) {
-
-                fps = Mathf::ceil(1.f / (Time::startUpTime()-fpsRound));
+                fps = (Time::m_frames) / Time::startUpTime();
                 std::sprintf(_title,
                              "Ronin Engine (Debug) FPS:%d Memory:%luMiB, "
                              "GC_Allocated:%lu, SDL_Allocated:%d",
                              static_cast<int>(fps), get_process_sizeMemory() / 1024 / 1024, GC::gc_total_allocated(),
                              SDL_GetNumAllocations());
                 SDL_SetWindowTitle(Application::GetWindow(), _title);
-                fpsRound = Time::startUpTime();
+                fpsRound = Time::startUpTime() + 1;  // updater per 1 seconds
             }
-
-            ++Time::m_frames;  // framecounter
 
             if (Time::m_deltaTime == 1.f) Time::m_deltaTime = 0;
             Time::m_deltaTime = delayed / secPerFrame;  // get deltas

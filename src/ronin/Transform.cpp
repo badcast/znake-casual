@@ -135,6 +135,10 @@ Vec2 Transform::position() { return p; }
 void Transform::position(const Vec2& value) {
     Vec2Int lastPoint = Vec2::RoundToInt(p);
     p = value;  // set the position
+    for(Transform* off : hierarchy){
+        Vec2 lp = off->localPosition();
+        off->position(p+lp);
+    }
     Level::self()->matrix_nature(this, lastPoint);
 }
 Vec2 Transform::localPosition() {
@@ -171,7 +175,10 @@ void Transform::hierarchy_parent_change(Transform* from, Transform* newParent) {
         hierarchy_append(Level::self()->main_object->transform(),
                          from);  // nullptr as Root
     else
+    {
         from->_parent = newParent;
+        hierarchy_append(newParent, from);
+    }
 }
 
 void Transform::hierarchy_remove(Transform* from, Transform* off) {

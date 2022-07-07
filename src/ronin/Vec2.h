@@ -88,8 +88,8 @@ struct Vec2 {
     static Vec2 Reflect(const Vec2& inDirection, const Vec2& inNormal);
     static Vec2 Scale(const Vec2& a, const Vec2& b);
     static float Distance(const Vec2& lhs, const Vec2& rhs);
-    static float Angle(const Vec2& from, const Vec2& to);
-    static float SignedAngle(const Vec2& from, const Vec2& to);
+    static float Angle(Vec2 from, Vec2 to);
+    static float SignedAngle(Vec2 from, Vec2 to);
     static Vec2 ClampMagnitude(Vec2 vector, float maxLength);
     static Vec2 SmoothDamp(Vec2 current, Vec2 target, Vec2& currentVelocity, float smoothTime, float maxSpeed, float deltaTime);
     static float Dot(const Vec2& lhs, const Vec2& rhs);

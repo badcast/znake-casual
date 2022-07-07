@@ -90,13 +90,15 @@ std::list<Transform*> Physics2D::sphereCast(Vec2 origin, float distance) {
             if (findedIter != std::end(mx)) {
                 // filtering by distance
                 for (auto lhs : findedIter->second) {
-                    if (Vec2::Distance(lhs->_p, origin) <= distance) _cont.emplace_back();
+                    if (Vec2::Distance(lhs->p, origin) <= distance) _cont.emplace_back(lhs);
                 }
             }
         }
     }
 
-    _cont.sort([&origin](Transform* lhs, Transform* rhs) { return Vec2::Distance(lhs->_p, origin); });
+    _cont.sort([&origin](const Transform* lhs, const Transform* rhs) {
+        return Vec2::Distance(lhs->p, origin) < Vec2::Distance(rhs->p, origin);
+    });
 
     return _cont;
 }

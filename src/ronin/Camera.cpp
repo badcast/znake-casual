@@ -246,9 +246,9 @@ const Vec2 Camera::ScreenToWorldPoint(Vec2 screenPoint) {
 const Vec2 Camera::WorldToScreenPoint(Vec2 worldPoint) {
     Resolution res = Application::getResolution();
     //Положение по горизонтале
-    worldPoint.x = ((res.width) / 2.0f - (_main->transform()->_p.x - worldPoint.x) * squarePerPixels);
+    worldPoint.x = ((res.width) / 2.0f - (_main->transform()->p.x - worldPoint.x) * squarePerPixels);
     //Положение по вертикале
-    worldPoint.y = ((res.height) / 2.0f + (_main->transform()->_p.y - worldPoint.y) * squarePerPixels);
+    worldPoint.y = ((res.height) / 2.0f + (_main->transform()->p.y - worldPoint.y) * squarePerPixels);
     return worldPoint;
 }
 Camera* Camera::mainCamera() { return _main; }

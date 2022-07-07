@@ -14,7 +14,7 @@ class Transform : public Component {
    protected:
     std::vector<Transform*> hierarchy;
     Transform* _parent;
-    Vec2 _p;
+    Vec2 p;
     float _angle;
 
     static void hierarchy_parent_change(Transform* from, Transform* newParent);

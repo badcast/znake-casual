@@ -43,8 +43,8 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
         renderSource->Render(&renderInfo);  // draw
 
         if (renderInfo.texture) {
-            Vec2* point = &transform()->_p;
-            Vec2* sourcePoint = &renderSource->transform()->_p;
+            Vec2* point = &transform()->p;
+            Vec2* sourcePoint = &renderSource->transform()->p;
 
             dst.w = renderInfo.dst.w * squarePerPixels;//_scale.x;
             dst.h = renderInfo.dst.h * squarePerPixels;//_scale.y;
@@ -69,8 +69,8 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
         lightSource->GetLightSource(&renderInfo);  // draw
 
         if (renderInfo.texture) {
-            point = &transform()->_p;
-            sourcePoint = &lightSource->transform()->_p;
+            point = &transform()->p;
+            sourcePoint = &lightSource->transform()->p;
 
             dst.w = renderInfo.dst.w * squarePerPixels;;
             dst.h = renderInfo.dst.h * squarePerPixels;;

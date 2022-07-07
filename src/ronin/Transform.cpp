@@ -10,7 +10,7 @@ Transform::Transform(const std::string& name) : Component(name) {
     _parent = nullptr;
     _angle = 0;
     // set as default
-    Level::self()->matrix_nature(this, Vec2::RoundToInt(_p + Vec2::one));
+    Level::self()->matrix_nature(this, Vec2::RoundToInt(p + Vec2::one));
 }
 
 Transform::~Transform() {
@@ -40,44 +40,44 @@ Transform* Transform::child_of(int index) {
 }
 void Transform::LookAt(Vec2 target) { LookAt(target, Vec2::up); }
 void Transform::LookAt(Vec2 target, Vec2 axis) {
-    _angle = Vec2::Angle(axis, target - this->_p) * Mathf::Rad2Deg;
+    _angle = Vec2::Angle(axis, target - this->p) * Mathf::Rad2Deg;
 
     // normalize horz
     if (axis.x == 1) {
-        if (_p.y < target.y) _angle = -_angle;
+        if (p.y < target.y) _angle = -_angle;
     } else if (axis.x == -1) {
-        if (_p.y > target.y) _angle = -_angle;
+        if (p.y > target.y) _angle = -_angle;
     }
     // normalize vert
     if (axis.y == 1) {
-        if (_p.x > target.x) _angle = -_angle;
+        if (p.x > target.x) _angle = -_angle;
     } else if (axis.y == -1) {
-        if (_p.x < target.x) _angle = -_angle;
+        if (p.x < target.x) _angle = -_angle;
     }
 }
 void Transform::LookAt(Transform* target) { LookAt(target, Vec2::up); }
 
 void Transform::LookAtLerp(Vec2 target, float t) {
     Vec2 axis = Vec2::up;
-    float a = Vec2::Angle(axis, target - this->_p) * Mathf::Rad2Deg;
+    float a = Vec2::Angle(axis, target - this->p) * Mathf::Rad2Deg;
     // normalize
     if (axis.x == 1) {
-        if (_p.y < target.y) a = -a;
+        if (p.y < target.y) a = -a;
     } else if (axis.x == -1) {
-        if (_p.y > target.y) a = -a;
+        if (p.y > target.y) a = -a;
     }
 
     if (axis.y == 1) {
-        if (_p.x > target.x) a = -a;
+        if (p.x > target.x) a = -a;
     } else if (axis.y == -1) {
-        if (_p.x < target.x) a = -a;
+        if (p.x < target.x) a = -a;
     }
 
     _angle = Mathf::LerpAngle(_angle, a, t);
 }
-void Transform::LookAtLerp(Transform* target, float t) { LookAtLerp(target->_p, t); }
+void Transform::LookAtLerp(Transform* target, float t) { LookAtLerp(target->p, t); }
 
-void Transform::LookAt(Transform* target, Vec2 axis) { LookAt(target->_p, axis); }
+void Transform::LookAt(Transform* target, Vec2 axis) { LookAt(target->p, axis); }
 
 void Transform::as_first_child() {
     if (this->_parent == nullptr) return;
@@ -131,19 +131,19 @@ const Vec2 Transform::rotate(Vec2 vec, Vec2 normal) {
     return normal;
 }
 
-Vec2 Transform::position() { return _p; }
+Vec2 Transform::position() { return p; }
 void Transform::position(const Vec2& value) {
-    Vec2Int lastPoint = Vec2::RoundToInt(_p);
-    _p = value;  // set the position
+    Vec2Int lastPoint = Vec2::RoundToInt(p);
+    p = value;  // set the position
     Level::self()->matrix_nature(this, lastPoint);
 }
 Vec2 Transform::localPosition() {
-    if (this->_parent != nullptr) return this->_parent->_p - _p;
-    return _p;
+    if (this->_parent != nullptr) return this->_parent->p - p;
+    return p;
 }
 void Transform::localPosition(const Vec2& value) {
-    Vec2Int lastPoint = Vec2::RoundToInt(_p);
-    _p = (this->_parent != nullptr) ? _parent->_p + value : value;
+    Vec2Int lastPoint = Vec2::RoundToInt(p);
+    p = (this->_parent != nullptr) ? _parent->p + value : value;
     Level::self()->matrix_nature(this, lastPoint);
 }
 

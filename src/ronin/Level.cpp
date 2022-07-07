@@ -68,7 +68,7 @@ std::list<Transform *> Level::matrixCheckDamaged() {
 
     for (auto x = begin(selfLevel->matrixWorld); x != end(selfLevel->matrixWorld); ++x) {
         for (auto y = begin(x->second); y != end(x->second); ++y) {
-            if (Vec2::RoundToInt((*y)->_p) != x->first) {
+            if (Vec2::RoundToInt((*y)->p) != x->first) {
                 damaged.emplace_back(*y);
             }
         }
@@ -84,7 +84,7 @@ int Level::matrixRestore() {
 int Level::matrixRestore(const std::list<Runtime::Transform *> &damaged_content) {
     int restored = 0;
     for (Runtime::Transform *dam : damaged_content) {
-        Vec2Int find = Vec2::RoundToInt(dam->_p);
+        Vec2Int find = Vec2::RoundToInt(dam->p);
         auto vertList = selfLevel->matrixWorld.find(find);
         if (vertList == std::end(selfLevel->matrixWorld)) continue;
 
@@ -119,7 +119,7 @@ void Level::render_info(int *culled, int *fullobjects) {
 }
 
 void Level::matrix_nature(Transform *target, Vec2Int lastPoint) {
-    Vec2Int newPoint(Vec2::RoundToInt(target->_p));
+    Vec2Int newPoint(Vec2::RoundToInt(target->p));
 
     if (newPoint == lastPoint) return;
 

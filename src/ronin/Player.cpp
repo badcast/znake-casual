@@ -23,9 +23,9 @@ void Player::OnUpdate() {
             if (axis.x - movementDir.x != 0 && axis.y - movementDir.y != 0) movementDir = axis;
         }
 
+        if (axis == Vec2::zero) return;
         movementDir = axis;
-
-        //transform()->LookAtLerp(point + movementDir, .5f);
+        transform()->LookAtLerp(point + movementDir, .5f);
         transform()->position(Vec2::MoveTowards(point, point + movementDir, curSpeed));
     }
 }

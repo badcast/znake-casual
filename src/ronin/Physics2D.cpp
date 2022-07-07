@@ -4,7 +4,7 @@
 
 namespace RoninEngine::Runtime {
 
-std::list<Transform*> Physics2D::stormCast(Vec2 origin, int edges) {
+std::list<Transform*> Physics2D::stormCast(const Vec2& origin, int edges) {
     /*
     Описание данных stormMember
     Младшие 4 байта, это все для шаги
@@ -23,61 +23,63 @@ std::list<Transform*> Physics2D::stormCast(Vec2 origin, int edges) {
     std::uint64_t stormMember = 0;
     std::int32_t stormFlags = 1;
     std::list<Transform*> grubbed;
-    ++edges;
-    for (;;) {
-        std::uint32_t&& steps = (stormMember & const_storm_steps_flag);
-        std::uint32_t&& maxSteps = (stormMember >> 32);
-        //Шаг заканчивается (step = turnSteps) происходит поворот
-        if (steps % std::max(1u, (maxSteps / 4)) == 0) {
-            //переход на новое измерение
-            //при steps == maxsteps
-            if (steps == maxSteps) {
-                if (--edges <= 0) break;
 
-                stormMember = (8ul * (stormFlags = stormFlags & const_storm_dimensions)) << 32;
-                stormFlags = ((stormFlags & const_storm_dimensions) + 1) | const_storm_yDeterminant_start;
-            } else {
-                if (stormFlags >> 28) {
+    if (edges > 0)
+        for (;;) {
+            std::uint32_t&& steps = (stormMember & const_storm_steps_flag);
+            std::uint32_t&& maxSteps = (stormMember >> 32);
+            //Шаг заканчивается (step = turnSteps) происходит поворот
+            if (steps % std::max(1u, (maxSteps / 4)) == 0) {
+                //переход на новое измерение
+                //при steps == maxsteps
+                if (steps == maxSteps) {
+                    if (--edges <= -1) break;
+
+                    stormMember = (8ul * (stormFlags = stormFlags & const_storm_dimensions)) << 32;
+                    stormFlags = ((stormFlags & const_storm_dimensions) + 1) | const_storm_yDeterminant_start;
+                } else {
+                    if (stormFlags >> 28) {
+                        stormFlags ^= stormFlags & const_storm_xDeterminant;                                      // clear x
+                        stormFlags |= ((stormFlags & const_storm_yDeterminant) >> 4) & const_storm_xDeterminant;  // x = y
+                        stormFlags ^= stormFlags & const_storm_yDeterminant;                                      // clear y
+                    } else {
+                        stormFlags ^= stormFlags & const_storm_yDeterminant;                                      // clear y
+                        stormFlags |= ((stormFlags & const_storm_xDeterminant) << 4) & const_storm_yDeterminant;  // y = x
+                        stormFlags ^= const_storm_yDeterminant_inverse;                                           // inverse
+                        stormFlags ^= stormFlags & const_storm_xDeterminant;                                      // clear x
+                    }
+                }
+            }
+
+            char&& xDeter = (stormFlags >> 24 & 0xf);
+            char&& yDeter = stormFlags >> 28;
+            auto iter = mx.find(ray);
+            if (iter != std::end(mx)) {
+                for(auto x : iter->second)
+                grubbed.emplace_back(x);
+            }
+            ray.x += xDeter == 2 ? -1 : xDeter;
+            ray.y += yDeter == 2 ? -1 : yDeter;
+
+
+            if (!(stormMember & const_storm_steps_flag)) {
+                if (yDeter) {
                     stormFlags ^= stormFlags & const_storm_xDeterminant;                                      // clear x
                     stormFlags |= ((stormFlags & const_storm_yDeterminant) >> 4) & const_storm_xDeterminant;  // x = y
                     stormFlags ^= stormFlags & const_storm_yDeterminant;                                      // clear y
-                } else {
+                } else if (xDeter) {
                     stormFlags ^= stormFlags & const_storm_yDeterminant;                                      // clear y
                     stormFlags |= ((stormFlags & const_storm_xDeterminant) << 4) & const_storm_yDeterminant;  // y = x
-                    stormFlags ^= const_storm_yDeterminant_inverse;                                           // inverse
                     stormFlags ^= stormFlags & const_storm_xDeterminant;                                      // clear x
                 }
             }
+
+            ++(*reinterpret_cast<std::uint32_t*>(&stormMember));
         }
-
-        char&& xDeter = (stormFlags >> 24 & 0xf);
-        char&& yDeter = stormFlags >> 28;
-        ray.x += xDeter == 2 ? -1 : xDeter;
-        ray.y += yDeter == 2 ? -1 : yDeter;
-
-        auto iter = mx.find(ray);
-        if (iter != std::end(mx)) {
-            grubbed.assign(iter->second.begin(), iter->second.end());
-        }
-
-        if (!(stormMember & const_storm_steps_flag)) {
-            if (yDeter) {
-                stormFlags ^= stormFlags & const_storm_xDeterminant;                                      // clear x
-                stormFlags |= ((stormFlags & const_storm_yDeterminant) >> 4) & const_storm_xDeterminant;  // x = y
-                stormFlags ^= stormFlags & const_storm_yDeterminant;                                      // clear y
-            } else if (xDeter) {
-                stormFlags ^= stormFlags & const_storm_yDeterminant;                                      // clear y
-                stormFlags |= ((stormFlags & const_storm_xDeterminant) << 4) & const_storm_yDeterminant;  // y = x
-                stormFlags ^= stormFlags & const_storm_xDeterminant;                                      // clear x
-            }
-        }
-
-        ++(*reinterpret_cast<std::uint32_t*>(&stormMember));
-    }
     return grubbed;
 }
 
-std::list<Transform*> Physics2D::sphereCast(Vec2 origin, float distance) {
+std::list<Transform*> Physics2D::sectorCast(Vec2 origin, float distance) {
     auto& mx = Level::self()->matrixWorld;
     std::list<Transform*> _cont;
 
@@ -96,9 +98,13 @@ std::list<Transform*> Physics2D::sphereCast(Vec2 origin, float distance) {
         }
     }
 
-    _cont.sort([&origin](const Transform* lhs, const Transform* rhs) {
-        return Vec2::Distance(lhs->p, origin) < Vec2::Distance(rhs->p, origin);
-    });
+    return _cont;
+}
+
+std::list<Transform*> Physics2D::sphereCast(Vec2 origin, float distance) {
+    std::list<Transform*> _cont = stormCast(origin, Mathf::number(Mathf::ceil(distance)));
+
+    _cont.remove_if([&](Transform* lhs) { return Vec2::Distance(lhs->p, origin) > distance; });
 
     return _cont;
 }

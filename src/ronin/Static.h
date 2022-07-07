@@ -15,6 +15,6 @@ constexpr auto const_storm_xDeterminant = 0xF000000;
 constexpr auto const_storm_yDeterminant = 0xF0000000;
 constexpr auto const_storm_yDeterminant_start = 0x20000000;
 constexpr auto const_storm_yDeterminant_inverse = 0x30000000;
-}
+}  // namespace Runtime
 
 }  // namespace RoninEngine

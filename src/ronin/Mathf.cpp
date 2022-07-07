@@ -124,11 +124,11 @@ namespace RoninEngine {
 	}
 
 	float Mathf::ceil(float x) {
-		return ::ceilf(x);
+          return SDL_ceilf(x);
 	}
 
 	float Mathf::floor(float x) {
-		return ::floorf(x);
+          return SDL_floorf(x);
 	}
 
 	float Mathf::frac(float x) {

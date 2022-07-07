@@ -234,56 +234,55 @@ void Gizmos::DrawStorm(Vec2 ray, int edges, int delim) {
 
     Color lastColor = Gizmos::color;
     Gizmos::color = 0xfff6f6f7;
-    ++edges;
-    for (;;) {
-        std::uint32_t&& steps = (stormMember & const_storm_steps_flag);
-        std::uint32_t&& maxSteps = (stormMember >> 32);
-        //Шаг заканчивается (step = turnSteps) происходит поворот
-        if (steps % std::max(1u, (maxSteps / 4)) == 0) {
-            //переход на новое измерение
-            //при steps == maxsteps
-            if (steps == maxSteps) {
+    if (edges > 0)
+        for (;;) {
+            std::uint32_t&& steps = (stormMember & const_storm_steps_flag);
+            std::uint32_t&& maxSteps = (stormMember >> 32);
+            //Шаг заканчивается (step = turnSteps) происходит поворот
+            if (steps % std::max(1u, (maxSteps / 4)) == 0) {
+                //переход на новое измерение
+                //при steps == maxsteps
+                if (steps == maxSteps) {
+                    if (--edges <= -1) break;
 
-                if (--edges <= 0) break;
-
-                stormMember = (8ul * (stormFlags = stormFlags & const_storm_dimensions)) << 32;
-                stormFlags = ((stormFlags & const_storm_dimensions) + 1) | const_storm_yDeterminant_start;
-            } else {
-                if (stormFlags >> 28) {
-                    stormFlags ^= stormFlags & const_storm_xDeterminant;                                // clear x
-                    stormFlags |= ((stormFlags & const_storm_yDeterminant) >> 4) & const_storm_xDeterminant;  // x = y
-                    stormFlags ^= stormFlags & const_storm_yDeterminant;                                // clear y
+                    stormMember = (8ul * (stormFlags = stormFlags & const_storm_dimensions)) << 32;
+                    stormFlags = ((stormFlags & const_storm_dimensions) + 1) | const_storm_yDeterminant_start;
                 } else {
-                    stormFlags ^= stormFlags & const_storm_yDeterminant;                                // clear y
-                    stormFlags |= ((stormFlags & const_storm_xDeterminant) << 4) & const_storm_yDeterminant;  // y = x
-                    stormFlags ^= const_storm_yDeterminant_inverse;                                     // inverse
-                    stormFlags ^= stormFlags & const_storm_xDeterminant;                                // clear x
+                    if (stormFlags >> 28) {
+                        stormFlags ^= stormFlags & const_storm_xDeterminant;                                      // clear x
+                        stormFlags |= ((stormFlags & const_storm_yDeterminant) >> 4) & const_storm_xDeterminant;  // x = y
+                        stormFlags ^= stormFlags & const_storm_yDeterminant;                                      // clear y
+                    } else {
+                        stormFlags ^= stormFlags & const_storm_yDeterminant;                                      // clear y
+                        stormFlags |= ((stormFlags & const_storm_xDeterminant) << 4) & const_storm_yDeterminant;  // y = x
+                        stormFlags ^= const_storm_yDeterminant_inverse;                                           // inverse
+                        stormFlags ^= stormFlags & const_storm_xDeterminant;                                      // clear x
+                    }
                 }
             }
-        }
 
-        char&& xDeter = (stormFlags >> 24 & 0xf);
-        char&& yDeter = stormFlags >> 28;
-        ray.x += xDeter == 2 ? -1 : xDeter;
-        ray.y += yDeter == 2 ? -1 : yDeter;
+            char&& xDeter = (stormFlags >> 24 & 0xf);
+            char&& yDeter = stormFlags >> 28;
+            ray.x += xDeter == 2 ? -1 : xDeter;
+            ray.y += yDeter == 2 ? -1 : yDeter;
 
-        DrawLine(last/delim, ray/delim);
-        last = ray;
+            DrawLine(last / delim, ray / delim);
+            last = ray;
 
-        if (!(stormMember & const_storm_steps_flag)) {
-            if (yDeter) {
-                stormFlags ^= stormFlags & const_storm_xDeterminant;                                // clear x
-                stormFlags |= ((stormFlags &const_storm_yDeterminant) >> 4) & const_storm_xDeterminant;  // x = y
-                stormFlags ^= stormFlags & const_storm_yDeterminant;                                // clear y
-            } else if (xDeter) {
-                stormFlags ^= stormFlags & const_storm_yDeterminant;                                // clear y
-                stormFlags |= ((stormFlags & const_storm_xDeterminant) << 4) & const_storm_yDeterminant;  // y = x
-                stormFlags ^= stormFlags & const_storm_xDeterminant;                                // clear x
+            if (!(stormMember & const_storm_steps_flag)) {
+                if (yDeter) {
+                    stormFlags ^= stormFlags & const_storm_xDeterminant;                                      // clear x
+                    stormFlags |= ((stormFlags & const_storm_yDeterminant) >> 4) & const_storm_xDeterminant;  // x = y
+                    stormFlags ^= stormFlags & const_storm_yDeterminant;                                      // clear y
+                } else if (xDeter) {
+                    stormFlags ^= stormFlags & const_storm_yDeterminant;                                      // clear y
+                    stormFlags |= ((stormFlags & const_storm_xDeterminant) << 4) & const_storm_yDeterminant;  // y = x
+                    stormFlags ^= stormFlags & const_storm_xDeterminant;                                      // clear x
+                }
             }
-        }
 
-        ++(*reinterpret_cast<std::uint32_t*>(&stormMember));
-    }
+            ++(*reinterpret_cast<std::uint32_t*>(&stormMember));
+        }
 
     Gizmos::color = lastColor;
 }

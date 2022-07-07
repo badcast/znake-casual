@@ -101,108 +101,12 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
     std::list<Renderer*> layers[Nz];
     std::uint8_t zN = 0;
     if (__rendererOutResults.empty()) {
-        Vec2Int ray, lastPlace(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
         Resolution res = Application::getResolution();
-        Vec2Int wpLeftTop(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2::zero)));
-        Vec2Int wpCenter(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2(res.width, res.height) / 2))*distanceEvcall);
-        Vec2Int wpRightBottom(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2(res.width, res.height)))*distanceEvcall);
-
-        // Разработака алгоритма поиска элементов - шторм
-        int step = 0;          // шагий
-        int steps = 0;         // пройденные шаги
-        int turnSteps = 0;     // шагий на поворотный круг
-        int maxSteps = 0;      // шагий на полный круг
-        int dimension = 1;     // измерение
-        int xDeterminant;  // определитель для x оси (абцис)
-        int yDeterminant;      // определитель для y оси (ординат)
-        bool rotate = false;
-        std::vector<std::string> values;
-        //Первая точка, относительна отчета
-        ray = wpCenter;
-        while (ray != wpRightBottom) {
-            if (ray == lastPlace) {
-                Application::fail("overflow is lastPosition");
-            }
-            lastPlace = ray;
-
-            // draw current point
-            auto iter = Level::self()->matrixWorld.find(ray);
-            if (iter != std::end(Level::self()->matrixWorld)) {
-                for (auto el : iter->second) {
-                    if (Renderer* render = el->gameObject()->getComponent<Renderer>()) {
-                        layers[render->zOrder].emplace_front(render);
-                    }
-                }
-            }
-            // 1. Шаг заканчивается (step = turnSteps) происходит поворот
-            if (step == turnSteps) {
-                //переход на новое измерение
-                if (steps == maxSteps) {
-                    maxSteps = 8 * dimension++;
-                    turnSteps = maxSteps / 4;
-                    steps = 0;
-                    yDeterminant = 0;
-                    xDeterminant = 0;
-                    rotate = true;
-                }
-                if (!yDeterminant && !xDeterminant) {
-                    xDeterminant = 0;
-                    yDeterminant = -1;
-                } else {
-                    if (yDeterminant) {
-                        xDeterminant = yDeterminant;
-                        yDeterminant = 0;
-                    } else {
-                        yDeterminant = xDeterminant * -1;
-                        xDeterminant = 0;
-                    }
-                }
-
-                step = 0;
-            }
-
-            // 2. Направляем вихр ...
-            ray.x += xDeterminant;
-            ray.y += yDeterminant;
-            values.emplace_back(std::to_string(ray.x) + " " + std::to_string(ray.y));
-            if (rotate) {
-                if (yDeterminant) {
-                    xDeterminant = yDeterminant;
-                    yDeterminant = 0;
-                } else if (xDeterminant) {
-                    yDeterminant = xDeterminant;
-                    xDeterminant = 0;
-                }
-                rotate = false;
-            }
-
-            ++step;
-            ++steps;
-        }
-
-        /*
-        Vec2Int ray;
-        Resolution res = Application::getResolution();
-        Vec2Int wpLeftTop(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2::zero)));
-        Vec2Int wpRightBottom(Vec2::RoundToInt(this->ScreenToWorldPoint(Vec2(res.width, res.height))));
-
-        ray.x = wpLeftTop.x;
-        while (ray.x <= wpRightBottom.x) {
-            ray.y = wpLeftTop.y;
-            while (ray.y >= wpRightBottom.y) {
-                auto iter = Level::self()->matrixWorld.find(ray);
-                if (iter != std::end(Level::self()->matrixWorld)) {
-                    for (auto el : iter->second) {
-                        if (Renderer* render = el->gameObject()->getComponent<Renderer>()) {
-                            layers[render->zOrder].emplace_front(render);
-                        }
-                    }
-                }
-                --ray.y;
-            }
-            ++ray.x;
-        }
-        */
+        Vec2Int wpLeftTop = Vec2::RoundToInt(ScreenToWorldPoint(Vec2::zero));
+        Vec2Int wpRightBottom = Vec2::RoundToInt(ScreenToWorldPoint(Vec2(res.width, res.height)));
+        std::list<Transform*> result = Physics2D::stormCast(
+            transform()->p, Mathf::number(Mathf::Max(wpRightBottom.x - transform()->p.x, wpRightBottom.y - transform()->p.y)) +
+                                1 + distanceEvcall);
 
         std::list<Renderer*> _removes;
         //собираем оставшиеся которые прикреплены к видимости
@@ -217,11 +121,18 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
         for (Renderer* y : _removes) prev.erase(y);
 
         // ordering and collect
-        std::list<Renderer*>* target;
+        /*std::list<Renderer*>* target;
         while ((target = zN < Nz ? &layers[zN++] : nullptr)) {
             for (Renderer* el : *target) {
                 __rendererOutResults.insert(el);
                 prev.insert(el);
+            }
+        }*/
+        for (Transform* el : result) {
+            Renderer* rend = el->gameObject()->getComponent<Renderer>();
+            if (rend) {
+                __rendererOutResults.insert(rend);
+                prev.insert(rend);
             }
         }
     }

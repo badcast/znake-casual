@@ -446,10 +446,11 @@ Vec2& Vec2::operator=(const Vec2& rhs) {
 
 Vec2 RoninEngine::Runtime::operator+(const Vec2& lhs, const Vec2& rhs) { return Vec2(lhs.x + rhs.x, lhs.y + rhs.y); }
 
-Vec2 RoninEngine::Runtime::operator-(const Vec2& lhs, const Vec2& rhs) {
-    return Vec2(lhs.x - rhs.x, lhs.y - rhs.y);
+Vec2 RoninEngine::Runtime::operator-(const Vec2& lhs, const Vec2& rhs) { return Vec2(lhs.x - rhs.x, lhs.y - rhs.y); }
 
-}
+Vec2 RoninEngine::Runtime::operator+(const Vec2& lhs, const Vec2Int& rhs) { return Vec2(lhs.x + rhs.x, lhs.y + rhs.y); }
+
+Vec2 RoninEngine::Runtime::operator-(const Vec2& lhs, const Vec2Int& rhs) { return Vec2(lhs.x - rhs.x, lhs.y - rhs.y); }
 
 bool RoninEngine::Runtime::operator==(const Vec2& lhs, const Vec2& rhs) { return (lhs - rhs).sqrMagnitude() < 9.999999E-11; }
 

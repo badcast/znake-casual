@@ -248,11 +248,11 @@ bool Application::Simulate() {
             ++Time::_frames;  // framecounter
 
             if (Time::_deltaTime == 1.f) Time::_deltaTime = 0;
-            _delayed = Mathf::Max(0, 1000 / displayMode.refresh_rate - _delayed);
             Time::_deltaTime = _delayed / (1000.f / displayMode.refresh_rate);
             Time::_deltaTime = Mathf::Clamp01(Time::_deltaTime);
 
-            Time::_time += .001f * _delayed;
+            Time::_time += .001f * Mathf::Min(_delayed, 1000/60);
+            _delayed = Mathf::Max(0, 1000 / displayMode.refresh_rate - _delayed);
 
             if (_delayed > 0) std::this_thread::sleep_for(std::chrono::milliseconds(_delayed));
         }

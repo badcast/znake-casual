@@ -128,6 +128,8 @@ bool operator!=(const Vec2Int &lhs, const Vec2 &rhs);
 
 Vec2 operator+(const Vec2& lhs, const Vec2& rhs);
 Vec2 operator-(const Vec2& lhs, const Vec2& rhs);
+Vec2 operator+(const Vec2& lhs, const Vec2Int& rhs);
+Vec2 operator-(const Vec2& lhs, const Vec2Int& rhs);
 bool operator==(const Vec2& lhs, const Vec2& rhs);
 bool operator!=(const Vec2& lhs, const Vec2& rhs);
 Vec2 operator*(const float& d, const Vec2& rhs);

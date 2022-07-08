@@ -106,6 +106,8 @@ struct Vec2 {
     static bool InArea(const Vec2& p, const SDL_FRect& r);
     static const Vec2 Rotate(float angle, Vec2 v);
     static const Vec2 RotateUp(float angle, Vec2 v);
+    static const Vec2 RotateAround(Vec2 center, Vec2 localPosition, float angle);
+
     static const Vec2 Perpendicular(Vec2 inDirection);
 
     Vec2& operator+=(const Vec2& rhs);

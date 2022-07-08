@@ -64,15 +64,15 @@ void SpriteRenderer::Render(Render_info* render) {
                 }
                 _srcRect.w = sprite->width();
                 _srcRect.h = sprite->height();
-                _dstRect.w = sprite->width() * abs(this->size.x) / squarePerPixels;
-                _dstRect.h = sprite->height() * abs(this->size.y) / squarePerPixels;
+                _dstRect.w = sprite->width() * abs(this->size.x) / pixelsPerSize;
+                _dstRect.h = sprite->height() * abs(this->size.y) / pixelsPerSize;
 
                 break;
             case SpriteRenderType::Tile: {
                 _srcRect.w = abs(this->size.x) * sprite->width();
                 _srcRect.h = abs(this->size.y) * sprite->width();
-                _dstRect.w = sprite->width() * abs(this->size.x) / squarePerPixels;
-                _dstRect.h = sprite->height() * abs(this->size.y) / squarePerPixels;
+                _dstRect.w = sprite->width() * abs(this->size.x) / pixelsPerSize;
+                _dstRect.h = sprite->height() * abs(this->size.y) / pixelsPerSize;
 
                 //                if (this->tileRenderPresent == SpriteRenderTile::Fixed) {
                 //                    _srcRect.w = (_srcRect.w / sprite->width()) * sprite->width();

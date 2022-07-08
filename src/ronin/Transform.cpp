@@ -166,6 +166,11 @@ void Transform::localAngle(float value) {
 }
 Transform* Transform::parent() { return _parent; }
 void Transform::setParent(Transform* parent) { hierarchy_parent_change(this, parent); }
+void Transform::internal_position(Vec2 worldposition)
+{
+
+}
+
 void Transform::hierarchy_parent_change(Transform* from, Transform* newParent) {
     Transform* lastParent = from->_parent;
 

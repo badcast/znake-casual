@@ -425,6 +425,12 @@ const Vec2 Vec2::RotateUp(float angle, Vec2 v) {
     return v;
 }
 
+const Vec2 Vec2::RotateAround(Vec2 center, Vec2 localPosition, float angle) {
+    float Sin = Mathf::sin(angle);
+    float Cos = Mathf::cos(angle);
+    return Vec2(center.x + (localPosition.x * Sin), center.y + (localPosition.y * Cos));
+}
+
 const Vec2 Vec2::Perpendicular(Vec2 inDirection) { return Vec2(0.f - inDirection.y, inDirection.x); }
 
 Vec2& Vec2::operator+=(const Vec2& rhs) {

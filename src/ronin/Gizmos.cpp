@@ -25,7 +25,7 @@ void Gizmos::DrawLine(Vec2 a, Vec2 b) {
 
     Vec2 scale;
     SDL_RenderGetScale(Application::GetRenderer(), &scale.x, &scale.y);
-    scale *= squarePerPixels;
+    scale *= pixelsPerSize;
     dst.x = res.width / 2.f;
     dst.y = res.height / 2.f;
     a.x = dst.x - (p.x - a.x) * scale.x;
@@ -39,28 +39,28 @@ void Gizmos::DrawLine(Vec2 a, Vec2 b) {
 void drawBox() {
     Vec2 a, b;
 
-    a.x = squarePerPixels;
-    a.y = squarePerPixels;
-    b.x = -squarePerPixels;
-    b.y = squarePerPixels;
+    a.x = pixelsPerSize;
+    a.y = pixelsPerSize;
+    b.x = -pixelsPerSize;
+    b.y = pixelsPerSize;
     Gizmos::DrawLine(std::move(a), std::move(b));
 
-    a.x = squarePerPixels;
-    a.y = -squarePerPixels;
-    b.x = -squarePerPixels;
-    b.y = -squarePerPixels;
+    a.x = pixelsPerSize;
+    a.y = -pixelsPerSize;
+    b.x = -pixelsPerSize;
+    b.y = -pixelsPerSize;
     Gizmos::DrawLine(std::move(a), std::move(b));
 
-    a.x = -squarePerPixels;
-    a.y = squarePerPixels;
-    b.x = -squarePerPixels;
-    b.y = -squarePerPixels;
+    a.x = -pixelsPerSize;
+    a.y = pixelsPerSize;
+    b.x = -pixelsPerSize;
+    b.y = -pixelsPerSize;
     Gizmos::DrawLine(std::move(a), std::move(b));
 
-    a.x = squarePerPixels;
-    a.y = squarePerPixels;
-    b.x = squarePerPixels;
-    b.y = -squarePerPixels;
+    a.x = pixelsPerSize;
+    a.y = pixelsPerSize;
+    b.x = pixelsPerSize;
+    b.y = -pixelsPerSize;
     Gizmos::DrawLine(std::move(a), std::move(b));
 }
 
@@ -85,8 +85,8 @@ void Gizmos::DrawSquare(Vec2 origin, float width) { DrawRectangle(origin, width,
 void Gizmos::DrawRectangle(Vec2 origin, float width, float height) {
     origin = Camera::mainCamera()->WorldToScreenPoint(origin);
     std::uint16_t x, y;
-    width *= squarePerPixels;
-    height *= squarePerPixels;
+    width *= pixelsPerSize;
+    height *= pixelsPerSize;
     x = origin.x - width / 2;
     y = origin.y - height / 2;
 
@@ -100,8 +100,8 @@ void Gizmos::DrawSquareRounded(Vec2 origin, float width, std::uint16_t radius) {
 void Gizmos::DrawRectangleRounded(Vec2 origin, float width, float height, std::uint16_t radius) {
     origin = Camera::mainCamera()->WorldToScreenPoint(origin);
     std::uint16_t x, y;
-    width *= squarePerPixels;
-    height *= squarePerPixels;
+    width *= pixelsPerSize;
+    height *= pixelsPerSize;
     x = origin.x - width / 2;
     y = origin.y - height / 2;
 
@@ -207,7 +207,7 @@ void Gizmos::DrawSphere(Vec2 origin, float distance) {
     std::uint16_t x, y, r;
     x = origin.x;
     y = origin.y;
-    r = static_cast<std::uint16_t>(distance * squarePerPixels);
+    r = static_cast<std::uint16_t>(distance * pixelsPerSize);
     circleRGBA(Application::GetRenderer(), x, y, r, color.r, color.g, color.b, color.a);
 }
 

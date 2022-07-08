@@ -20,6 +20,8 @@ class Transform : public Component {
     Vec2 p;
     float _angle;
 
+    void parent_notify(Vec2 worldposition);
+
     static void hierarchy_parent_change(Transform* from, Transform* newParent);
     static void hierarchy_remove(Transform* from, Transform* off);
     static void hierarchy_removeAll(Transform* from);
@@ -61,12 +63,14 @@ class Transform : public Component {
 
     const Vec2 rotate(Vec2 vec, Vec2 normal);
 
-    //Точка в мировых кординатах
+    //get position in world space
     Vec2 position();
+    //set position in world space
     void position(const Vec2& value);
 
-    //Точка относительно в кординатах родителя
+    //get position in local space from parent
     Vec2 localPosition();
+    //set position in local space from parent
     void localPosition(const Vec2& value);
 
     float angle();

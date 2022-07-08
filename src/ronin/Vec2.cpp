@@ -106,7 +106,17 @@ Vec2 Vec2::Reflect(const Vec2& inDirection, const Vec2& inNormal) {
 
 Vec2 Vec2::Scale(const Vec2& a, const Vec2& b) { return Vec2(a.x * b.x, a.y * b.y); }
 
-float Vec2::Distance(const Vec2& lhs, const Vec2& rhs) { return (lhs - rhs).magnitude(); }
+float Vec2::Distance(const Vec2& lhs, const Vec2& rhs) {
+    float num = lhs.x - rhs.x;
+    float num2 = lhs.y - rhs.y;
+    return Mathf::sqrt(num * num + num2 * num2);
+}
+
+float Vec2::DistanceSqr(const Vec2& lhs, const Vec2& rhs) {
+    float num = lhs.x - rhs.x;
+    float num2 = lhs.y - rhs.y;
+    return num * num + num2 * num2;
+}
 
 float Vec2::Angle(Vec2 from, Vec2 to) {
     from.Normalize();
@@ -414,6 +424,8 @@ const Vec2 Vec2::RotateUp(float angle, Vec2 v) {
     v.y = -v.x * Sin + v.y * Cos;
     return v;
 }
+
+const Vec2 Vec2::Perpendicular(Vec2 inDirection) { return Vec2(0.f - inDirection.y, inDirection.x); }
 
 Vec2& Vec2::operator+=(const Vec2& rhs) {
     this->x += rhs.x;

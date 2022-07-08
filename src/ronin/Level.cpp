@@ -29,6 +29,7 @@ Level::~Level() {
         selfLevel = nullptr;
     }
 
+    //BUG: _destruction members is not free
     if (_firstRunScripts) {
         GC::gc_unalloc(_firstRunScripts);
     }
@@ -38,6 +39,7 @@ Level::~Level() {
     if (_destructions) {
         GC::gc_unalloc(_destructions);
     }
+
 
     /*
         // free objects
@@ -119,8 +121,11 @@ void Level::render_info(int *culled, int *fullobjects) {
 }
 
 void Level::matrix_nature(Transform *target, Vec2Int lastPoint) {
-    Vec2Int newPoint(Vec2::RoundToInt(target->p));
+    matrix_nature(target, Vec2::RoundToInt(target->p), lastPoint);
+}
 
+void Level::matrix_nature(Runtime::Transform *target, Runtime::Vec2Int newPoint, Runtime::Vec2Int lastPoint)
+{
     if (newPoint == lastPoint) return;
 
     // 1. delete last point source
@@ -224,7 +229,7 @@ void Level::RenderSceneLate(SDL_Renderer *renderer) {
 }
 bool Level::is_hierarchy() { return this->main_object != nullptr; }
 
-std::string &Level::name() { return this->name(); }
+std::string &Level::name() { return this->m_name; }
 
 UI::GUI *Level::Get_GUI() { return this->ui; }
 

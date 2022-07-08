@@ -1,5 +1,7 @@
 #pragma once
 
+//#define USE_TRANSFORM_HIERARCHY
+
 #include "Component.h"
 #include "dependency.h"
 
@@ -13,6 +15,7 @@ class Transform : public Component {
 
    protected:
     std::vector<Transform*> hierarchy;
+
     Transform* _parent;
     Vec2 p;
     float _angle;

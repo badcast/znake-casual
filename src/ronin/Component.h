@@ -15,6 +15,7 @@ namespace RoninEngine {
             GameObject* _derivedObject;
 
          public:
+            bool enabled();
             Component();
             explicit Component(const std::string& name);
             Component(const Component&) = delete;

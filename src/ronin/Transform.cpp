@@ -24,13 +24,13 @@ int Transform::child_count() { return hierarchy.size(); }
 
 Transform* Transform::child_of(int index) {
     Transform* tf = nullptr;
-    int i;
+    int x;
 
     if (child_count() <= index || child_count() >= index) throw std::out_of_range("index");
 
     auto iter = begin(hierarchy);
-    for (i = 0; iter != end(hierarchy); i++) {
-        if (i == index) {
+    for (x = 0; iter != end(hierarchy); ++x) {
+        if (x == index) {
             tf = *iter;
             break;
         }
@@ -38,9 +38,8 @@ Transform* Transform::child_of(int index) {
 
     return tf;
 }
-void Transform::LookAt(Vec2 target) { LookAt(target, Vec2::up); }
 void Transform::LookAt(Vec2 target, Vec2 axis) {
-    _angle = Vec2::Angle(axis, target - this->p) * Mathf::Rad2Deg;
+    _angle = Vec2::Angle(axis, target - p) * Mathf::Rad2Deg;
 
     // normalize horz
     if (axis.x == 1) {
@@ -55,11 +54,16 @@ void Transform::LookAt(Vec2 target, Vec2 axis) {
         if (p.x < target.x) _angle = -_angle;
     }
 }
+
 void Transform::LookAt(Transform* target) { LookAt(target, Vec2::up); }
+
+void Transform::LookAt(Transform* target, Vec2 axis) { LookAt(target->p, axis); }
+
+void Transform::LookAt(Vec2 target) { LookAt(target, Vec2::up); }
 
 void Transform::LookAtLerp(Vec2 target, float t) {
     Vec2 axis = Vec2::up;
-    float a = Vec2::Angle(axis, target - this->p) * Mathf::Rad2Deg;
+    float a = Vec2::Angle(axis, target - p) * Mathf::Rad2Deg;
     // normalize
     if (axis.x == 1) {
         if (p.y < target.y) a = -a;
@@ -75,9 +79,8 @@ void Transform::LookAtLerp(Vec2 target, float t) {
 
     _angle = Mathf::LerpAngle(_angle, a, t);
 }
-void Transform::LookAtLerp(Transform* target, float t) { LookAtLerp(target->p, t); }
 
-void Transform::LookAt(Transform* target, Vec2 axis) { LookAt(target->p, axis); }
+void Transform::LookAtLerp(Transform* target, float t) { LookAtLerp(target->p, t); }
 
 void Transform::as_first_child() {
     if (this->_parent == nullptr) return;
@@ -135,10 +138,6 @@ Vec2 Transform::position() { return p; }
 void Transform::position(const Vec2& value) {
     Vec2Int lastPoint = Vec2::RoundToInt(p);
     p = value;  // set the position
-    for(Transform* off : hierarchy){
-        Vec2 lp = off->localPosition();
-        off->position(p+lp);
-    }
     Level::self()->matrix_nature(this, lastPoint);
 }
 Vec2 Transform::localPosition() {
@@ -154,12 +153,17 @@ void Transform::localPosition(const Vec2& value) {
 float Transform::angle() { return this->_angle; }
 
 void Transform::angle(float value) {
-    if (isnan(value)) value = 0;
     this->_angle = value;
 }
 
-float Transform::localAngle() { return (this->_parent) ? this->_parent->_angle - this->_angle : this->_angle; }
-void Transform::localAngle(float value) {}
+float Transform::localAngle() {
+    float langle = (this->_parent) ? this->_parent->_angle + this->_angle : this->_angle;
+    return langle;
+}
+void Transform::localAngle(float value) {
+    // TODO: create local angle
+    throw std::runtime_error("Not implemented");
+}
 Transform* Transform::parent() { return _parent; }
 void Transform::setParent(Transform* parent) { hierarchy_parent_change(this, parent); }
 void Transform::hierarchy_parent_change(Transform* from, Transform* newParent) {
@@ -174,8 +178,7 @@ void Transform::hierarchy_parent_change(Transform* from, Transform* newParent) {
     if (!newParent)
         hierarchy_append(Level::self()->main_object->transform(),
                          from);  // nullptr as Root
-    else
-    {
+    else {
         from->_parent = newParent;
         hierarchy_append(newParent, from);
     }

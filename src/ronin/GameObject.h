@@ -1,8 +1,5 @@
 #pragma once
-
 #include "Object.h"
-#include "Transform.h"
-#include "dependency.h"
 
 namespace RoninEngine {
 namespace Runtime {
@@ -10,12 +7,25 @@ namespace Runtime {
 template <typename T>
 class AttribGetTypeHelper {
    public:
-    static T* getType(std::list<Component*>& container) {
-        auto iter = find_if(++begin(container), end(container), [](Component* c) { return dynamic_cast<T*>(c) != nullptr; });
+    static T* getType(const std::list<Component*>& container) {
+        auto iter =
+            std::find_if(++begin(container), end(container), [](Component* c) { return dynamic_cast<T*>(c) != nullptr; });
 
         if (iter != end(container)) return reinterpret_cast<T*>(*iter);
 
         return nullptr;
+    }
+
+    static std::list<T*> getTypes(const std::list<Component*>& container) {
+        std::list<T*> types;
+        T* cast;
+        for (auto iter = std::begin(container); iter != std::end(container); ++iter) {
+            if ((cast = dynamic_cast<T*>(*iter))) {
+                types.emplace_back(cast);
+            }
+        }
+
+        return types;
     }
 };
 
@@ -31,6 +41,8 @@ class GameObject final : public Object {
 
    private:
     std::list<Component*> m_components;
+    // TODO: Реализовать компонент m_active, для всех объектов GameObject
+    bool m_active;
 
    public:
     GameObject();
@@ -41,6 +53,11 @@ class GameObject final : public Object {
 
     ~GameObject();
 
+    bool isActive();
+    bool isActiveHierarchy();
+    bool setActive(bool state);
+    bool setActiveRecursivelly(bool state);
+
     Transform* transform();
 
     Component* addComponent(Component* component);
@@ -49,7 +66,7 @@ class GameObject final : public Object {
 
     Camera2D* camera2D() { return getComponent<Camera2D>(); }
 
-    Terrain2D* terraind2D() { return getComponent<Terrain2D>();}
+    Terrain2D* terraind2D() { return getComponent<Terrain2D>(); }
 
     template <typename T>
     std::enable_if_t<std::is_base_of<Component, T>::value, T*> addComponent();
@@ -57,6 +74,12 @@ class GameObject final : public Object {
     template <typename T>
     T* getComponent() {
         return AttribGetTypeHelper<T>::getType(this->m_components);
+    }
+
+    template <typename T>
+    // std::enable_if<!std::is_same<RoninEngine::Runtime::Transform,T>::value, std::list<T*>>
+    std::list<T*> getComponents() {
+        return AttribGetTypeHelper<T>::getTypes(this->m_components);
     }
 };
 

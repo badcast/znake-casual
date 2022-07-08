@@ -129,11 +129,9 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
             }
         }*/
         for (Transform* el : result) {
-            Renderer* rend = el->gameObject()->getComponent<Renderer>();
-            if (rend) {
-                __rendererOutResults.insert(rend);
-                prev.insert(rend);
-            }
+            std::list<Renderer*> rends = el->gameObject()->getComponents<Renderer>();
+            __rendererOutResults.insert(rends.begin(), rends.end());
+            prev.insert(rends.begin(), rends.end());
         }
     }
 
@@ -148,18 +146,25 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
 const Vec2 Camera::ScreenToWorldPoint(Vec2 screenPoint) {
     Resolution res = Application::getResolution();
     Vec2 offset = _main->transform()->position();
+    Vec2 scale;
+    SDL_RenderGetScale(Application::GetRenderer(), &scale.x, &scale.y);
+    scale *= squarePerPixels;
     screenPoint.x = (res.width / 2.f - (screenPoint.x)) * -1;
     screenPoint.y = res.height / 2.f - (screenPoint.y);
-    screenPoint /= squarePerPixels;
+    screenPoint.x /= scale.x;
+    screenPoint.y /= scale.x;
     screenPoint += offset;
     return screenPoint;
 }
 const Vec2 Camera::WorldToScreenPoint(Vec2 worldPoint) {
     Resolution res = Application::getResolution();
+    Vec2 scale;
+    SDL_RenderGetScale(Application::GetRenderer(), &scale.x, &scale.y);
+    scale *= squarePerPixels;
     //Положение по горизонтале
-    worldPoint.x = ((res.width) / 2.0f - (_main->transform()->p.x - worldPoint.x) * squarePerPixels);
+    worldPoint.x = ((res.width) / 2.0f - (_main->transform()->p.x - worldPoint.x) * scale.x);
     //Положение по вертикале
-    worldPoint.y = ((res.height) / 2.0f + (_main->transform()->p.y - worldPoint.y) * squarePerPixels);
+    worldPoint.y = ((res.height) / 2.0f + (_main->transform()->p.y - worldPoint.y) * scale.y);
     return worldPoint;
 }
 Camera* Camera::mainCamera() { return _main; }

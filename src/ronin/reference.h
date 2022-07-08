@@ -1,10 +1,5 @@
 #pragma once
 
-#include <stdio.h>
-
-#undef nullptr
-#define nullptr 0
-
 //#define _ref std::shared_ptr
 
 /*

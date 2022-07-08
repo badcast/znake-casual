@@ -45,7 +45,8 @@ class Level {
     virtual void RenderLevel(SDL_Renderer* renderer);
     virtual void RenderUI(SDL_Renderer* renderer);
     virtual void RenderSceneLate(SDL_Renderer* renderer);
-    void matrix_nature(Runtime::Transform* transform, Runtime::Vec2Int lastPoint);
+    void matrix_nature(Runtime::Transform* target, Runtime::Vec2Int lastPoint);
+    void matrix_nature(Runtime::Transform* target, Runtime::Vec2Int newPoint, Runtime::Vec2Int lastPoint);
 
    public:
     // Main or Root object

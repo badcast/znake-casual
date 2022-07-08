@@ -125,9 +125,9 @@ void Application::LoadLevel(Level* level) {
     if (!level->is_hierarchy()) {
         // init main object
         level->main_object = create_empty_gameobject();
+        if (level->main_object == nullptr) Application::fail_OutOfMemory();
 
-        if (level->main_object == nullptr) throw std::bad_exception();
-
+        level->name() = "Main Object";
         level->main_object->transform()->name("Root Transform");
     }
 
@@ -236,6 +236,7 @@ bool Application::Simulate() {
 
             ++Time::m_frames;  // framecounter
             if (Time::m_frames == 0) Time::m_frames = 1;
+
             if (Time::startUpTime() > fpsRound) {
                 fps = (Time::m_frames) / Time::startUpTime();
                 std::sprintf(_title,
@@ -247,11 +248,10 @@ bool Application::Simulate() {
                 fpsRound = Time::startUpTime() + 1;  // updater per 1 seconds
             }
 
-            if (Time::m_deltaTime == 1.f) Time::m_deltaTime = 0;
             Time::m_deltaTime = delayed / secPerFrame;  // get deltas
             Time::m_deltaTime = Mathf::Clamp01(Time::m_deltaTime);
 
-            Time::m_time += .001f * Mathf::Min(static_cast<float>(delayed), secPerFrame);
+            Time::m_time += 0.001f*Mathf::ceil(secPerFrame);
             delayed = Mathf::Max(0.f, secPerFrame - delayed);
 
             if (delayed > 0) std::this_thread::sleep_for(std::chrono::milliseconds(delayed));

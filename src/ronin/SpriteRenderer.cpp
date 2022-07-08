@@ -1,18 +1,16 @@
-#include <bits/types/FILE.h>
-
 #include "framework.h"
 
 namespace RoninEngine::Runtime {
-SpriteRenderer::SpriteRenderer() : SpriteRenderer("Sprite Renderer") {}
+SpriteRenderer::SpriteRenderer() : SpriteRenderer(typeid(*this).name()) {}
 
-SpriteRenderer::SpriteRenderer(const std::string& name) : Renderer(name) {
-    sprite = nullptr;
-    texture = nullptr;
-    flip = Vec2::one;
-    SpriteRenderType renderType = SpriteRenderType::Simple;
-    SpriteRenderTile tileRenderPresent = SpriteRenderTile::Place;
-    color = 0;
-}
+SpriteRenderer::SpriteRenderer(const std::string& name)
+    : Renderer(name),
+      sprite(nullptr),
+      texture(nullptr),
+      flip(Vec2::one),
+      renderType(SpriteRenderType::Simple),
+      renderTilePresent(SpriteRenderPresentTiles::Place),
+      color(Color::white) {}
 
 RoninEngine::Runtime::SpriteRenderer::SpriteRenderer(const SpriteRenderer& proto)
     : Renderer(proto.m_name),
@@ -20,9 +18,10 @@ RoninEngine::Runtime::SpriteRenderer::SpriteRenderer(const SpriteRenderer& proto
       sprite(proto.sprite),
       size(proto.size),
       renderType(proto.renderType),
-      tileRenderPresent(proto.tileRenderPresent),
+      renderTilePresent(proto.renderTilePresent),
       color(proto.color),
-      flip(proto.flip) {}
+      flip(proto.flip),
+      offset(proto.offset) {}
 
 SpriteRenderer::~SpriteRenderer() {}
 
@@ -42,6 +41,15 @@ void SpriteRenderer::setSpriteFromTextureToGC(Texture* texture) {
 }
 Sprite* SpriteRenderer::getSprite() { return this->sprite; }
 
+void SpriteRenderer::offsetFromLocalPosition(Vec2 localPosition) {
+    offsetFromWorldPosition(transform()->position() + localPosition);
+}
+
+void SpriteRenderer::offsetFromWorldPosition(Vec2 position) {
+    // Convert world position to Screen Point
+    offset = Camera::WorldToScreenPoint(transform()->position()) - Camera::WorldToScreenPoint(position);
+}
+
 void SpriteRenderer::Render(Render_info* render) {
     Rect& _srcRect = render->src;
     Rectf_t& _dstRect = render->dst;
@@ -54,8 +62,8 @@ void SpriteRenderer::Render(Render_info* render) {
                 if (!texture) {
                     texture = sprite->texture;
                 }
-                _srcRect.w = sprite->width() * squarePerPixels;
-                _srcRect.h = sprite->height() * squarePerPixels;
+                _srcRect.w = sprite->width();
+                _srcRect.h = sprite->height();
                 _dstRect.w = sprite->width() * abs(this->size.x) / squarePerPixels;
                 _dstRect.h = sprite->height() * abs(this->size.y) / squarePerPixels;
 
@@ -86,8 +94,8 @@ void SpriteRenderer::Render(Render_info* render) {
                     _srcRect.y = _srcRect.h / dest.h;
 
                     // render tile
-                    switch (this->tileRenderPresent) {
-                        case SpriteRenderTile::Fixed: {
+                    switch (this->renderTilePresent) {
+                        case SpriteRenderPresentTiles::Fixed: {
                             for (x = 0; x < _srcRect.x; ++x) {
                                 for (y = 0; y < _srcRect.y; ++y) {
                                     dest.x = x * dest.w;
@@ -98,7 +106,7 @@ void SpriteRenderer::Render(Render_info* render) {
                             }
                             break;
                         }
-                        case SpriteRenderTile::Place: {
+                        case SpriteRenderPresentTiles::Place: {
                             for (x = 0; x < _srcRect.x; ++x) {
                                 for (y = 0; y < _srcRect.y; ++y) {
                                     dest.x = x * dest.w;
@@ -134,6 +142,9 @@ void SpriteRenderer::Render(Render_info* render) {
 
     _dstRect.w *= flip.x;
     _dstRect.h *= flip.y;
+
+    _dstRect.x -= offset.x;
+    _dstRect.y -= offset.y;
 
     render->texture = texture;
 }

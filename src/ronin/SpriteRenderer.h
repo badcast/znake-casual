@@ -3,7 +3,7 @@
 #include "dependency.h"
 
 namespace RoninEngine::Runtime {
-enum class SpriteRenderTile : char { Fixed, Place };
+enum class SpriteRenderPresentTiles : char { Fixed, Place };
 enum class SpriteRenderType : char {
     ///Обычное отрисовка спрайта с учетом его параметров.
     Simple,
@@ -19,10 +19,11 @@ class SpriteRenderer : public Renderer {
     virtual ~SpriteRenderer();
 
     SpriteRenderType renderType;
-    SpriteRenderTile tileRenderPresent;
+    SpriteRenderPresentTiles renderTilePresent;
     Color color;
     Vec2 size;
     Vec2 flip;
+    Vec2 offset;
 
     SpriteRenderer();
     SpriteRenderer(const std::string& name);
@@ -33,6 +34,9 @@ class SpriteRenderer : public Renderer {
     void setSprite(Sprite* sprite);
     void setSpriteFromTextureToGC(Texture* texture);
     Sprite* getSprite();
+
+    void offsetFromLocalPosition(Vec2 localPosition);
+    void offsetFromWorldPosition(Vec2 worldPosition);
 
     void Render(Render_info* render_info);
 };

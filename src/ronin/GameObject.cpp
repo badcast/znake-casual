@@ -16,6 +16,7 @@ GameObject::GameObject(const std::string& name) : Object(name) {
     m_components.push_back(create_empty_transform());
     m_components.front()->_derivedObject = this;
     Level::self()->_gameObjects.emplace_back(this);
+    m_active = true;
 }
 
 GameObject::~GameObject() {
@@ -24,6 +25,8 @@ GameObject::~GameObject() {
         GC::gc_unload(x);
     }
 }
+
+bool GameObject::isActive() { return m_active; }
 
 inline Transform* GameObject::transform() {
     // NOTE: transform всегда первый объект из контейнера m_components

@@ -88,6 +88,7 @@ struct Vec2 {
     static Vec2 Reflect(const Vec2& inDirection, const Vec2& inNormal);
     static Vec2 Scale(const Vec2& a, const Vec2& b);
     static float Distance(const Vec2& lhs, const Vec2& rhs);
+    static float DistanceSqr(const Vec2& lhs, const Vec2& rhs);
     static float Angle(Vec2 from, Vec2 to);
     static float SignedAngle(Vec2 from, Vec2 to);
     static Vec2 ClampMagnitude(Vec2 vector, float maxLength);
@@ -105,6 +106,7 @@ struct Vec2 {
     static bool InArea(const Vec2& p, const SDL_FRect& r);
     static const Vec2 Rotate(float angle, Vec2 v);
     static const Vec2 RotateUp(float angle, Vec2 v);
+    static const Vec2 Perpendicular(Vec2 inDirection);
 
     Vec2& operator+=(const Vec2& rhs);
     Vec2& operator-=(const Vec2& rhs);

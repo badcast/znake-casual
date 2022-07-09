@@ -84,9 +84,9 @@ Vec2 Vec2::Lerp(const Vec2& a, const Vec2& b, float t) {
 
 Vec2 Vec2::LerpUnclamped(const Vec2& a, const Vec2& b, float t) { return Vec2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t); }
 
-Vec2 Vec2::Max(const Vec2& lhs, const Vec2& rhs) { return Vec2(Mathf::Max(lhs.x, rhs.x), Mathf::Max(lhs.y, rhs.y)); }
+Vec2 Vec2::Max(const Vec2& lhs, const Vec2& rhs) { return Vec2(Mathf::max(lhs.x, rhs.x), Mathf::max(lhs.y, rhs.y)); }
 
-Vec2 Vec2::Min(const Vec2& lhs, const Vec2& rhs) { return Vec2(Mathf::Min(lhs.x, rhs.x), Mathf::Min(lhs.y, rhs.y)); }
+Vec2 Vec2::Min(const Vec2& lhs, const Vec2& rhs) { return Vec2(Mathf::min(lhs.x, rhs.x), Mathf::min(lhs.y, rhs.y)); }
 
 Vec2 Vec2::MoveTowards(const Vec2& current, const Vec2& target, float maxDistanceDelta) {
     Vec2 a = target - current;
@@ -144,7 +144,7 @@ Vec2 Vec2::ClampMagnitude(Vec2 vector, float maxLength) {
 }
 
 Vec2 Vec2::SmoothDamp(Vec2 current, Vec2 target, Vec2& currentVelocity, float smoothTime, float maxSpeed, float deltaTime) {
-    smoothTime = Mathf::Max(0.f, Mathf::Max(0001.f, smoothTime));
+    smoothTime = Mathf::max(0.f, Mathf::max(0001.f, smoothTime));
     float num = 2 / smoothTime;
     float num2 = num * deltaTime;
     float d = 1 / (1 + num2 + 0, 48 * num2 * num2 + 0, 235 * num2 * num2 * num2);
@@ -409,24 +409,24 @@ bool Vec2::AreaPointInRect(const Vec2& p, const SDL_FRect& r) {
 
 bool Vec2::InArea(const Vec2& p, const SDL_FRect& r) { return p.x >= r.x && p.x <= r.w && p.y >= r.h && p.y <= r.y; }
 
-const Vec2 Vec2::Rotate(Vec2 vec, Vec2 normal, float angle) {
-    normal = Vec2::RotateUp(angle * Mathf::Deg2Rad, normal);
+const Vec2 Vec2::Rotate(Vec2 vec, Vec2 normal, float angleRadian) {
+    normal = Vec2::RotateUp(angleRadian * Mathf::Deg2Rad, normal);
     normal.x *= vec.x;
     normal.y *= vec.y;
     return normal;
 }
 
-const Vec2 Vec2::Rotate(float angle, Vec2 v) {
-    float Cos = Mathf::cos(angle);
-    float Sin = Mathf::sin(angle);
+const Vec2 Vec2::Rotate(float angleRadian, Vec2 v) {
+    float Cos = Mathf::cos(angleRadian);
+    float Sin = Mathf::sin(angleRadian);
     v.x = v.x * Cos - v.y * Sin;
     v.y = v.x * Sin + v.y * Cos;
     return v;
 }
 
-const Vec2 Vec2::RotateUp(float angle, Vec2 v) {
-    float Cos = Mathf::cos(angle);
-    float Sin = Mathf::sin(angle);
+const Vec2 Vec2::RotateUp(float angleRadian, Vec2 v) {
+    float Cos = Mathf::cos(angleRadian);
+    float Sin = Mathf::sin(angleRadian);
     v.x = v.x * Cos + v.y * Sin;
     v.y = -v.x * Sin + v.y * Cos;
     return v;
@@ -435,7 +435,9 @@ const Vec2 Vec2::RotateUp(float angle, Vec2 v) {
 const Vec2 Vec2::RotateAround(Vec2 center, Vec2 localPosition, float angleRadian) {
     float Cos = Mathf::cos(angleRadian);
     float Sin = Mathf::sin(angleRadian);
-    return Vec2(center.x + (localPosition.x * Sin), center.y + (localPosition.y * Cos));
+    center.x = center.x + localPosition.x * Sin;
+    center.y = center.y + localPosition.y * Cos;
+    return center;
 }
 
 const Vec2 Vec2::Perpendicular(Vec2 inDirection) { return Vec2(0.f - inDirection.y, inDirection.x); }

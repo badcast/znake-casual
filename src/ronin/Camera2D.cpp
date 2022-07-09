@@ -45,22 +45,13 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
             Transform* rTrans = renderSource->transform();
 
             if (rTrans->m_parent && renderSource->transform()->m_parent != Level::self()->main_object->transform()) {
-                // TODO: Сделать возможность отрисовки вращений, дочерных элментов. Внимание не рабочая область
-                // WARNING: Не рабочая область кода, не следует добавлять Transform к SetParent
-                // throw std::runtime_error("This method not implemented");
+                Vec2 direction = rTrans->p;
+                sourcePoint = Vec2::RotateAround(rTrans->m_parent->position(), direction, rTrans->angle() * Mathf::Deg2Rad);
+                rTrans->localPosition(
+                    Vec2::Max(direction, Vec2::RotateAround(Vec2::zero, direction, rTrans->angle() * Mathf::Deg2Rad)));
 
-                /*
-                где localPosition это изначальный вектор смешения объекта относительно center
-                ScreenToWorldPoint(input::getMousePointF())
-                Vec2::one*0.3f
-                */
-                Vec2 locl = rTrans->localPosition();
-                Vec2 r = Vec2::RotateAround(ScreenToWorldPoint(input::getMousePointF()), rTrans->p.normalized(), rTrans->angle() * Mathf::Deg2Rad);
-               // rTrans->position(r);
-                sourcePoint = r;
-            }
-            else {
-                 sourcePoint = rTrans->position();
+            } else {
+                sourcePoint = rTrans->position();
             }
 
             wrapper.dst.w *= pixelsPerSize;  //_scale.x;
@@ -78,7 +69,6 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
 
             // arranged.x -= rotated.x;
             // arranged.y += rotated.y;
-
 
             //Положение по горизонтале
             wrapper.dst.x = arranged.x + ((rect.w - wrapper.dst.w) / 2.0f - (point.x - sourcePoint.x) * pixelsPerSize);

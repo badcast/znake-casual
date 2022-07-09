@@ -250,7 +250,7 @@ bool Application::Simulate() {
             Time::m_deltaTime = Mathf::Clamp01(Time::m_deltaTime);
 
             Time::m_time += 0.001f*Mathf::ceil(secPerFrame);
-            delayed = Mathf::Max(0.f, secPerFrame - delayed);
+            delayed = Mathf::max(0.f, secPerFrame - delayed);
 
             if (delayed > 0) std::this_thread::sleep_for(std::chrono::milliseconds(delayed));
         }

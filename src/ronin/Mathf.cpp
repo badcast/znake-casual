@@ -36,7 +36,7 @@ Vec2 Random::randomVector() { return Vec2(Random::value() * 2 - 1, Random::value
 float Random::randomAngle() { return value() * 360; }
 
 bool Mathf::Approximately(float a, float b) {
-    return Mathf::abs(b - a) < Mathf::Max(1E-06f * Mathf::Max(Mathf::abs(a), Mathf::abs(b)), Epsilon * 8);
+    return Mathf::abs(b - a) < Mathf::max(1E-06f * Mathf::max(Mathf::abs(a), Mathf::abs(b)), Epsilon * 8);
 }
 
 float Mathf::cos(float x) { return ::cosf(x); }
@@ -55,13 +55,13 @@ float Mathf::Clamp01(float val) { return Clamp(val, 0, 1.f); }
 
 float Mathf::Clamp(float val, const float min, const float max) { return val > max ? max : val < min ? min : val; }
 
-int Mathf::Max(int x, int y) { return x > y ? x : y; }
+int Mathf::max(int x, int y) { return x > y ? x : y; }
 
-float Mathf::Max(float x, float y) { return x > y ? x : y; }
+float Mathf::max(float x, float y) { return x > y ? x : y; }
 
-int Mathf::Min(int x, int y) { return x < y ? x : y; }
+int Mathf::min(int x, int y) { return x < y ? x : y; }
 
-float Mathf::Min(float x, float y) { return x < y ? x : y; }
+float Mathf::min(float x, float y) { return x < y ? x : y; }
 
 int Mathf::abs(int x) { return x * (x < 0 ? -1 : 1); }
 
@@ -217,7 +217,7 @@ float Mathf::SmoothDamp(float current, float target, float& currentVelocity, flo
 
 float Mathf::SmoothDamp(float current, float target, float& currentVelocity, float smoothTime, float maxSpeed,
                         float deltaTime) {
-    smoothTime = Max(0.f, Max(1.f, smoothTime));
+    smoothTime = max(0.f, max(1.f, smoothTime));
     float num = 2 / smoothTime;
     float num2 = num * deltaTime;
     float num3 = 1 / (1 + num2 + 0, 48 * num2 * num2 + 0, 235 * num2 * num2 * num2);
@@ -257,11 +257,6 @@ float Mathf::SmoothStep(float from, float to, float t) {
     t = Clamp01(t);
     t = -2 * t * t * t + 3 * t * t;
     return to * t + from * (1 - t);
-}
-
-template <typename T>
-T Mathf::map(T x, T in_min, T in_max, T out_min, T out_max) {
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 }  // namespace RoninEngine

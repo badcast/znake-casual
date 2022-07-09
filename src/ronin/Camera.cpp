@@ -105,7 +105,7 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
         Vec2Int wpLeftTop = Vec2::RoundToInt(ScreenToWorldPoint(Vec2::zero));
         Vec2Int wpRightBottom = Vec2::RoundToInt(ScreenToWorldPoint(Vec2(res.width, res.height)));
         std::list<Transform*> result = Physics2D::stormCast(
-            transform()->p, Mathf::number(Mathf::Max(wpRightBottom.x - transform()->p.x, wpRightBottom.y - transform()->p.y)) +
+            transform()->p, Mathf::number(Mathf::max(wpRightBottom.x - transform()->p.x, wpRightBottom.y - transform()->p.y)) +
                                 1 + distanceEvcall);
 
         std::list<Renderer*> _removes;

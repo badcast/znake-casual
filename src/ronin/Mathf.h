@@ -49,9 +49,6 @@ namespace RoninEngine::Runtime {
 		static float atan2(float y, float x);
 
 		static float Clamp01(float val);
-        long map(long x, long in_min, long in_max, long out_min, long out_max){
-          return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-        }
 
         template<typename T>
         static T map(T x, T in_min, T in_max, T out_min, T out_max);

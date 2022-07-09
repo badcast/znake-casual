@@ -78,7 +78,7 @@ void Transform::LookAtLerp(Vec2 target, float t) {
         if (p.x < target.x) a = -a;
     }
 
-    _angle = Mathf::LerpAngle(_angle, a, t);
+    localAngle(Mathf::LerpAngle(_angle, a, t));
 }
 
 void Transform::LookAtLerp(Transform* target, float t) { LookAtLerp(target->p, t); }
@@ -127,30 +127,43 @@ Vec2 Transform::position() { return (this->m_parent) ? this->m_parent->position(
 
 void Transform::position(const Vec2& value) {
     if (value == position()) return;
-    Vec2Int lastPoint = Vec2::RoundToInt(position());
+    Vec2 lastPoint = position();
     p = (this->m_parent) ? this->m_parent->position() + value : value;  // set the position
-    Level::self()->matrix_nature(this, lastPoint);
-    for (Transform* chlid : hierarchy) chlid->parent_notify();
+    Level::self()->matrix_nature(this, Vec2::RoundToInt(lastPoint));
+    for (Transform* chlid : hierarchy) chlid->parent_notify(lastPoint);
 }
 
-void Transform::parent_notify() {
-    Vec2Int lastPoint = Vec2::RoundToInt(p);
-    Level::self()->matrix_nature(this, lastPoint);
-    for (Transform* chlid : hierarchy) chlid->parent_notify();
+void Transform::parent_notify(Vec2 lastParentPoint) {
+    Vec2 lastPoint = lastParentPoint + p;  // world cordinates
+    Level::self()->matrix_nature(this, Vec2::RoundToInt(lastPoint));
+    for (Transform* chlid : hierarchy) chlid->parent_notify(lastPoint);
 }
 
-float Transform::angle() { return this->_angle; }
+float Transform::angle() { return (this->m_parent) ? this->m_parent->_angle + this->_angle : this->_angle; }
 
-void Transform::angle(float value) { this->_angle = value; }
+void Transform::angle(float value) {
+    while (value > 360) value -= 360;
 
-float Transform::localAngle() { return (this->m_parent) ? this->m_parent->_angle + this->_angle : this->_angle; }
+    this->_angle = (this->m_parent) ? this->m_parent->angle() - value : value;
+}
+
+float Transform::localAngle() { return this->_angle; }
 void Transform::localAngle(float value) {
-    // TODO: create local angle
-    throw std::runtime_error("Not implemented");
+    while (value > 360) value -= 360;
+    this->_angle = value;
 }
 Transform* Transform::parent() { return m_parent; }
 
-void Transform::setParent(Transform* parent, bool worldPositionStays) { hierarchy_parent_change(this, parent); }
+void Transform::setParent(Transform* parent, bool worldPositionStays) {
+    if(this->m_parent == nullptr){
+        throw std::runtime_error("This transform is not they are parent, or is main parent?");
+    }
+    Vec2 lastParentPoint = this->m_parent->position();
+    // change children of the parent
+    hierarchy_parent_change(this, parent);
+    // change position child
+    this->parent_notify(lastParentPoint);
+}
 
 void Transform::hierarchy_parent_change(Transform* from, Transform* newParent) {
     Transform* lastParent = from->m_parent;

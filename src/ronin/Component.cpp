@@ -9,15 +9,15 @@ namespace Runtime {
 Component::Component() : Component(typeid(Component).name()) {}
 
 Component::Component(const std::string& name)
-    : Object(name), _derivedObject(nullptr) {}
+    : Object(name), pin(nullptr) {}
 
-const bool Component::isBind() { return _derivedObject != nullptr; }
+const bool Component::isBind() { return pin != nullptr; }
 
-GameObject* Component::gameObject() { return _derivedObject; }
+GameObject* Component::gameObject() { return pin; }
 
 Transform* Component::transform() {
-    if (!isBind()) throw std::runtime_error("This component isn't binding");
-    return _derivedObject->getComponent<Transform>();
+    if (!isBind()) throw std::runtime_error("This component isn't binded");
+    return pin->getComponent<Transform>();
 }
 }  // namespace Runtime
 }  // namespace RoninEngine

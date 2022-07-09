@@ -6,6 +6,6 @@ namespace RoninEngine::Runtime {
 		auto iter = _sprites.find(spriteName);
 		if (iter == end(_sprites))
 			return nullptr; 
-          return iter->second;
+          return &iter->second;
 	}
 }

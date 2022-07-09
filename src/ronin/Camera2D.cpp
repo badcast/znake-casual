@@ -55,11 +55,12 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
                 Vec2::one*0.3f
                 */
                 Vec2 locl = rTrans->localPosition();
-                Vec2 r = Vec2::RotateAround(rTrans->m_parent->position(), rTrans->p, rTrans->localAngle() * Mathf::Deg2Rad);
+                Vec2 r = Vec2::RotateAround(ScreenToWorldPoint(input::getMousePointF()), rTrans->p.normalized(), rTrans->angle() * Mathf::Deg2Rad);
+               // rTrans->position(r);
                 sourcePoint = r;
             }
             else {
-                 sourcePoint = rTrans->p;
+                 sourcePoint = rTrans->position();
             }
 
             wrapper.dst.w *= pixelsPerSize;  //_scale.x;
@@ -78,15 +79,14 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
             // arranged.x -= rotated.x;
             // arranged.y += rotated.y;
 
-            // arranged = Vec2::Perpendicular(arranged);
+
             //Положение по горизонтале
             wrapper.dst.x = arranged.x + ((rect.w - wrapper.dst.w) / 2.0f - (point.x - sourcePoint.x) * pixelsPerSize);
             //Положение по вертикале
             wrapper.dst.y = arranged.y + ((rect.h - wrapper.dst.h) / 2.0f + (point.y - sourcePoint.y) * pixelsPerSize);
 
-            // SDL_RenderCopyF(renderer, renderInfo.texture, (SDL_Rect*)&renderInfo.src, (SDL_FRect*)&dst);
             SDL_RenderCopyExF(renderer, wrapper.texture->native(), (SDL_Rect*)&wrapper.src,
-                              reinterpret_cast<SDL_FRect*>(&wrapper.dst), renderSource->transform()->localAngle(), nullptr,
+                              reinterpret_cast<SDL_FRect*>(&wrapper.dst), renderSource->transform()->angle(), nullptr,
                               SDL_RendererFlip::SDL_FLIP_NONE);
         }
     }

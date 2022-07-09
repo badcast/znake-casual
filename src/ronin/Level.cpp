@@ -68,7 +68,7 @@ std::list<Transform *> Level::matrixCheckDamaged() {
 
     for (auto x = begin(selfLevel->matrixWorld); x != end(selfLevel->matrixWorld); ++x) {
         for (auto y = begin(x->second); y != end(x->second); ++y) {
-            if (Vec2::RoundToInt((*y)->p) != x->first) {
+            if (Vec2::RoundToInt((*y)->position()) != x->first) {
                 damaged.emplace_back(*y);
             }
         }
@@ -121,7 +121,7 @@ void Level::matrix_nature(Transform *target, Vec2Int lastPoint) {
     matrix_nature(target, Vec2::RoundToInt(target->position()), lastPoint);
 }
 
-void Level::matrix_nature(Runtime::Transform *target, Runtime::Vec2Int newPoint, Runtime::Vec2Int lastPoint) {
+void Level::matrix_nature(Runtime::Transform *target, const RoninEngine::Runtime::Vec2Int &newPoint, const RoninEngine::Runtime::Vec2Int &lastPoint) {
     if (newPoint == lastPoint) return;
 
     // 1. delete last point source

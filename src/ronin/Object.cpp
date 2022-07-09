@@ -160,7 +160,7 @@ GameObject* Instantiate(GameObject* obj) {
             continue;
         }
 
-        replacement->_derivedObject = nullptr;
+        replacement->pin = nullptr;
         clone->addComponent(replacement);
     }
 
@@ -172,11 +172,10 @@ GameObject* Instantiate(GameObject* obj, Vec2 position, float angle) {
     obj->transform()->angle(angle);
     return obj;
 }
-GameObject* Instantiate(GameObject* obj, Vec2 position, Transform* parent, bool worldPositionState) {
-    throw std::bad_alloc();
+GameObject* Instantiate(GameObject* obj, Vec2 position, Transform* parent, bool worldPositionStay) {
     obj = Instantiate(obj);
     obj->transform()->position(position);
-    // TODO: arg parent and worldPositionState not implemented. Checkout
+    obj->transform()->setParent(parent, worldPositionStay);
     return obj;
 }
 

@@ -12,7 +12,7 @@ namespace RoninEngine {
             friend GameObject;
             friend GameObject* Instantiate(GameObject* obj);
 
-            GameObject* _derivedObject;
+            GameObject* pin;
 
          public:
             bool enabled();

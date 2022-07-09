@@ -14,7 +14,7 @@ GameObject::GameObject() : GameObject("GameObject") {}
 
 GameObject::GameObject(const std::string& name) : Object(name) {
     m_components.push_back(create_empty_transform());
-    m_components.front()->_derivedObject = this;
+    m_components.front()->pin = this;
     Level::self()->_gameObjects.emplace_back(this);
     m_active = true;
 }
@@ -40,9 +40,9 @@ Component* GameObject::addComponent(Component* component) {
         std::find_if(begin(m_components), end(m_components), [component](Component* ref) { return component == ref; })) {
         this->m_components.emplace_back(component);
 
-        if (component->_derivedObject) throw std::bad_exception();
+        if (component->pin) throw std::bad_exception();
 
-        component->_derivedObject = this;
+        component->pin = this;
 
         if (Behaviour* behav = dynamic_cast<Behaviour*>(component)) {
             Level::self()->PinScript(behav);

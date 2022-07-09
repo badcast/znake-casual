@@ -29,7 +29,7 @@ ObjectType* Instantiate(ObjectType* obj);
 //Клонирует объект
 GameObject* Instantiate(GameObject* obj, Vec2 position, float angle = 0);
 //Клонирует объект
-GameObject* Instantiate(GameObject* obj, Vec2 position, Transform* parent, bool worldPositionState = true);
+GameObject* Instantiate(GameObject* obj, Vec2 position, Transform* parent, bool worldPositionStay = true);
 
 class Object {
     template <typename ObjectType>

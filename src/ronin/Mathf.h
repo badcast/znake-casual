@@ -14,7 +14,7 @@ namespace RoninEngine::Runtime {
 
 		static float value();
 
-          static Vec2 randomVector();
+        static Vec2 randomVector();
 
 		static float randomAngle();
 	};
@@ -49,6 +49,12 @@ namespace RoninEngine::Runtime {
 		static float atan2(float y, float x);
 
 		static float Clamp01(float val);
+        long map(long x, long in_min, long in_max, long out_min, long out_max){
+          return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+        }
+
+        template<typename T>
+        static T map(T x, T in_min, T in_max, T out_min, T out_max);
 
 		static float Clamp(float val, const float min, const float max);
 
@@ -69,7 +75,7 @@ namespace RoninEngine::Runtime {
 
 		static int nabs(int x);
 
-		static float sign(float x);
+        static float signf(float x);
 
 		static int sign(int x);
 

@@ -20,7 +20,7 @@ class Transform : public Component {
     Vec2 p;
     float _angle;
 
-    void parent_notify();
+    void parent_notify(Vec2 lastParentPoint);
 
     static void hierarchy_parent_change(Transform* from, Transform* newParent);
     static void hierarchy_remove(Transform* from, Transform* off);

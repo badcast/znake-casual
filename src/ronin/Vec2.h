@@ -104,9 +104,10 @@ struct Vec2 {
     // Rectf_t* clip, Rectf_t* result);
     static bool AreaPointInRect(const Vec2& p, const SDL_FRect& r);
     static bool InArea(const Vec2& p, const SDL_FRect& r);
+    static const Vec2 Rotate(Vec2 vec, Vec2 normal, float angle);
     static const Vec2 Rotate(float angle, Vec2 v);
     static const Vec2 RotateUp(float angle, Vec2 v);
-    static const Vec2 RotateAround(Vec2 center, Vec2 localPosition, float angle);
+    static const Vec2 RotateAround(Vec2 center, Vec2 localPosition, float angleRadian);
 
     static const Vec2 Perpendicular(Vec2 inDirection);
 

@@ -118,7 +118,7 @@ void Level::render_info(int *culled, int *fullobjects) {
 }
 
 void Level::matrix_nature(Transform *target, Vec2Int lastPoint) {
-    matrix_nature(target, Vec2::RoundToInt(target->p), lastPoint);
+    matrix_nature(target, Vec2::RoundToInt(target->position()), lastPoint);
 }
 
 void Level::matrix_nature(Runtime::Transform *target, Runtime::Vec2Int newPoint, Runtime::Vec2Int lastPoint) {

@@ -5,7 +5,6 @@ Camera2D::Camera2D() : Camera("Camera 2D"), scale(Vec2::one) {
     this->visibleBorders = false;
     this->visibleGrids = false;
     this->visibleObjects = false;
-
 }
 
 RoninEngine::Runtime::Camera2D::Camera2D(const Camera2D& proto)
@@ -18,7 +17,7 @@ RoninEngine::Runtime::Camera2D::Camera2D(const Camera2D& proto)
 void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
     Render_info wrapper;
     Vec2* point;
-    Vec2* sourcePoint;
+    Vec2 sourcePoint;
     // Vec2 _scale;
 
     Gizmos::color = 0xc4c4c4;
@@ -37,49 +36,49 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
     for (auto renderSource : *std::get<std::set<Renderer*>*>(stack)) {
         // drawing
         // clear
-        wrapper={};
+        wrapper = {};
         wrapper.renderer = renderer;
 
         renderSource->Render(&wrapper);  // draw
-
         if (wrapper.texture) {
             Vec2 point = transform()->p;
             Transform* rTrans = renderSource->transform();
-            Vec2 sourcePoint;
-            if (rTrans->_parent && renderSource->transform()->_parent != Level::self()->main_object->transform()) {
+
+            if (rTrans->m_parent && renderSource->transform()->m_parent != Level::self()->main_object->transform()) {
                 // TODO: Сделать возможность отрисовки вращений, дочерных элментов. Внимание не рабочая область
                 // WARNING: Не рабочая область кода, не следует добавлять Transform к SetParent
-                //throw std::runtime_error("This method not implemented");
-
-                // Convert global to local
-                Vec2 offset = rTrans->p;
+                // throw std::runtime_error("This method not implemented");
 
                 /*
                 где localPosition это изначальный вектор смешения объекта относительно center
+                ScreenToWorldPoint(input::getMousePointF())
+                Vec2::one*0.3f
                 */
-                Vec2 r = Vec2::RotateAround(ScreenToWorldPoint(input::getMousePointF()), Vec2::one, rTrans->localAngle()*Mathf::Deg2Rad);
-                sourcePoint=r;
-
+                Vec2 locl = rTrans->localPosition();
+                Vec2 r = Vec2::RotateAround(rTrans->m_parent->position(), rTrans->p, rTrans->localAngle() * Mathf::Deg2Rad);
+                sourcePoint = r;
             }
-            else{
-                sourcePoint = rTrans->p;
+            else {
+                 sourcePoint = rTrans->p;
             }
 
             wrapper.dst.w *= pixelsPerSize;  //_scale.x;
             wrapper.dst.h *= pixelsPerSize;  //_scale.y;
 
-            Vec2 arranged(wrapper.dst.x,wrapper.dst.y);
+            Vec2 arranged(wrapper.dst.x, wrapper.dst.y);
 
-/*
-            ((позиция тела).x * sin(угла поворота тела), (позиция тела).y * cos(угла поворота тела)) + (позиция тела)
-*/
+            /*
+                        ((позиция тела).x * sin(угла поворота тела), (позиция тела).y * cos(угла поворота тела)) + (позиция
+               тела)
+            */
 
-            //Vec2 rotated = arranged=Vec2::RotateAround(sourcePoint, arranged, renderSource->transform()->localAngle()*Mathf::Deg2Rad);
+            // Vec2 rotated = arranged=Vec2::RotateAround(sourcePoint, arranged,
+            // renderSource->transform()->localAngle()*Mathf::Deg2Rad);
 
-            //arranged.x -= rotated.x;
-            //arranged.y += rotated.y;
+            // arranged.x -= rotated.x;
+            // arranged.y += rotated.y;
 
-            //arranged = Vec2::Perpendicular(arranged);
+            // arranged = Vec2::Perpendicular(arranged);
             //Положение по горизонтале
             wrapper.dst.x = arranged.x + ((rect.w - wrapper.dst.w) / 2.0f - (point.x - sourcePoint.x) * pixelsPerSize);
             //Положение по вертикале
@@ -102,16 +101,16 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
 
         if (wrapper.texture) {
             point = &transform()->p;
-            sourcePoint = &lightSource->transform()->p;
+            sourcePoint = lightSource->transform()->position();
 
             wrapper.dst.w *= pixelsPerSize;
 
             wrapper.dst.h *= pixelsPerSize;
 
             // h
-            wrapper.dst.x += ((rect.w - wrapper.dst.w) / 2.0f - (point->x - sourcePoint->x) * pixelsPerSize);
+            wrapper.dst.x += ((rect.w - wrapper.dst.w) / 2.0f - (point->x - sourcePoint.x) * pixelsPerSize);
             // v
-            wrapper.dst.y += ((rect.h - wrapper.dst.h) / 2.0f + (point->y - sourcePoint->y) * pixelsPerSize);
+            wrapper.dst.y += ((rect.h - wrapper.dst.h) / 2.0f + (point->y - sourcePoint.y) * pixelsPerSize);
 
             SDL_RenderCopyExF(renderer, wrapper.texture->native(), reinterpret_cast<SDL_Rect*>(&wrapper.src),
                               reinterpret_cast<SDL_FRect*>(&wrapper.dst),

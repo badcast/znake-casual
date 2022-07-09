@@ -16,7 +16,7 @@ class Transform : public Component {
    protected:
     std::vector<Transform*> hierarchy;
 
-    Transform* _parent;
+    Transform* m_parent;
     Vec2 p;
     float _angle;
 
@@ -34,7 +34,7 @@ class Transform : public Component {
     ~Transform();
 
     Transform* parent();
-    void setParent(Transform* parent);
+    void setParent(Transform* parent, bool worldPositionStays = true);
 
     int child_count();
     Transform* child_of(int index);
@@ -50,7 +50,7 @@ class Transform : public Component {
 
     void as_first_child();
 
-    void child_has(Transform* child);
+    bool child_has(Transform* child);
     void child_append(Transform* child);
     void child_remove(Transform* child);
 
@@ -62,8 +62,6 @@ class Transform : public Component {
 
     const Vec2 transformDirection(Vec2 direction);
     const Vec2 transformDirection(float x, float y);
-
-    const Vec2 rotate(Vec2 vec, Vec2 normal);
 
     //get position in world space
     Vec2 position();

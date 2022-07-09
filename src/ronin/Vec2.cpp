@@ -409,6 +409,13 @@ bool Vec2::AreaPointInRect(const Vec2& p, const SDL_FRect& r) {
 
 bool Vec2::InArea(const Vec2& p, const SDL_FRect& r) { return p.x >= r.x && p.x <= r.w && p.y >= r.h && p.y <= r.y; }
 
+const Vec2 Vec2::Rotate(Vec2 vec, Vec2 normal, float angle) {
+    normal = Vec2::RotateUp(angle * Mathf::Deg2Rad, normal);
+    normal.x *= vec.x;
+    normal.y *= vec.y;
+    return normal;
+}
+
 const Vec2 Vec2::Rotate(float angle, Vec2 v) {
     float Cos = Mathf::cos(angle);
     float Sin = Mathf::sin(angle);
@@ -425,9 +432,9 @@ const Vec2 Vec2::RotateUp(float angle, Vec2 v) {
     return v;
 }
 
-const Vec2 Vec2::RotateAround(Vec2 center, Vec2 localPosition, float angle) {
-    float Sin = Mathf::sin(angle);
-    float Cos = Mathf::cos(angle);
+const Vec2 Vec2::RotateAround(Vec2 center, Vec2 localPosition, float angleRadian) {
+    float Cos = Mathf::cos(angleRadian);
+    float Sin = Mathf::sin(angleRadian);
     return Vec2(center.x + (localPosition.x * Sin), center.y + (localPosition.y * Cos));
 }
 
@@ -483,6 +490,7 @@ Vec2 RoninEngine::Runtime::operator*(const Vec2& rhs, const float& d) { return d
 Vec2 RoninEngine::Runtime::operator/(const Vec2& rhs, const float& d) { return d / rhs; }
 
 bool RoninEngine::Runtime::operator==(const Vec2Int& lhs, const Vec2& rhs) { return rhs.x == lhs.x && rhs.y == lhs.y; }
+
 bool RoninEngine::Runtime::operator!=(const Vec2Int& lhs, const Vec2& rhs) { return !operator==(lhs, rhs); }
 
 Vec2Int RoninEngine::Runtime::operator+(const Vec2Int& lhs, const Vec2Int& rhs) {

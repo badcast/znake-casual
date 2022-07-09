@@ -1,6 +1,4 @@
-#ifndef _GAME_H
-#define _GAME_H
-
+#pragma once
 #include "dependency.h"
 
 namespace RoninEngine {
@@ -34,4 +32,3 @@ class Application {
 };
 
 }  // namespace RoninEngine
-#endif

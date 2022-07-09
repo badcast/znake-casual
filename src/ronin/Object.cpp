@@ -33,14 +33,13 @@ T* factory_base(bool initInHierarchy, T* clone, const char* name) {
         clone = newc;
     }
 
-    if (clone == nullptr) throw std::bad_alloc();
+    if (clone == nullptr) Application::fail_OutOfMemory();
 
     if constexpr (std::is_same<T, GameObject>()) {
         if (initInHierarchy) {
             if (RoninEngine::Level::self() == nullptr) throw std::runtime_error("var pCurrentScene is null");
 
-            if (!RoninEngine::Level::self()->is_hierarchy())
-                throw std::runtime_error("var pCurrentScene->mainObject is null");
+            if (!RoninEngine::Level::self()->is_hierarchy()) throw std::runtime_error("var pCurrentScene->mainObject is null");
 
             auto mainObj = Level::self()->main_object;
             auto root = mainObj->transform();
@@ -80,8 +79,7 @@ void Destroy(Object* obj) { Destroy(obj, 0); }
 void Destroy(Object* obj, float t) {
     if (!obj || !Level::self()) throw std::bad_exception();
     if (!Level::self()->_destructions) {
-        Level::self()->_destructions =
-            GC::gc_alloc<std::remove_pointer<decltype(Level::self()->_destructions)>::type>();
+        Level::self()->_destructions = GC::gc_alloc<std::remove_pointer<decltype(Level::self()->_destructions)>::type>();
     }
 
     auto ref = Level::self()->_destructions;
@@ -112,11 +110,9 @@ void Destroy_Immediate(Object* obj) {
 
                 return iter != end(gObj->m_components);
             });
-        }
-        else // destroy other types
+        } else  // destroy other types
         {
-            //FIXME: destroy other types from gameobject->m_components (delete a list)
-
+            // FIXME: destroy other types from gameobject->m_components (delete a list)
         }
     }
 
@@ -153,7 +149,7 @@ GameObject* Instantiate(GameObject* obj) {
                 yClone->m_name = t->gameObject()->m_name;  // put " (clone)" name
                 yClone->m_name.shrink_to_fit();
             }
-            //skip transform existent component
+            // skip transform existent component
             continue;
         } else if (dynamic_cast<SpriteRenderer*>(replacement)) {
             replacement = factory_base<SpriteRenderer>(false, reinterpret_cast<SpriteRenderer*>(replacement), nullptr);

@@ -7,15 +7,15 @@ namespace RoninEngine::Runtime {
 Transform::Transform() : Transform(typeid(*this).name()) {}
 
 Transform::Transform(const std::string& name) : Component(name) {
-    _parent = nullptr;
+    m_parent = nullptr;
     _angle = 0;
     // set as default
     Level::self()->matrix_nature(this, Vec2::RoundToInt(p + Vec2::one));
 }
 
 Transform::~Transform() {
-    if (_parent) {
-        hierarchy_remove(_parent, this);
+    if (m_parent) {
+        hierarchy_remove(m_parent, this);
     }
     hierarchy_removeAll(this);
 }
@@ -38,6 +38,7 @@ Transform* Transform::child_of(int index) {
 
     return tf;
 }
+
 void Transform::LookAt(Vec2 target, Vec2 axis) {
     _angle = Vec2::Angle(axis, target - p) * Mathf::Rad2Deg;
 
@@ -83,11 +84,14 @@ void Transform::LookAtLerp(Vec2 target, float t) {
 void Transform::LookAtLerp(Transform* target, float t) { LookAtLerp(target->p, t); }
 
 void Transform::as_first_child() {
-    if (this->_parent == nullptr) return;
-    hierarchy_sibiling(_parent, 0);  // 0 is first
+    if (this->m_parent == nullptr) return;
+    hierarchy_sibiling(m_parent, 0);  // 0 is first
 }
 
-void Transform::child_has(Transform* child) {}
+bool Transform::child_has(Transform* child) {
+    return std::find(std::begin(hierarchy), std::end(hierarchy), child) != std::end(hierarchy);
+}
+
 void Transform::child_append(Transform* child) {
     Transform* t = this;
     hierarchy_append(t, child);
@@ -107,59 +111,49 @@ const Vec2 Transform::up() { return transformDirection(Vec2::up); }
 
 const Vec2 Transform::down() { return transformDirection(Vec2::down); }
 
-const Vec2 Transform::transformDirection(Vec2 direction) { return Vec2::RotateUp(_angle * Mathf::Deg2Rad, direction); }
+const Vec2 Transform::transformDirection(Vec2 direction) { return Vec2::RotateAround(p, direction, _angle * Mathf::Deg2Rad); }
 
 const Vec2 Transform::transformDirection(float x, float y) { return transformDirection(Vec2(x, y)); }
 
-const Vec2 Transform::rotate(Vec2 vec, Vec2 normal) {
-    normal = Vec2::RotateUp(_angle * Mathf::Deg2Rad, normal);
-    normal.x *= vec.x;
-    normal.y *= vec.y;
-    return normal;
+Vec2 Transform::localPosition() { return p; }
+void Transform::localPosition(const Vec2& value) {
+    if (value == p) return;
+    Vec2Int lastPoint = Vec2::RoundToInt(position());
+    p = value;
+    Level::self()->matrix_nature(this, lastPoint);
 }
 
-Vec2 Transform::position() { return p; }
+Vec2 Transform::position() { return (this->m_parent) ? this->m_parent->position() + p : p; }
+
 void Transform::position(const Vec2& value) {
-    Vec2Int lastPoint = Vec2::RoundToInt(p);
-    if(p==value)
-        return;
-    p = value;  // set the position
+    if (value == position()) return;
+    Vec2Int lastPoint = Vec2::RoundToInt(position());
+    p = (this->m_parent) ? this->m_parent->position() + value : value;  // set the position
     Level::self()->matrix_nature(this, lastPoint);
     for (Transform* chlid : hierarchy) chlid->parent_notify();
 }
-Vec2 Transform::localPosition() {
-    if (this->_parent != nullptr) return this->_parent->p - p;
-    return p;
-}
-void Transform::localPosition(const Vec2& value) {
+
+void Transform::parent_notify() {
     Vec2Int lastPoint = Vec2::RoundToInt(p);
-    p = (this->_parent != nullptr) ? _parent->p + value : value;
     Level::self()->matrix_nature(this, lastPoint);
+    for (Transform* chlid : hierarchy) chlid->parent_notify();
 }
 
 float Transform::angle() { return this->_angle; }
 
 void Transform::angle(float value) { this->_angle = value; }
 
-float Transform::localAngle() {
-    float langle = (this->_parent) ? this->_parent->_angle + this->_angle : this->_angle;
-    return langle;
-}
+float Transform::localAngle() { return (this->m_parent) ? this->m_parent->_angle + this->_angle : this->_angle; }
 void Transform::localAngle(float value) {
     // TODO: create local angle
     throw std::runtime_error("Not implemented");
 }
-Transform* Transform::parent() { return _parent; }
+Transform* Transform::parent() { return m_parent; }
 
-void Transform::setParent(Transform* parent) { hierarchy_parent_change(this, parent); }
-
-void Transform::parent_notify() {
-    Vec2 newPosition = _parent->p - p;
-    position(newPosition);
-}
+void Transform::setParent(Transform* parent, bool worldPositionStays) { hierarchy_parent_change(this, parent); }
 
 void Transform::hierarchy_parent_change(Transform* from, Transform* newParent) {
-    Transform* lastParent = from->_parent;
+    Transform* lastParent = from->m_parent;
 
     if (newParent && lastParent == newParent) return;
 
@@ -171,23 +165,22 @@ void Transform::hierarchy_parent_change(Transform* from, Transform* newParent) {
         hierarchy_append(Level::self()->main_object->transform(),
                          from);  // nullptr as Root
     else {
-        from->_parent = newParent;
+        from->m_parent = newParent;
         hierarchy_append(newParent, from);
     }
 }
-
 void Transform::hierarchy_remove(Transform* from, Transform* off) {
-    if (off->_parent != from) return;
+    if (off->m_parent != from) return;
 
     auto iter = std::find(from->hierarchy.begin(), from->hierarchy.end(), off);
     if (iter == from->hierarchy.end()) return;
     from->hierarchy.erase(iter);
     from->hierarchy.shrink_to_fit();
-    off->_parent = nullptr;  // not parent
+    off->m_parent = nullptr;  // not parent
 }
 void Transform::hierarchy_removeAll(Transform* from) {
     for (auto t : from->hierarchy) {
-        t->_parent = nullptr;
+        t->m_parent = nullptr;
     }
 
     from->hierarchy.clear();
@@ -196,7 +189,7 @@ void Transform::hierarchy_removeAll(Transform* from) {
 void Transform::hierarchy_append(Transform* from, Transform* off) {
     auto iter = find_if(begin(from->hierarchy), end(from->hierarchy), [off](Transform* of) { return of == off; });
     if (iter == end(from->hierarchy)) {
-        off->_parent = from;
+        off->m_parent = from;
         from->hierarchy.emplace_back(off);
     }
 }

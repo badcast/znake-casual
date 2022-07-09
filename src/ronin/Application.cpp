@@ -125,10 +125,8 @@ void Application::LoadLevel(Level* level) {
     if (!level->is_hierarchy()) {
         // init main object
         level->main_object = create_empty_gameobject();
-        if (level->main_object == nullptr) Application::fail_OutOfMemory();
-
         level->name() = "Main Object";
-        level->main_object->transform()->name("Root Transform");
+        level->main_object->transform()->name("Root");
     }
 
     m_level = level;

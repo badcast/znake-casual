@@ -29,7 +29,7 @@ Level::~Level() {
         selfLevel = nullptr;
     }
 
-    //BUG: _destruction members is not free
+    // BUG: _destruction members is not free
     if (_firstRunScripts) {
         GC::gc_unalloc(_firstRunScripts);
     }
@@ -39,7 +39,6 @@ Level::~Level() {
     if (_destructions) {
         GC::gc_unalloc(_destructions);
     }
-
 
     /*
         // free objects
@@ -66,7 +65,6 @@ Level::~Level() {
 // NOTE: Check game hierarchy
 std::list<Transform *> Level::matrixCheckDamaged() {
     std::list<Transform *> damaged;
-    int mxSz = selfLevel->matrixWorld.size();
 
     for (auto x = begin(selfLevel->matrixWorld); x != end(selfLevel->matrixWorld); ++x) {
         for (auto y = begin(x->second); y != end(x->second); ++y) {
@@ -88,12 +86,11 @@ int Level::matrixRestore(const std::list<Runtime::Transform *> &damaged_content)
     for (Runtime::Transform *dam : damaged_content) {
         Vec2Int find = Vec2::RoundToInt(dam->p);
         auto vertList = selfLevel->matrixWorld.find(find);
+
         if (vertList == std::end(selfLevel->matrixWorld)) continue;
 
-        if (vertList->first != find) {
-            // HASH function incorrect result
-            int xxx = 0;
-        }
+        if (vertList->first != find) static_assert(true, "Hash function is collision");
+
         auto fl = vertList->second.find(dam);
 
         if (fl == end(vertList->second)) {
@@ -124,8 +121,7 @@ void Level::matrix_nature(Transform *target, Vec2Int lastPoint) {
     matrix_nature(target, Vec2::RoundToInt(target->p), lastPoint);
 }
 
-void Level::matrix_nature(Runtime::Transform *target, Runtime::Vec2Int newPoint, Runtime::Vec2Int lastPoint)
-{
+void Level::matrix_nature(Runtime::Transform *target, Runtime::Vec2Int newPoint, Runtime::Vec2Int lastPoint) {
     if (newPoint == lastPoint) return;
 
     // 1. delete last point source
@@ -148,7 +144,7 @@ void Level::CC_Light_Push(Light *light) { _assoc_lightings.emplace_front(light);
 
 void Level::ObjectPush(Object *obj) { _objects.insert(std::make_pair(obj, Time::time())); }
 
-std::vector<RoninEngine::Runtime::Transform *> *RoninEngine::Level::getInternalTransforms(Runtime::Transform *parent) {
+std::vector<RoninEngine::Runtime::Transform *> *RoninEngine::Level::getHierarchy(Runtime::Transform *parent) {
     if (!parent) {
         Application::fail("Argument is null");
     }
@@ -196,7 +192,6 @@ void Level::RenderLevel(SDL_Renderer *renderer) {
         if (cam->targetClear) cam->__rendererOutResults.clear();
         // Рисуем в соотношение окна...
         cam->render(renderer, {0, 0, res.width, res.height}, main_object);
-
     }
 
     // Destroy req objects

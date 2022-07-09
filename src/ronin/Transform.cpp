@@ -4,7 +4,7 @@
 
 namespace RoninEngine::Runtime {
 
-Transform::Transform() : Transform("Transform") {}
+Transform::Transform() : Transform(typeid(*this).name()) {}
 
 Transform::Transform(const std::string& name) : Component(name) {
     _parent = nullptr;
@@ -97,31 +97,15 @@ void Transform::child_remove(Transform* child) {
     hierarchy_remove(t, child);
 }
 
-const Vec2 Transform::forward() {
-    Vec2 result = Vec2::RotateUp(_angle * Mathf::Deg2Rad, Vec2::up);
-    result.Normalize();
-    return result;
-}
-const Vec2 Transform::right() {
-    Vec2 result;
-    // TODO: Complete at
-    return result;
-}
-const Vec2 Transform::left() {
-    Vec2 result;
-    // TODO: Complete at
-    return result;
-}
-const Vec2 Transform::up() {
-    Vec2 result;
-    // TODO: Complete at
-    return result;
-}
-const Vec2 Transform::down() {
-    Vec2 result;
-    // TODO: Complete at
-    return result;
-}
+const Vec2 Transform::forward() { return transformDirection(Vec2::up); }
+
+const Vec2 Transform::right() { return transformDirection(Vec2::right); }
+
+const Vec2 Transform::left() { return transformDirection(Vec2::left); }
+
+const Vec2 Transform::up() { return transformDirection(Vec2::up); }
+
+const Vec2 Transform::down() { return transformDirection(Vec2::down); }
 
 const Vec2 Transform::transformDirection(Vec2 direction) { return Vec2::RotateUp(_angle * Mathf::Deg2Rad, direction); }
 
@@ -137,8 +121,11 @@ const Vec2 Transform::rotate(Vec2 vec, Vec2 normal) {
 Vec2 Transform::position() { return p; }
 void Transform::position(const Vec2& value) {
     Vec2Int lastPoint = Vec2::RoundToInt(p);
+    if(p==value)
+        return;
     p = value;  // set the position
     Level::self()->matrix_nature(this, lastPoint);
+    for (Transform* chlid : hierarchy) chlid->parent_notify();
 }
 Vec2 Transform::localPosition() {
     if (this->_parent != nullptr) return this->_parent->p - p;
@@ -152,9 +139,7 @@ void Transform::localPosition(const Vec2& value) {
 
 float Transform::angle() { return this->_angle; }
 
-void Transform::angle(float value) {
-    this->_angle = value;
-}
+void Transform::angle(float value) { this->_angle = value; }
 
 float Transform::localAngle() {
     float langle = (this->_parent) ? this->_parent->_angle + this->_angle : this->_angle;
@@ -165,10 +150,12 @@ void Transform::localAngle(float value) {
     throw std::runtime_error("Not implemented");
 }
 Transform* Transform::parent() { return _parent; }
-void Transform::setParent(Transform* parent) { hierarchy_parent_change(this, parent); }
-void Transform::internal_position(Vec2 worldposition)
-{
 
+void Transform::setParent(Transform* parent) { hierarchy_parent_change(this, parent); }
+
+void Transform::parent_notify() {
+    Vec2 newPosition = _parent->p - p;
+    position(newPosition);
 }
 
 void Transform::hierarchy_parent_change(Transform* from, Transform* newParent) {

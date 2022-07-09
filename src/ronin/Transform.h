@@ -20,7 +20,7 @@ class Transform : public Component {
     Vec2 p;
     float _angle;
 
-    void parent_notify(Vec2 worldposition);
+    void parent_notify();
 
     static void hierarchy_parent_change(Transform* from, Transform* newParent);
     static void hierarchy_remove(Transform* from, Transform* off);
@@ -38,6 +38,8 @@ class Transform : public Component {
 
     int child_count();
     Transform* child_of(int index);
+
+    Transform* root();
 
     void LookAt(Vec2 target, Vec2 axis);
     void LookAt(Vec2 target);

@@ -38,7 +38,7 @@ class Level {
     void CC_Light_Push(Runtime::Light* light);
     void ObjectPush(Runtime::Object* obj);
 
-    std::vector<Runtime::Transform*>* getInternalTransforms(Runtime::Transform* parent);
+    std::vector<Runtime::Transform*>* getHierarchy(Runtime::Transform* parent);
 
    protected:
     UI::GUI* ui;

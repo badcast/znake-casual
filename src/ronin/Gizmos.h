@@ -4,8 +4,9 @@
 namespace RoninEngine::Runtime {
 class Gizmos {
    public:
-    static Color color;
     static float angle;
+    static Color getColor();
+    static void setColor(const Color &newColor);
 
     static void DrawLine(Vec2 a, Vec2 b);
     static void DrawPosition(const Vec2& origin, float scalar = maxWorldScalar);
@@ -18,6 +19,9 @@ class Gizmos {
     static void DrawTriangle(Vec2 origin, float base, float height);
     static void DrawTextOnPosition(Vec2 origin, const std::string& text);
     static void DrawSphere(Vec2 origin, float distance);
+
+    static void DrawFill(Vec2 center, float width, float height);
+    static void DrawFillSquare(Vec2 center, float width);
 
     //@origin offset point
     //@edges count edge

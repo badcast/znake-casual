@@ -4,24 +4,27 @@
 
 using namespace RoninEngine;
 
-const Vec2 Vec2::one = Vec2(1, 1);
-const Vec2 Vec2::half = one / 2;
-const Vec2 Vec2::minusOne = Vec2::one * -1;
-const Vec2 Vec2::zero = Vec2(0, 0);
-const Vec2 Vec2::down = Vec2(0, -1);
-const Vec2 Vec2::left = Vec2(-1, 0);
-const Vec2 Vec2::right = Vec2(1, 0);
-const Vec2 Vec2::up = Vec2(0, 1);
-const Vec2 Vec2::infinity = Vec2(Mathf::Infinity, Mathf::Infinity);
-const Vec2 Vec2::negativeInfinity = Vec2(Mathf::Infinity, Mathf::Infinity) * -1;
+// const Vec2 Vec2::one = Vec2(1, 1);
+// const Vec2 Vec2::half = Vec2::one / 2;
+// const Vec2 Vec2::minusOne = Vec2(-1, -1);
+// const Vec2 Vec2::zero = Vec2(0, 0);
+// const Vec2 Vec2::down = Vec2(0, -1);
+// const Vec2 Vec2::left = Vec2(-1, 0);
+// const Vec2 Vec2::right = Vec2(1, 0);
+// const Vec2 Vec2::up = Vec2(0, 1);
+// const Vec2 Vec2::infinity = Vec2(Mathf::Infinity, Mathf::Infinity);
+// const Vec2 Vec2::negativeInfinity = infinity * -1;
+
+int countRun = 0;
 
 Vec2::Vec2() : x(0), y(0) {}
 
 Vec2::Vec2(const Vec2Int& rhs) : x(rhs.x), y(rhs.y) {}
 
-Vec2::Vec2(float x, float y) {
+Vec2::Vec2(const float& x, const float& y) {
     this->x = x;
     this->y = y;
+    ++countRun;
 }
 
 float Vec2::magnitude() const { return Mathf::sqrt(x * x + y * y); }
@@ -410,26 +413,26 @@ bool Vec2::AreaPointInRect(const Vec2& p, const SDL_FRect& r) {
 bool Vec2::InArea(const Vec2& p, const SDL_FRect& r) { return p.x >= r.x && p.x <= r.w && p.y >= r.h && p.y <= r.y; }
 
 const Vec2 Vec2::Rotate(Vec2 vec, Vec2 normal, float angleRadian) {
-    normal = Vec2::RotateUp(angleRadian * Mathf::Deg2Rad, normal);
+    normal = Vec2::RotateClockwise(normal,angleRadian * Mathf::Deg2Rad);
     normal.x *= vec.x;
     normal.y *= vec.y;
     return normal;
 }
 
-const Vec2 Vec2::Rotate(float angleRadian, Vec2 v) {
+const Vec2 Vec2::Rotate(Vec2 position,float angleRadian) {
     float Cos = Mathf::cos(angleRadian);
     float Sin = Mathf::sin(angleRadian);
-    v.x = v.x * Cos - v.y * Sin;
-    v.y = v.x * Sin + v.y * Cos;
-    return v;
+    position.x = position.x * Cos - position.y * Sin;
+    position.y = position.x * Sin + position.y * Cos;
+    return position;
 }
 
-const Vec2 Vec2::RotateUp(float angleRadian, Vec2 v) {
+const Vec2 Vec2::RotateClockwise(Vec2 position,float angleRadian) {
     float Cos = Mathf::cos(angleRadian);
     float Sin = Mathf::sin(angleRadian);
-    v.x = v.x * Cos + v.y * Sin;
-    v.y = -v.x * Sin + v.y * Cos;
-    return v;
+    position.x = position.x * Cos + position.y * Sin;
+    position.y = -position.x * Sin + position.y * Cos;
+    return position;
 }
 
 const Vec2 Vec2::RotateAround(Vec2 center, Vec2 localPosition, float angleRadian) {

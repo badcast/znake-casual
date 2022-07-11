@@ -6,10 +6,9 @@
 
 namespace RoninEngine::Runtime {
 
-Color Gizmos::color;
 float Gizmos::angle;
 
-void Gizmos::DrawLine(Vec2 a, Vec2 b) {
+void internal_drawLine(Vec2 a, Vec2 b) {
     if (!Camera::mainCamera()) return;
 
     Vec2 p = Camera::mainCamera()->transform()->position();
@@ -25,7 +24,7 @@ void Gizmos::DrawLine(Vec2 a, Vec2 b) {
 
     Vec2 scale;
     SDL_RenderGetScale(Application::GetRenderer(), &scale.x, &scale.y);
-    scale *= pixelsPerSize;
+    scale *= pixelsPerPoint;
     dst.x = res.width / 2.f;
     dst.y = res.height / 2.f;
     a.x = dst.x - (p.x - a.x) * scale.x;
@@ -33,35 +32,48 @@ void Gizmos::DrawLine(Vec2 a, Vec2 b) {
     b.x = dst.x - (p.x - b.x) * scale.x;
     b.y = dst.y + (p.y - b.y) * scale.y;
 
-    SDL_SetRenderDrawColor(Application::GetRenderer(), color.r, color.g, color.b, color.a);
     SDL_RenderDrawLineF(Application::GetRenderer(), a.x, a.y, b.x, b.y);
 }
+
+void internal_drawPosition(Vec2 position, float size) {}
+
+Color Gizmos::getColor() {
+    Color clb;
+    SDL_GetRenderDrawColor(Application::GetRenderer(), &clb.r, &clb.g, &clb.b, &clb.a);
+    return clb;
+}
+
+void Gizmos::setColor(const Color& newColor) {
+    SDL_SetRenderDrawColor(Application::GetRenderer(), newColor.r, newColor.g, newColor.b, newColor.a);
+}
+
+void Gizmos::DrawLine(Vec2 a, Vec2 b) { internal_drawLine(a, b); }
 void drawBox() {
     Vec2 a, b;
 
-    a.x = pixelsPerSize;
-    a.y = pixelsPerSize;
-    b.x = -pixelsPerSize;
-    b.y = pixelsPerSize;
-    Gizmos::DrawLine(std::move(a), std::move(b));
+    a.x = pixelsPerPoint;
+    a.y = pixelsPerPoint;
+    b.x = -pixelsPerPoint;
+    b.y = pixelsPerPoint;
+    internal_drawLine(std::move(a), std::move(b));
 
-    a.x = pixelsPerSize;
-    a.y = -pixelsPerSize;
-    b.x = -pixelsPerSize;
-    b.y = -pixelsPerSize;
-    Gizmos::DrawLine(std::move(a), std::move(b));
+    a.x = pixelsPerPoint;
+    a.y = -pixelsPerPoint;
+    b.x = -pixelsPerPoint;
+    b.y = -pixelsPerPoint;
+    internal_drawLine(std::move(a), std::move(b));
 
-    a.x = -pixelsPerSize;
-    a.y = pixelsPerSize;
-    b.x = -pixelsPerSize;
-    b.y = -pixelsPerSize;
-    Gizmos::DrawLine(std::move(a), std::move(b));
+    a.x = -pixelsPerPoint;
+    a.y = pixelsPerPoint;
+    b.x = -pixelsPerPoint;
+    b.y = -pixelsPerPoint;
+    internal_drawLine(std::move(a), std::move(b));
 
-    a.x = pixelsPerSize;
-    a.y = pixelsPerSize;
-    b.x = pixelsPerSize;
-    b.y = -pixelsPerSize;
-    Gizmos::DrawLine(std::move(a), std::move(b));
+    a.x = pixelsPerPoint;
+    a.y = pixelsPerPoint;
+    b.x = pixelsPerPoint;
+    b.y = -pixelsPerPoint;
+    internal_drawLine(std::move(a), std::move(b));
 }
 
 void Gizmos::DrawPosition(const Vec2& origin, float scalar) {
@@ -71,13 +83,14 @@ void Gizmos::DrawPosition(const Vec2& origin, float scalar) {
     b = a = origin;
     a.x -= scalar;
     b.x += scalar;
-    DrawLine(std::move(a), std::move(b));
+
+    internal_drawLine(std::move(a), std::move(b));
 
     // Draw Line V
     b = a = origin;
     a.y -= scalar;
     b.y += scalar;
-    DrawLine(std::move(a), std::move(b));
+    internal_drawLine(std::move(a), std::move(b));
 }
 
 void Gizmos::DrawSquare(Vec2 origin, float width) { DrawRectangle(origin, width, width); }
@@ -85,12 +98,11 @@ void Gizmos::DrawSquare(Vec2 origin, float width) { DrawRectangle(origin, width,
 void Gizmos::DrawRectangle(Vec2 origin, float width, float height) {
     origin = Camera::mainCamera()->WorldToScreenPoint(origin);
     std::uint16_t x, y;
-    width *= pixelsPerSize;
-    height *= pixelsPerSize;
+    width *= pixelsPerPoint;
+    height *= pixelsPerPoint;
     x = origin.x - width / 2;
     y = origin.y - height / 2;
-
-    rectangleColor(Application::GetRenderer(), x, y, x + width, y + height, color);
+    rectangleColor(Application::GetRenderer(), x, y, x + width, y + height, getColor());
 }
 
 void Gizmos::DrawSquareRounded(Vec2 origin, float width, std::uint16_t radius) {
@@ -100,20 +112,19 @@ void Gizmos::DrawSquareRounded(Vec2 origin, float width, std::uint16_t radius) {
 void Gizmos::DrawRectangleRounded(Vec2 origin, float width, float height, std::uint16_t radius) {
     origin = Camera::mainCamera()->WorldToScreenPoint(origin);
     std::uint16_t x, y;
-    width *= pixelsPerSize;
-    height *= pixelsPerSize;
+    width *= pixelsPerPoint;
+    height *= pixelsPerPoint;
     x = origin.x - width / 2;
     y = origin.y - height / 2;
-
-    roundedRectangleColor(Application::GetRenderer(), x, y, x + width, y + height, radius, color);
+    roundedRectangleColor(Application::GetRenderer(), x, y, x + width, y + height, radius, getColor());
 }
 
 void Gizmos::Draw2DWorldSpace(const Vec2& origin, int depth) {
     int i;
     Vec2 dest1, dest2;
     dest1 = dest2 = origin;
-    Color lastColor = color;
-    color = 0xaa575757;
+    Color lastColor = getColor();
+    setColor(0xaa575757);
 
     // Draw H and V position
     DrawPosition(std::move(origin));
@@ -126,50 +137,39 @@ void Gizmos::Draw2DWorldSpace(const Vec2& origin, int depth) {
         DrawPosition(std::move(dest2));
     }
 
-    color = lastColor;
+    setColor(lastColor);
 }
 
 void Gizmos::DrawNavMesh(AIPathFinder::NavMesh* navMesh) {
     Vec2 lastPoint;
     Vec2 a, b;
     AIPathFinder::Neuron* p;
-    AIPathFinder::Disposition p1, p2;
+    Vec2Int p1, p2;
     Resolution res;
-
-    if (Camera::mainCamera() == nullptr) {
-        return;
-    }
+    Color prev;
+    Color next;
+    int yDefault;
 
     res = Application::getResolution();
-
-    color = 0xf6f6f723;
-
-    navMesh->neuron(Camera::mainCamera()->ScreenToWorldPoint(Vec2(0, 0)), p1);
+    prev = getColor();
+    setColor(next = 0xfff6f723);
+    navMesh->neuron(Camera::mainCamera()->ScreenToWorldPoint(Vec2::zero), p1);
     navMesh->neuron(Camera::mainCamera()->ScreenToWorldPoint(Vec2(res.width, res.height)), p2);
-    int x = p1.x, y = p1.y;
-    while (x < p2.x) {
-        while (y < p2.y) {
-            p = navMesh->neuron(x, y);
-            lastPoint = navMesh->PointToWorldPosition(x, y);
-            color.r = !p || p->locked() ? 255 : 53;
-            color.g = p && p->total() ? 100 : 0;
-
-            // Draw Line H
-            b = a = lastPoint;
-            a.x -= 0.03f;
-            b.x += 0.03f;
-            DrawLine(std::move(a), std::move(b));
-
-            // Draw Line V
-            b = a = lastPoint;
-            a.y -= 0.03f;
-            b.y += 0.03f;
-            DrawLine(std::move(a), std::move(b));
-            ++y;
+    yDefault = p1.y;
+    while (p1.x <= p2.x) {
+        while (p1.y <= p2.y) {
+            p = navMesh->neuron(p1.x, p1.y);
+            lastPoint = navMesh->PointToWorldPosition(p1);
+            next.r = !p || p->locked() ? 255 : 53;
+            next.g = p && p->total() ? 100 : 0;
+            setColor(next);
+            internal_drawPosition(lastPoint, 0.03f);
+            ++p1.y;
         }
-        y = p1.y;
-        ++x;
+        p1.y = yDefault;
+        ++p1.x;
     }
+    setColor(prev);
 }
 
 void Gizmos::DrawTriangle(Vec2 origin, float base, float height) {
@@ -207,8 +207,26 @@ void Gizmos::DrawSphere(Vec2 origin, float distance) {
     std::uint16_t x, y, r;
     x = origin.x;
     y = origin.y;
-    r = static_cast<std::uint16_t>(distance * pixelsPerSize);
-    circleRGBA(Application::GetRenderer(), x, y, r, color.r, color.g, color.b, color.a);
+    r = static_cast<std::uint16_t>(distance * pixelsPerPoint);
+    Color m_color = getColor();
+    circleRGBA(Application::GetRenderer(), x, y, r, m_color.r, m_color.g, m_color.b, m_color.a);
+}
+
+void Gizmos::DrawFill(Vec2 center, float width, float height) {
+    center = Camera::WorldToScreenPoint(center);
+    width *= pixelsPerPoint;
+    height *= pixelsPerPoint;
+    Rectf_t rect{center.x - width / 2, center.y - height / 2, width, height};
+
+    SDL_RenderFillRectF(Application::GetRenderer(), reinterpret_cast<SDL_FRect*>(&rect));
+}
+
+void Gizmos::DrawFillSquare(Vec2 center, float width) {
+    center = Camera::WorldToScreenPoint(center);
+    width *= pixelsPerPoint;
+    Rectf_t rect{center.x - width / 2, center.y - width / 2, width, width};
+
+    SDL_RenderFillRectF(Application::GetRenderer(), reinterpret_cast<SDL_FRect*>(&rect));
 }
 
 void Gizmos::DrawStorm(Vec2 ray, int edges, int delim) {
@@ -232,8 +250,8 @@ void Gizmos::DrawStorm(Vec2 ray, int edges, int delim) {
 
     // draw current point
 
-    Color lastColor = Gizmos::color;
-    Gizmos::color = 0xfff6f6f7;
+    Color lastColor = getColor();
+    setColor(0xfff6f6f7);
     if (edges > 0)
         for (;;) {
             std::uint32_t&& steps = (stormMember & const_storm_steps_flag);
@@ -284,7 +302,7 @@ void Gizmos::DrawStorm(Vec2 ray, int edges, int delim) {
             ++(*reinterpret_cast<std::uint32_t*>(&stormMember));
         }
 
-    Gizmos::color = lastColor;
+    setColor(lastColor);
 }
 
 float Gizmos::square_triangle(float base, float height) { return base * height / 2; }

@@ -5,13 +5,13 @@
 #include "framework.h"
 
 namespace RoninEngine::AIPathFinder {
+NavMesh *clnavmesh = nullptr;
+
 Neuron::Neuron() : Neuron(0, 0) {}
-Neuron::Neuron(const Disposition &p) : Neuron(p.x, p.y) {}
+Neuron::Neuron(const Vec2Int &position) : Neuron(position.x, position.y) {}
 Neuron::Neuron(const int &x, const int &y) {
     this->x = x;
     this->y = y;
-    this->_data = nullptr;
-    this->m_lock = false;
 
 #ifdef _DEBUG
     this->p_flag = nullptr;
@@ -20,43 +20,63 @@ Neuron::Neuron(const int &x, const int &y) {
 #endif  // _DEBUG
 }
 
-const bool Neuron::locked() { return this->m_lock; }
-void Neuron::lock(const bool state) { m_lock = state; }
+#define MEMORY_DATA                                                                                          \
+    (((std::uint8_t *)clnavmesh->pmemory) + ((x * clnavmesh->heightSpace + y) * NavMeshDataSizeMultiplier) + \
+     clnavmesh->segmentOffset)
 
-decltype(Neuron_Struct::flagType) &Neuron::flag() { return (*static_cast<uint8_t *>(_data)); }
+const bool Neuron::locked() {
+    auto divide = std::div(x * clnavmesh->heightSpace + y, 8);
+    auto pointer = (reinterpret_cast<std::uint8_t *>(clnavmesh->pmemory)) + divide.quot;
+    bool result = (*pointer) & (1 << divide.rem);
+    return result;
+}
+
+void Neuron::lock(const bool state) {
+    auto divide = std::div(x * clnavmesh->heightSpace + y, 8);
+    auto &&pointer = (reinterpret_cast<std::uint8_t *>(clnavmesh->pmemory)) + divide.quot;
+    divide.quot = (1 << divide.rem);
+    (*pointer) ^= (*pointer) & (divide.quot);
+    (*pointer) |= divide.quot * (state == true);
+}
+
+decltype(Neuron_Struct::flagType) &Neuron::flag() { return *MEMORY_DATA; }
 
 decltype(Neuron_Struct::CostType) &Neuron::cost() {
-    return *(decltype(Neuron_Struct::CostType) *)((uint8_t *)_data + sizeof(Neuron_Struct::flagType) +
-                                                  sizeof(Neuron_Struct::h));
+    return *(decltype(Neuron_Struct::CostType) *)(MEMORY_DATA + sizeof(Neuron_Struct::flagType) + sizeof(Neuron_Struct::h));
 }
+
 decltype(Neuron_Struct::h) &Neuron::heuristic() {
-    return *(decltype(Neuron_Struct::h) *)((uint8_t *)_data + sizeof(Neuron_Struct::flagType));
+    return *(decltype(Neuron_Struct::h) *)(MEMORY_DATA + sizeof(Neuron_Struct::flagType));
 }
 
 const int Neuron::weight() { return x * x + y * y; }
 
 const uint32_t Neuron::total() { return cost() + heuristic(); }
 
-const bool Neuron::empty() { return total() == 0; }
+const bool Neuron::empty() { return !total(); }
 
-NavMesh::NavMesh(std::size_t Width, std::size_t Height) {
-    if (!Width || !Height) throw std::out_of_range("Width or Height is zero!");
-    this->widthSpace = Width;
-    this->heightSpace = Height;
-    this->segments = new RoninEngine::AIPathFinder::Neuron[Width * Height];
-    this->worldScale = Vec2(1, 1) / 2;
-    this->pmemory =
-        GC::gc_malloc(widthSpace * heightSpace *
-                      (sizeof(Neuron_Struct::flagType) + sizeof(Neuron_Struct::CostType) + sizeof(Neuron_Struct::h)));
+NavMesh::NavMesh(int lwidth, int lheight) {
     Neuron *p;
-    for (Width = 0; Width < widthSpace; ++Width) {
-        for (Height = 0; Height < heightSpace; ++Height) {
-            p = &this->segments[Width * heightSpace + Height];
-            p->x = Width;
-            p->y = Height;
-            p->_data = ((uint8_t *)pmemory) +
-                       (Width * heightSpace + Height) *
-                           (sizeof(Neuron_Struct::flagType) + sizeof(Neuron_Struct::CostType) + sizeof(Neuron_Struct::h));
+    if (!lwidth || !lheight) throw std::runtime_error("Width or Height is zero!");
+
+    if (clnavmesh != nullptr) {
+        throw std::runtime_error("Multi use NavMesh source");
+    }
+    clnavmesh = this;
+
+    this->widthSpace = lwidth;
+    this->heightSpace = lheight;
+    this->segments = new RoninEngine::AIPathFinder::Neuron[lheight = (lwidth * lheight)];
+    this->worldScale = Vec2::one;
+    auto lockedDiv = div(Mathf::max(lheight, 8), 8);  // add locked bits
+    segmentOffset = lwidth = lockedDiv.quot + lockedDiv.rem;
+    this->pmemory = GC::gc_malloc(lheight * NavMeshDataSizeMultiplier + lwidth);
+
+    for (lwidth = 0; lwidth < widthSpace; ++lwidth) {
+        for (lheight = 0; lheight < heightSpace; ++lheight) {
+            p = &this->segments[lwidth * heightSpace + lheight];
+            p->x = lwidth;
+            p->y = lheight;
 #ifdef _DEBUG
             p->p_flag = (static_cast<decltype(Neuron_Struct::flagType) *>(p->_data));
             p->p_h = (decltype(Neuron_Struct::h) *)((uint8_t *)p->_data + sizeof(Neuron_Struct::flagType));
@@ -65,39 +85,59 @@ NavMesh::NavMesh(std::size_t Width, std::size_t Height) {
 #endif
         }
     }
+
     clear();
 }
 
 NavMesh::~NavMesh() {
     delete[] this->segments;
     GC::gc_free(this->pmemory);
+
+    if (clnavmesh == this) {
+        clnavmesh = nullptr;
+    }
 }
 
-void NavMesh::randomGenerate() {
-    int w, h;
+void NavMesh::randomGenerate(int flagFilter) {
+    std::uint32_t lhs, rhs = segmentOffset;
     Neuron *p;
-    clear();
-    for (w = 0; w < widthSpace; ++w) {
-        for (h = 0; h < heightSpace; ++h) {
-            p = &this->segments[w * heightSpace + h];
-            p->lock(Random::range(0, 100) < 25);
-        }
-    }
+    clear(true);
+    do {
+        lhs = static_cast<std::uint32_t>(rand() & flagFilter);
+        memcpy(reinterpret_cast<std::int8_t *>(pmemory) + segmentOffset - rhs, &lhs, Mathf::min(rhs, (std::uint32_t)sizeof(int)));
+        rhs -= Mathf::min(rhs, static_cast<std::uint32_t>(sizeof(int)));
+    } while (rhs > 0);
 }
 
-void NavMesh::clear() {
-    memset(pmemory, 0,
-           widthSpace * heightSpace *
-               (sizeof(Neuron_Struct::flagType) + sizeof(Neuron_Struct::CostType) + sizeof(Neuron_Struct::h)));
+void NavMesh::stress() {
+    NavResult result;
+    Vec2Int first, next = {static_cast<int>(widthSpace - 1), static_cast<int>(heightSpace - 1)};
+    // TODO: next a strees
+    find(result, NavMethodRule::NavigationIntelegency, first, next);
 }
 
-void NavMesh::clear(bool clearLockedData) {
-    int len;
-    clear();
-
-    if (clearLockedData) {
-        for (len = widthSpace * heightSpace; len;) this->segments[--len].m_lock = false;
+void NavMesh::clear(bool clearLocks) {
+    std::uint32_t length = widthSpace * heightSpace * NavMeshDataSizeMultiplier;
+    std::uint32_t leftoffset;
+    if (!clearLocks) {
+        leftoffset = this->segmentOffset;
+    } else {
+        leftoffset = 0;
+        length += this->segmentOffset;
     }
+    memset(reinterpret_cast<std::uint8_t *>(pmemory) + leftoffset, 0, length);
+}
+
+void NavMesh::fill(bool fillLocks) {
+    std::uint32_t length = widthSpace * heightSpace * NavMeshDataSizeMultiplier;
+    std::uint32_t leftoffset;
+    if (!fillLocks) {
+        leftoffset = this->segmentOffset;
+    } else {
+        leftoffset = 0;
+        length += this->segmentOffset;
+    }
+    memset(reinterpret_cast<std::uint8_t *>(pmemory) + leftoffset, 0xff, length);
 }
 
 Neuron *NavMesh::neuron(const int &x, const int &y) {
@@ -106,25 +146,64 @@ Neuron *NavMesh::neuron(const int &x, const int &y) {
     return result;
 }
 
+const Vec2Int NavMesh::getDisposition(const Vec2 &worldPoint) {
+    Vec2Int p;
+    p.x = Mathf::ceil(widthSpace / 2 + worldPoint.x / worldScale.x);
+    p.y = Mathf::ceil(heightSpace / 2 - worldPoint.y / worldScale.y);
+    return p;
+}
+
+void NavMesh::find(NavResult &navResult, NavMethodRule method, Runtime::Vec2 worldPointFirst, Runtime::Vec2 worldPointLast) {
+    find(navResult, method, this->getDisposition(worldPointFirst), getDisposition(worldPointLast));
+}
+
 Neuron *NavMesh::neuron(const Vec2 &vector2) {
-    Disposition p;
-    p.x = widthSpace / 2 + vector2.x / worldScale.x + 0.5f;
-    p.y = heightSpace / 2 - vector2.y / worldScale.y + 0.5f;
+    Vec2Int p;
+    p.x = Mathf::ceil(widthSpace / 2 + vector2.x / worldScale.x);
+    p.y = Mathf::ceil(heightSpace / 2 - vector2.y / worldScale.y);
     return neuron(p);
 }
-Neuron *NavMesh::neuron(const Vec2 &vector2, Disposition &p) {
-    p.x = widthSpace / 2 + vector2.x / worldScale.x + 0.5f;
-    p.y = heightSpace / 2 - vector2.y / worldScale.y + 0.5f;
-    return neuron(p);
+Neuron *NavMesh::neuron(const Runtime::Vec2 &vector2, Runtime::Vec2Int &outPoint) {
+    outPoint.x = Mathf::ceil(widthSpace / 2 + vector2.x / worldScale.x);
+    outPoint.y = Mathf::ceil(heightSpace / 2 - vector2.y / worldScale.y);
+    return neuron(outPoint);
 }
-Neuron *NavMesh::neuron(Disposition point) { return neuron(point.x, point.y); }
-const Vec2 NavMesh::PointToWorldPosition(Disposition point) { return PointToWorldPosition(point.x, point.y); }
-const Vec2 NavMesh::PointToWorldPosition(Neuron *path) { return PointToWorldPosition(path->x, path->y); }
-const Vec2 NavMesh::PointToWorldPosition(const int &x, const int &y) {
+Neuron *NavMesh::neuron(Runtime::Vec2Int point) { return neuron(point.x, point.y); }
+const Runtime::Vec2 NavMesh::PointToWorldPosition(const Runtime::Vec2Int &point) {
+    return PointToWorldPosition(point.x, point.y);
+}
+const Runtime::Vec2 NavMesh::PointToWorldPosition(Neuron *path) { return PointToWorldPosition(path->x, path->y); }
+const Runtime::Vec2 NavMesh::PointToWorldPosition(const int &x, const int &y) {
     Vec2 vec2(widthSpace / 2.f, heightSpace / 2.f);
     vec2.x = (x - vec2.x) * worldScale.x;
     vec2.y = -(y - vec2.y) * worldScale.y;
     return vec2;
+}
+
+void NavMesh::load(const NavMeshData &navmeshData) {
+    if (!navmeshData.widthSpace || !navmeshData.heightSpace)
+        throw std::runtime_error("Argument param, width or height is empty");
+
+    if (navmeshData.navmesh == nullptr) throw std::runtime_error("Data is null");
+
+    if (this->pmemory == navmeshData.navmesh) throw std::runtime_error("pmemory == navmesh data, unflow effect");
+
+    if (this->segments != nullptr) delete[] this->segments;
+
+    if (this->pmemory != nullptr) GC::gc_free(this->pmemory);
+
+    this->widthSpace = navmeshData.widthSpace;
+    this->heightSpace = navmeshData.heightSpace;
+    this->segments = new Neuron[navmeshData.widthSpace * navmeshData.heightSpace];
+    this->pmemory = navmeshData.navmesh;
+}
+
+void NavMesh::save(NavMeshData *navmeshData) {
+    if (navmeshData == nullptr) return;
+
+    navmeshData->widthSpace = this->widthSpace;
+    navmeshData->heightSpace = this->heightSpace;
+    navmeshData->navmesh = this->pmemory;
 }
 
 std::list<Vec2> NavMesh::findSpaces(const Neuron *neuron, int radiusInBlocks) {
@@ -134,21 +213,25 @@ std::list<Vec2> NavMesh::findSpaces(const Neuron *neuron, int radiusInBlocks) {
 std::list<Vec2> NavMesh::findSpaces(const int &x, const int &y, int radiusInBlocks) {
     return findSpaces(neuron(x, y), radiusInBlocks);
 }
-NavResult NavMesh::find(NavMethodRule method, Neuron *firstNeuron, Neuron *lastNeuron, std::list<Neuron *> *result,
-                        NavAlgorithm algorithm) {
-    NavResult pinfo;
-    pinfo.map = this;
-    pinfo.firstNeuron = firstNeuron;
-    pinfo.lastNeuron = lastNeuron;
-    pinfo.algorithm = algorithm;
-    pinfo.RelativePaths = result;
-    pinfo.status = NavStatus::Undefined;
 
-    if (firstNeuron == nullptr || lastNeuron == nullptr || result == nullptr) return pinfo;
+void NavMesh::find(NavResult &navResult, NavMethodRule method, Vec2Int first, Vec2Int last) {
+    find(navResult, method, neuron(first), neuron(last), NavAlgorithm::AStar);
+}
 
+void NavMesh::find(NavResult &navResult, NavMethodRule method, Neuron *firstNeuron, Neuron *lastNeuron,
+                   NavAlgorithm algorithm) {
+    navResult.map = this;
+    navResult.firstNeuron = firstNeuron;
+    navResult.lastNeuron = lastNeuron;
+    navResult.algorithm = algorithm;
+
+    if (firstNeuron == nullptr || lastNeuron == nullptr) {
+        navResult.status = NavStatus::Undefined;
+        return;
+    }
     if (firstNeuron->locked() || lastNeuron->locked()) {
-        pinfo.status = NavStatus::Fail;
-        return pinfo;
+        navResult.status = NavStatus::Locked;
+        return;
     }
 
     enum { FLAG_OPEN_LIST = 1, FLAG_CLOSED_LIST = 2, FLAG_TILED_LIST = 4 };
@@ -156,22 +239,22 @@ NavResult NavMesh::find(NavMethodRule method, Neuron *firstNeuron, Neuron *lastN
     // list<Neuron*> closed;
     std::list<Neuron *> finded;
     Neuron *current;
-    decltype(result->begin()) iter, p1, p2;
-    result->clear();
-    result->emplace_back(firstNeuron);
-    firstNeuron->heuristic() = AlgorithmUtils::DistanceManht(firstNeuron, lastNeuron);
+    decltype(navResult.RelativePaths)::iterator iter, p1, p2;
+    navResult.RelativePaths.clear();
+    navResult.RelativePaths.emplace_back(firstNeuron);
+    firstNeuron->heuristic() = AlgorithmUtils::DistancePhf(firstNeuron, lastNeuron);
 
     //Перестройка
-    pinfo.status = NavStatus::Opened;
-    while (!result->empty()) {
-        iter = result->begin();  // get the best Neuron
+    navResult.status = NavStatus::Opened;
+    while (!navResult.RelativePaths.empty()) {
+        iter = navResult.RelativePaths.begin();  // get the best Neuron
         current = iter.operator*();
         if (current == lastNeuron) {
             break;
         }
 
         current->flag() = FLAG_CLOSED_LIST;  // change to closing list
-        result->erase(iter);
+        navResult.RelativePaths.erase(iter);
 
         // Avail
         AlgorithmUtils::AvailPoints(this, method, current, lastNeuron, &finded);
@@ -180,20 +263,20 @@ NavResult NavMesh::find(NavMethodRule method, Neuron *firstNeuron, Neuron *lastN
             {
                 (*iter)->flag() = FLAG_OPEN_LIST;
                 (*iter)->cost() = current->cost() + 1;
-                (*iter)->heuristic() = AlgorithmUtils::DistanceManht((*iter), lastNeuron);
+                (*iter)->heuristic() = AlgorithmUtils::DistancePhf((*iter), lastNeuron);
 
-                result->emplace_back((*iter));
-                p1 = std::begin(*result);
-                p2 = std::end(*result);
+                navResult.RelativePaths.emplace_back((*iter));
+                p1 = std::begin(navResult.RelativePaths);
+                p2 = std::end(navResult.RelativePaths);
 
                 for (; p1 != p2;) {
                     if ((*p1)->total() > (*iter)->total()) {
-                        result->emplace(p1, (*iter));
+                        navResult.RelativePaths.emplace(p1, (*iter));
                         break;
-                    } else
-                        ++p1;
+                    }
+                    ++p1;
                 }
-                if (p1 == p2) result->emplace_back((*iter));
+                if (p1 == p2) navResult.RelativePaths.emplace_back((*iter));
             }
         }
 
@@ -202,11 +285,11 @@ NavResult NavMesh::find(NavMethodRule method, Neuron *firstNeuron, Neuron *lastN
 
     Neuron *pathIsNot = nullptr;
     current = lastNeuron;
-    result->clear();
-    result->emplace_back(current);
+    navResult.RelativePaths.clear();
+    navResult.RelativePaths.emplace_back(current);
     while (current != firstNeuron) {
         if (current == pathIsNot) {
-            pinfo.status = NavStatus::Closed;
+            navResult.status = NavStatus::Closed;
             break;
         }
         pathIsNot = current;
@@ -214,15 +297,13 @@ NavResult NavMesh::find(NavMethodRule method, Neuron *firstNeuron, Neuron *lastN
         for (auto position : finded) {
             if ((position->cost() && position->cost() < current->cost()) || position == firstNeuron) {
                 current = position;
-                result->emplace_front(current);
+                navResult.RelativePaths.emplace_front(current);
                 current->flag() = FLAG_TILED_LIST;
             }
         }
 
         finded.clear();
     }
-
-    return pinfo;
 }
 
 int AlgorithmUtils::DistancePhf(Neuron *a, Neuron *b) {
@@ -274,14 +355,14 @@ int GetMatrixMethod(NavMethodRule method, std::int8_t **matrixH, std::int8_t **m
     return 0;
 }
 
-void AlgorithmUtils::AvailPoints(NavMesh *map, NavMethodRule method, Neuron *arrange, Neuron *target, std::list<Neuron *> *pathTo,
-                                 std::size_t maxCount, int filterFlag) {
+void AlgorithmUtils::AvailPoints(NavMesh *map, NavMethodRule method, Neuron *arrange, Neuron *target,
+                                 std::list<Neuron *> *pathTo, std::size_t maxCount, int filterFlag) {
     Neuron *it = nullptr;
     int i = 0, c;
     std::int8_t *matrixH;
     std::int8_t *matrixV;
     switch (method) {
-        case RoninEngine::AIPathFinder::NavigationIntelegency: {
+        case RoninEngine::AIPathFinder::NavMethodRule::NavigationIntelegency: {
             // TODO: Написать интелектуальный пойск путей для достижения лучших
             // результатов.
             // TODO: Приводить вектор направление для лучшего достижения.
@@ -290,7 +371,7 @@ void AlgorithmUtils::AvailPoints(NavMesh *map, NavMethodRule method, Neuron *arr
             c = GetMatrixMethod(NavMethodRule::SquareMethod, &matrixH, &matrixV);
             do {
                 it = map->neuron(arrange->x + matrixH[i], arrange->y + matrixV[i]);
-                if (it && !it->locked() && (filterFlag == static_cast<int>(0x80000000) || (it->flag() & filterFlag))) {
+                if (it && !it->locked() && (filterFlag == ~0 || it->flag() & filterFlag)) {
                     if (it->x == target->x || it->y == target->y) {
                         if (it == target) {
                             i = c;
@@ -308,7 +389,7 @@ void AlgorithmUtils::AvailPoints(NavMesh *map, NavMethodRule method, Neuron *arr
             c = GetMatrixMethod(method, &matrixH, &matrixV);
             for (; i != c; ++i) {
                 it = map->neuron(arrange->x + matrixH[i], arrange->y + matrixV[i]);
-                if (it && !it->locked() && (filterFlag == 0x80000000 || (it->flag() & filterFlag))) {
+                if (it && !it->locked() && (filterFlag == ~0 || it->flag() & filterFlag)) {
                     pathTo->emplace_back(it);
                     if (maxCount == pathTo->size() || it == target) break;
                 }
@@ -319,3 +400,4 @@ void AlgorithmUtils::AvailPoints(NavMesh *map, NavMethodRule method, Neuron *arr
 }
 
 }  // namespace RoninEngine::AIPathFinder
+#undef MEMORY_DATA

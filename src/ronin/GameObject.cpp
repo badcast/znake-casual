@@ -57,13 +57,6 @@ Component* GameObject::addComponent(Component* component) {
     return component;
 }
 
-template <typename T>
-std::enable_if_t<std::is_base_of<Component, T>::value, T*> GameObject::addComponent() {
-    T* comp = GC::gc_push<T>();
-    addComponent(reinterpret_cast<Component*>(comp));
-    return comp;
-}
-
 template <>
 Transform* GameObject::getComponent<Transform>() {
     return transform();

@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include "ResourceManager.h"
 
 namespace RoninEngine {
 namespace Runtime {
@@ -69,7 +70,11 @@ class GameObject final : public Object {
     Terrain2D* terraind2D() { return getComponent<Terrain2D>(); }
 
     template <typename T>
-    std::enable_if_t<std::is_base_of<Component, T>::value, T*> addComponent();
+    std::enable_if_t<std::is_base_of<Component, T>::value, T*> addComponent(){
+        T* comp = Runtime::GC::gc_push<T>();
+        addComponent(reinterpret_cast<Component*>(comp));
+        return comp;
+    }
 
     template <typename T>
     T* getComponent() {

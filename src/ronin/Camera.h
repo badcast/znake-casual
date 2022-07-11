@@ -29,6 +29,9 @@ class Camera : public Component {
 
     static const Vec2 ScreenToWorldPoint(Vec2 screenPoint);
     static const Vec2 WorldToScreenPoint(Vec2 worldPoint);
+    static const Vec2 ViewportToWorldPoint(Vec2 viewportPoint);
+    static const Vec2 WorldToViewport(Vec2 worldPoint);
+    static const Vec2 WorldToViewportClamp(Vec2 worldPoint);
     static Camera* mainCamera();
 };
 

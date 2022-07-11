@@ -99,7 +99,7 @@ int jno_format(const char* content, void** mem, JNOType& out) {
     } else if (jno_is_jbool(content, &offset)) {
         if (mem) *mem = jalloc<jbool>(offset == sizeof(jno_syntax.jno_true_string) - 1);
         out = JNOType::JNOBoolean;
-    } else
+    } else // another type
         offset = 0;
 
     return offset;

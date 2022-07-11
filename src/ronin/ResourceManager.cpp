@@ -235,7 +235,7 @@ void GC::CheckResources() {
       char *membuf = (char *)GC::gc_malloc(256);
       membuf[0] = '\0';
       if (!std::filesystem::exists(p)) {
-          strcat(membuf, "\"Data\" is not found");
+          SDL_strlcat(membuf, "\"Data\" is not found", 256);
           Application::fail(membuf);
       }
       GC::gc_free(membuf);

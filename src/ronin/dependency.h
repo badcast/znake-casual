@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <ctime>
+#include <functional>
 #include <list>
 #include <map>
 #include <memory>
@@ -21,13 +22,14 @@
 #include <type_traits>
 #include <typeinfo>
 #include <unordered_map>
-#include <functional>
 #include <vector>
 
 #include "Color.h"
 #include "Static.h"
 #include "Vec2.h"
+#include "Paths.h"
 
+// Pre declarations
 namespace RoninEngine {
 class Application;
 class Level;
@@ -42,7 +44,7 @@ class Neuron;
 class NavMesh;
 }  // namespace AIPathFinder
 
-// Pre declaration
+
 namespace Runtime {
 
 struct Vec2;
@@ -82,21 +84,7 @@ class Physics2D;
 
 struct Color;
 
-// serialize
-enum FolderKind {
-    // graphics
-    GFX,
-    // SOUND
-    SOUND,
-    // MUSIC
-    MUSIC,
-    // LOADER
-    LOADER,
-    // LEVELS
-    LEVELS,
-    // TEXTURES
-    TEXTURES
-};
+class Mathf;
 
 }  // namespace Runtime
 }  // namespace RoninEngine

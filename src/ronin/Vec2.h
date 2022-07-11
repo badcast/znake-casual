@@ -55,10 +55,15 @@ struct Vec2 {
 
     Vec2();
     explicit Vec2(const Vec2Int& rhs);
-    Vec2(float x, float y);
+    Vec2(const float& x, const float& y);
     // extern Vec2(float && x, float && y);
     Vec2(const Vec2&) = default;
     ~Vec2() = default;
+
+    float magnitude() const;
+    float sqrMagnitude() const;
+    Vec2 normalized();
+    void Normalize();
 
     static const Vec2 one;
     static const Vec2 half;
@@ -70,11 +75,6 @@ struct Vec2 {
     static const Vec2 up;
     static const Vec2 infinity;
     static const Vec2 negativeInfinity;
-
-    float magnitude() const;
-    float sqrMagnitude() const;
-    Vec2 normalized();
-    void Normalize();
 
     static const Vec2 Abs(const Vec2& value);
     static const Vec2 NAbs(const Vec2& value);
@@ -105,8 +105,8 @@ struct Vec2 {
     static bool AreaPointInRect(const Vec2& p, const SDL_FRect& r);
     static bool InArea(const Vec2& p, const SDL_FRect& r);
     static const Vec2 Rotate(Vec2 vec, Vec2 normal, float angleRadian);
-    static const Vec2 Rotate(float angleRadian, Vec2 v);
-    static const Vec2 RotateUp(float angleRadian, Vec2 v);
+    static const Vec2 Rotate(Vec2 position,float angleRadian);
+    static const Vec2 RotateClockwise(Vec2 position,float angleRadian);
     static const Vec2 RotateAround(Vec2 center, Vec2 localPosition, float angleRadian);
 
     static const Vec2 Perpendicular(Vec2 inDirection);
@@ -118,18 +118,30 @@ struct Vec2 {
     Vec2& operator=(const Vec2& rhs);
 };
 
+//NOTE: Я не считаю это лучшим способом инициализировать переменные статических членов.
+//TODO: Перевести строки ниже на функий get constexpr для предотвращения пре-инициализаций, пре-проверки
+inline const Vec2 Vec2::one(1, 1);
+inline const Vec2 Vec2::half(0.5f, 0.5f);
+inline const Vec2 Vec2::minusOne(-1, -1);
+inline const Vec2 Vec2::zero(0, 0);
+inline const Vec2 Vec2::down(0, -1);
+inline const Vec2 Vec2::left(-1, 0);
+inline const Vec2 Vec2::right(1, 0);
+inline const Vec2 Vec2::up(0, 1);
+inline const Vec2 Vec2::infinity(1.f / 0.f, 1.f / 0.f);
+inline const Vec2 Vec2::negativeInfinity(-1.f / 0.f, -1.f / 0.f);
 
-Vec2Int operator+(const Vec2Int &lhs, const Vec2Int &rhs);
-Vec2Int operator-(const Vec2Int &lhs, const Vec2Int &rhs);
-bool operator==(const Vec2Int &lhs, const Vec2Int &rhs);
-bool operator!=(const Vec2Int &lhs, const Vec2Int &rhs);
-Vec2Int operator*(const float &d, const Vec2Int &rhs);
-Vec2Int operator/(const float &d, const Vec2Int &rhs);
-Vec2Int operator*(const Vec2Int &rhs, const float &d);
-Vec2Int operator/(const Vec2Int &rhs, const float &d);
+Vec2Int operator+(const Vec2Int& lhs, const Vec2Int& rhs);
+Vec2Int operator-(const Vec2Int& lhs, const Vec2Int& rhs);
+bool operator==(const Vec2Int& lhs, const Vec2Int& rhs);
+bool operator!=(const Vec2Int& lhs, const Vec2Int& rhs);
+Vec2Int operator*(const float& d, const Vec2Int& rhs);
+Vec2Int operator/(const float& d, const Vec2Int& rhs);
+Vec2Int operator*(const Vec2Int& rhs, const float& d);
+Vec2Int operator/(const Vec2Int& rhs, const float& d);
 
-bool operator==(const Vec2Int &lhs, const Vec2 &rhs);
-bool operator!=(const Vec2Int &lhs, const Vec2 &rhs);
+bool operator==(const Vec2Int& lhs, const Vec2& rhs);
+bool operator!=(const Vec2Int& lhs, const Vec2& rhs);
 
 Vec2 operator+(const Vec2& lhs, const Vec2& rhs);
 Vec2 operator-(const Vec2& lhs, const Vec2& rhs);
@@ -141,7 +153,6 @@ Vec2 operator*(const float& d, const Vec2& rhs);
 Vec2 operator/(const float& d, const Vec2& rhs);
 Vec2 operator*(const Vec2& rhs, const float& d);
 Vec2 operator/(const Vec2& rhs, const float& d);
-
 
 }  // namespace Runtime
 }  // namespace RoninEngine

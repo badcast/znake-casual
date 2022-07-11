@@ -26,6 +26,8 @@ T* factory_base(bool initInHierarchy, T* clone, const char* name) {
             GC::gc_push_lvalue(newc, *clone);
         } else if constexpr (std::is_same<T, Camera2D>()) {
             GC::gc_push_lvalue(newc, *clone);
+        } else if constexpr(std::is_same<T, Terrain2D>()) {
+            GC::gc_push_lvalue(newc, *clone);
         } else {
             static_assert(true, "undefined type");
             newc = nullptr;

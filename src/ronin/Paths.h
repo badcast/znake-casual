@@ -2,15 +2,31 @@
 
 #include "dependency.h"
 
-namespace RoninEngine::Runtime
-{
-	const char* applicationPath();
+namespace RoninEngine::Runtime {
 
-	const char* prefDataPath();
+// serialize
+enum FolderKind {
+    // graphics
+    GFX,
+    // SOUND
+    SOUND,
+    // MUSIC
+    MUSIC,
+    // LOADER
+    LOADER,
+    // LEVELS
+    LEVELS,
+    // TEXTURES
+    TEXTURES
+};
 
-	const std::string dataPath();
+const char* applicationPath();
 
-	const std::string getDataFrom(FolderKind type);
+const char* prefDataPath();
 
-    void release_sdlpaths();
-}
+const std::string dataPath();
+
+const std::string getDataFrom(FolderKind type);
+
+void release_sdlpaths();
+}  // namespace RoninEngine::Runtime

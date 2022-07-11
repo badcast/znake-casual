@@ -55,14 +55,6 @@ float Mathf::Clamp01(float val) { return Clamp(val, 0, 1.f); }
 
 float Mathf::Clamp(float val, const float min, const float max) { return val > max ? max : val < min ? min : val; }
 
-int Mathf::max(int x, int y) { return x > y ? x : y; }
-
-float Mathf::max(float x, float y) { return x > y ? x : y; }
-
-int Mathf::min(int x, int y) { return x < y ? x : y; }
-
-float Mathf::min(float x, float y) { return x < y ? x : y; }
-
 int Mathf::abs(int x) { return x * (x < 0 ? -1 : 1); }
 
 float Mathf::abs(float x) { return x * (x < 0 ? -1 : 1); }

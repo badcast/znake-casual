@@ -2,29 +2,27 @@
 
 #include "dependency.h"
 
-using Vec2 = RoninEngine::Runtime::Vec2;
+// TODO: Добавить Storm алгоритм в NavMesh
 
 namespace RoninEngine::AIPathFinder {
+
 class NavMesh;
+
 class Neuron;
 
-enum NavStatus { Undefined, Fail, Closed, Opened };
+enum NavStatus { Undefined, Locked, Closed, Opened };
 
+// TODO: Дополнить список алгоритмов поиска путей
 enum NavAlgorithm { AStar };
 
 enum NavMethodRule { NavigationIntelegency, PlusMethod, SquareMethod, CrossMethod };
-
-struct Disposition {
-    int x;
-    int y;
-};
 
 struct NavResult {
     NavStatus status;
     NavAlgorithm algorithm;
     Neuron *firstNeuron;
     Neuron *lastNeuron;
-    std::list<Neuron *> *RelativePaths;
+    std::list<Neuron *> RelativePaths;
     NavMesh *map;
 };
 
@@ -35,7 +33,15 @@ struct Neuron_Struct {
     std::uint16_t disposition;
 };
 
-//TODO: Class Neuron required optimization
+struct NavMeshData {
+    std::uint32_t widthSpace;
+    std::uint32_t heightSpace;
+    void *navmesh;
+};
+
+constexpr std::size_t NavMeshDataSizeMultiplier =
+    (sizeof(Neuron_Struct::flagType) + sizeof(Neuron_Struct::CostType) + sizeof(Neuron_Struct::h));
+
 class Neuron {
     friend class NavMesh;
 
@@ -44,22 +50,18 @@ class Neuron {
     decltype(Neuron_Struct::h) *p_h;
     decltype(Neuron_Struct::flagType) *p_flag;
 #endif
-    void *_data;
-    bool m_lock;
-
    public:
     std::uint16_t x, y;
 
     Neuron();
-    Neuron(const Disposition &p);
+    Neuron(const Runtime::Vec2Int& position);
     Neuron(const int &x, const int &y);
 
     inline const bool locked();
     inline void lock(const bool state);
-
     inline std::uint8_t &flag();
     inline std::uint32_t &cost();
-    inline std::uint32_t  &heuristic();
+    inline std::uint32_t &heuristic();
 
     inline const int weight();
     inline const std::uint32_t total();
@@ -67,35 +69,45 @@ class Neuron {
 };
 class NavMesh {
     Neuron *segments;
+    int segmentOffset;
     void *pmemory;
 
    public:
     std::size_t widthSpace, heightSpace;
-    Vec2 worldScale;
+    RoninEngine::Runtime::Vec2 worldScale;
 
-    explicit NavMesh(std::size_t width, std::size_t height);
+    explicit NavMesh(int width, int height);
 
     ~NavMesh();
 
-    void clear();
-    void clear(bool clearLockedData);
-    void randomGenerate();
+    void clear(bool clearLocks = false);
+    void fill(bool fillLocks = false);
+    void randomGenerate(int flagFilter = 0xffffff);
+    void stress();
 
-    Neuron *neuron(Disposition point);
-    Neuron *neuron(const Vec2 &vector2);
-    Neuron *neuron(const Vec2 &vector2, Disposition &outPoint);
+    Neuron *neuron(Runtime::Vec2Int nt);
+    Neuron *neuron(const RoninEngine::Runtime::Vec2 &vector2);
+    Neuron *neuron(const Runtime::Vec2 &vector2, Runtime::Vec2Int& outPoint);
     Neuron *neuron(const int &x, const int &y);
 
-    NavResult find(NavMethodRule method, Neuron *firstNeuron, Neuron *lastNeuron, std::list<Neuron *> *result,
-                   NavAlgorithm algorithm);
+    inline const Runtime::Vec2Int getDisposition(const RoninEngine::Runtime::Vec2& worldPoint);
 
-    std::list<Vec2> findSpaces(const int &x, const int &y, int radiusInBlocks);
-    std::list<Vec2> findSpaces(const Neuron *neuron, int radiusInBlocks);
-    std::list<Vec2> findSpaces(const Vec2 &destination, float radiusInBlocks);
+    void find(NavResult &navResult, NavMethodRule method, Runtime::Vec2 worldPointFirst, Runtime::Vec2 worldPointLast);
 
-    const Vec2 PointToWorldPosition(Disposition point);
-    const Vec2 PointToWorldPosition(Neuron *path);
-    const Vec2 PointToWorldPosition(const int &x, const int &y);
+    void find(NavResult &navResult, NavMethodRule method, Runtime::Vec2Int first, Runtime::Vec2Int last);
+    void find(NavResult &navResult, NavMethodRule method, Neuron *firstNeuron, Neuron *lastNeuron, NavAlgorithm algorithm);
+
+    std::list<RoninEngine::Runtime::Vec2> findSpaces(const int &x, const int &y, int radiusInBlocks);
+    std::list<RoninEngine::Runtime::Vec2> findSpaces(const Neuron *neuron, int radiusInBlocks);
+    std::list<RoninEngine::Runtime::Vec2> findSpaces(const RoninEngine::Runtime::Vec2 &destination, float radiusInBlocks);
+
+    const RoninEngine::Runtime::Vec2 PointToWorldPosition(const Runtime::Vec2Int& point);
+    const RoninEngine::Runtime::Vec2 PointToWorldPosition(Neuron *path);
+    const RoninEngine::Runtime::Vec2 PointToWorldPosition(const int &x, const int &y);
+    void load(const NavMeshData &navmeshData);
+    void save(NavMeshData *navmeshData);
+
+    friend class Neuron;
 };
 
 class AlgorithmUtils {
@@ -118,6 +130,7 @@ class AlgorithmUtils {
 
     /// Определяет, функцию пойска по направлениям. Таких как: left, up, right,
     static void AvailPoints(NavMesh *map, NavMethodRule method, Neuron *arrange, Neuron *target, std::list<Neuron *> *pathTo,
-                            std::size_t maxCount = -1, int filterFlag = 0x80000000);
+                            std::size_t maxCount = -1, int filterFlag = -1);
 };
+
 }  // namespace RoninEngine::AIPathFinder

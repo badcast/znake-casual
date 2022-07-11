@@ -66,13 +66,15 @@ class Mathf {
 
     static float Clamp(float val, const float min, const float max);
 
-    static int max(int x, int y);
+    template <typename T>
+    static const T& max(const T& x, const T& y) {
+        return x > y ? x : y;
+    }
 
-    static float max(float x, float y);
-
-    static int min(int x, int y);
-
-    static float min(float x, float y);
+    template <typename T>
+    static const T& min(const T& x, const T& y) {
+        return x < y ? x : y;
+    }
 
     static float abs(float x);
 

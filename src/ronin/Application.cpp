@@ -182,6 +182,10 @@ bool Application::Simulate() {
     SDL_DisplayMode displayMode = Application::getDisplayMode();
     float secPerFrame = 1000.f / displayMode.refresh_rate;
 
+    if (m_level == nullptr) {
+        fail("Level not loaded");
+    }
+
     while (!isQuiting) {
         // update events
         input::Reset();
@@ -216,7 +220,7 @@ bool Application::Simulate() {
                 }
 
                 m_level->RenderLevel(renderer);
-                m_level->onDrawGizmos();  // Draw gizmos
+                if (Camera::mainCamera()) m_level->onDrawGizmos();  // Draw gizmos
 
                 // Set scale as default
                 SDL_RenderSetScale(renderer, 1, 1);
@@ -249,8 +253,8 @@ bool Application::Simulate() {
             Time::m_deltaTime = delayed / secPerFrame;  // get deltas
             Time::m_deltaTime = Mathf::Clamp01(Time::m_deltaTime);
 
-            Time::m_time += 0.001f*Mathf::ceil(secPerFrame);
-            delayed = Mathf::max(0.f, secPerFrame - delayed);
+            Time::m_time += 0.001f * Mathf::ceil(secPerFrame);
+            delayed = Mathf::max(0, static_cast<int>(secPerFrame - delayed));
 
             if (delayed > 0) std::this_thread::sleep_for(std::chrono::milliseconds(delayed));
         }
@@ -288,3 +292,4 @@ void Application::fail(const std::string& message) {
 
 void Application::fail_OutOfMemory() { fail("Out of memory!"); }
 }  // namespace RoninEngine
+

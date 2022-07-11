@@ -48,10 +48,3 @@ Color::operator int() { return *reinterpret_cast<int *>(this); }
 Color::operator std::uint32_t() { return *reinterpret_cast<std::uint32_t *>(this); }
 
 Color::operator SDL_Color() { return *reinterpret_cast<SDL_Color *>(this); }
-
-const Color Color::transparent(0);
-const Color Color::black(0xff000000);
-const Color Color::white(0xffffffff);
-const Color Color::red(0xff0000ff);
-const Color Color::green(0xff00ff00);
-const Color Color::blue(0xffff0000);

@@ -20,7 +20,7 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
     Vec2 sourcePoint;
     // Vec2 _scale;
 
-    Gizmos::color = 0xc4c4c4;
+    Gizmos::setColor(0xffc4c4c4);
 
     if (visibleGrids) {
         Gizmos::Draw2DWorldSpace(Vec2::zero);
@@ -47,33 +47,25 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
             if (rTrans->m_parent && renderSource->transform()->m_parent != Level::self()->main_object->transform()) {
                 Vec2 direction = rTrans->p;
                 sourcePoint = Vec2::RotateAround(rTrans->m_parent->position(), direction, rTrans->angle() * Mathf::Deg2Rad);
-                rTrans->localPosition(
-                    Vec2::Max(direction, Vec2::RotateAround(Vec2::zero, direction, rTrans->angle() * Mathf::Deg2Rad)));
+                //                rTrans->localPosition(
+                //                    Vec2::Max(direction, Vec2::RotateAround(Vec2::zero, direction, rTrans->angle() *
+                //                    Mathf::Deg2Rad)));
 
             } else {
                 sourcePoint = rTrans->position();
             }
 
-            wrapper.dst.w *= pixelsPerSize;  //_scale.x;
-            wrapper.dst.h *= pixelsPerSize;  //_scale.y;
+            wrapper.dst.w *= pixelsPerPoint;  //_scale.x;
+            wrapper.dst.h *= pixelsPerPoint;  //_scale.y;
 
             Vec2 arranged(wrapper.dst.x, wrapper.dst.y);
-
-            /*
-                        ((позиция тела).x * sin(угла поворота тела), (позиция тела).y * cos(угла поворота тела)) + (позиция
-               тела)
-            */
-
-            // Vec2 rotated = arranged=Vec2::RotateAround(sourcePoint, arranged,
-            // renderSource->transform()->localAngle()*Mathf::Deg2Rad);
-
-            // arranged.x -= rotated.x;
-            // arranged.y += rotated.y;
+            if (arranged != Vec2::zero)
+                arranged = Vec2::RotateAround(sourcePoint, arranged, renderSource->transform()->angle() * Mathf::Deg2Rad);
 
             //Положение по горизонтале
-            wrapper.dst.x = arranged.x + ((rect.w - wrapper.dst.w) / 2.0f - (point.x - sourcePoint.x) * pixelsPerSize);
+            wrapper.dst.x = arranged.x + ((rect.w - wrapper.dst.w) / 2.0f - (point.x - sourcePoint.x) * pixelsPerPoint);
             //Положение по вертикале
-            wrapper.dst.y = arranged.y + ((rect.h - wrapper.dst.h) / 2.0f + (point.y - sourcePoint.y) * pixelsPerSize);
+            wrapper.dst.y = arranged.y + ((rect.h - wrapper.dst.h) / 2.0f + (point.y - sourcePoint.y) * pixelsPerPoint);
 
             SDL_RenderCopyExF(renderer, wrapper.texture->native(), (SDL_Rect*)&wrapper.src,
                               reinterpret_cast<SDL_FRect*>(&wrapper.dst), renderSource->transform()->angle(), nullptr,
@@ -93,14 +85,14 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
             point = &transform()->p;
             sourcePoint = lightSource->transform()->position();
 
-            wrapper.dst.w *= pixelsPerSize;
+            wrapper.dst.w *= pixelsPerPoint;
 
-            wrapper.dst.h *= pixelsPerSize;
+            wrapper.dst.h *= pixelsPerPoint;
 
             // h
-            wrapper.dst.x += ((rect.w - wrapper.dst.w) / 2.0f - (point->x - sourcePoint.x) * pixelsPerSize);
+            wrapper.dst.x += ((rect.w - wrapper.dst.w) / 2.0f - (point->x - sourcePoint.x) * pixelsPerPoint);
             // v
-            wrapper.dst.y += ((rect.h - wrapper.dst.h) / 2.0f + (point->y - sourcePoint.y) * pixelsPerSize);
+            wrapper.dst.y += ((rect.h - wrapper.dst.h) / 2.0f + (point->y - sourcePoint.y) * pixelsPerPoint);
 
             SDL_RenderCopyExF(renderer, wrapper.texture->native(), reinterpret_cast<SDL_Rect*>(&wrapper.src),
                               reinterpret_cast<SDL_FRect*>(&wrapper.dst),
@@ -140,9 +132,9 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
         for (auto face : (*std::get<std::set<Renderer*>*>(stack))) {
             Vec2 p = face->transform()->position();
             Vec2 sz = face->GetSize() * 2;
-            Gizmos::color = Color::blue;
+            Gizmos::setColor(Color::blue);
             Gizmos::DrawRectangleRounded(p, sz.x, sz.y, 5);
-            Gizmos::color = Color::black;
+            Gizmos::setColor(Color::black);
             Gizmos::DrawPosition(p, 0.2f);
             Gizmos::DrawTextOnPosition(p, face->gameObject()->m_name);
         }

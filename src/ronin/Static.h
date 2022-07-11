@@ -4,8 +4,8 @@
 
 namespace RoninEngine {
 // default square pixel/100
-constexpr float pixelsPerSize = 100;
-constexpr float spaceDiv = pixelsPerSize / 2.f;
+constexpr float pixelsPerPoint = 100;
+constexpr float spaceDiv = pixelsPerPoint / 2.f;
 constexpr float maxWorldScalar = 10000;
 
 namespace Runtime {

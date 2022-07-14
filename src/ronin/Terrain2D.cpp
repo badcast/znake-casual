@@ -26,8 +26,8 @@ void Terrain2D::load(const TerrainData &terrainData)
 }
 
 const bool Terrain2D::isCollider(const Vec2 destination) {
-    auto n = this->nav->neuron(destination);
-    return n && n->locked();
+    auto n = this->nav->GetNeuron(destination);
+    return n && nav->neuronLocked(nav->neuronGetPoint(n));
 }
 
 Vec2 Terrain2D::GetSize() { return {}; }

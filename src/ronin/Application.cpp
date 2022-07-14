@@ -22,24 +22,22 @@ void Application::Init(const std::uint32_t& width, const std::uint32_t& height) 
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_VIDEO)) fail("Fail init main system.");
 
     // init graphics
-    if (!IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG | IMG_INIT_TIF)) fail("Fail init imageformats. (libPNG, libJPG) not defined");
+    if (!IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG)) fail("Fail init imageformats. (libPNG, libJPG) not defined");
 
     // init Audio system
     if (!Mix_Init(MIX_InitFlags::MIX_INIT_OGG | MIX_InitFlags::MIX_INIT_MP3)) fail("Fail init audio.");
 
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 512)) fail("Fail open audio.");
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024)) fail("Fail open audio.");
 
     window = SDL_CreateWindow("Ronin Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
 
     if (!window) fail(SDL_GetErrorMsg(errorStr, 128));
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED /*| SDL_RENDERER_PRESENTVSYNC*/);
+    renderer = SDL_CreateRenderer(window, -1,  SDL_RENDERER_ACCELERATED/*| SDL_RENDERER_PRESENTVSYNC*/);
     if (!renderer) fail(SDL_GetErrorMsg(errorStr, 128));
 
     // Brightness - Яркость
     SDL_SetWindowBrightness(window, 1);
-
-    Time::Init_TimeEngine();
 
     LoadGame();
     m_inited = true;
@@ -146,7 +144,7 @@ SDL_Surface* Application::ScreenShot() {
     SDL_RenderReadPixels(renderer, nullptr, SDL_PIXELFORMAT_RGBA8888, pixels, pitch);
 
     SDL_Surface* su =
-        SDL_CreateRGBSurfaceFrom(pixels, pitch / 4, rect.h - rect.y, 32, pitch, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+        SDL_CreateRGBSurfaceFrom(pixels, pitch / 4, rect.h - rect.y, 32, pitch,0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
     return su;
 }
 
@@ -181,6 +179,7 @@ bool Application::Simulate() {
     SDL_WindowFlags wndFlags;
     SDL_DisplayMode displayMode = Application::getDisplayMode();
     float secPerFrame = 1000.f / displayMode.refresh_rate;
+    Time::Init_TimeEngine();
 
     if (m_level == nullptr) {
         fail("Level not loaded");
@@ -233,31 +232,31 @@ bool Application::Simulate() {
                     m_level->RenderSceneLate(renderer);
                 }
             }
-
-            delayed = Time::tickMillis() - delayed;
-
-            ++Time::m_frames;  // framecounter
-            if (Time::m_frames == 0) Time::m_frames = 1;
-
-            if (Time::startUpTime() > fpsRound) {
-                fps = (Time::m_frames) / Time::startUpTime();
-                std::sprintf(_title,
-                             "Ronin Engine (Debug) FPS:%d Memory:%luMiB, "
-                             "GC_Allocated:%lu, SDL_Allocated:%d",
-                             static_cast<int>(fps), get_process_sizeMemory() / 1024 / 1024, GC::gc_total_allocated(),
-                             SDL_GetNumAllocations());
-                SDL_SetWindowTitle(Application::GetWindow(), _title);
-                fpsRound = Time::startUpTime() + 1;  // updater per 1 seconds
-            }
-
-            Time::m_deltaTime = delayed / secPerFrame;  // get deltas
-            Time::m_deltaTime = Mathf::Clamp01(Time::m_deltaTime);
-
-            Time::m_time += 0.001f * Mathf::ceil(secPerFrame);
-            delayed = Mathf::max(0, static_cast<int>(secPerFrame - delayed));
-
-            if (delayed > 0) std::this_thread::sleep_for(std::chrono::milliseconds(delayed));
         }
+
+        delayed = Time::tickMillis() - delayed;
+
+        ++Time::m_frames;  // framecounter
+        if (Time::m_frames == 0) Time::m_frames = 1;
+
+        if (Time::startUpTime() > fpsRound) {
+            fps = (Time::m_frames) / Time::startUpTime();
+            std::sprintf(_title,
+                         "Ronin Engine (Debug) FPS:%d Memory:%luMiB, "
+                         "GC_Allocated:%lu, SDL_Allocated:%d",
+                         static_cast<int>(fps), get_process_sizeMemory() / 1024 / 1024, GC::gc_total_allocated(),
+                         SDL_GetNumAllocations());
+            SDL_SetWindowTitle(Application::GetWindow(), _title);
+            fpsRound = Time::startUpTime() + 1;  // updater per 1 seconds
+        }
+
+        Time::m_deltaTime = delayed / secPerFrame;  // get deltas
+        Time::m_deltaTime = Mathf::Clamp01(Time::m_deltaTime);
+
+        Time::m_time += 0.001f * Mathf::ceil(secPerFrame);
+        delayed = Mathf::max(0, static_cast<int>(secPerFrame - delayed));
+
+        if (delayed > 0) std::this_thread::sleep_for(std::chrono::milliseconds(delayed));
     }
 
     return isQuiting;

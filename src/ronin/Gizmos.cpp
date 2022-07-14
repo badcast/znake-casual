@@ -153,15 +153,22 @@ void Gizmos::DrawNavMesh(AIPathFinder::NavMesh* navMesh) {
     res = Application::getResolution();
     prev = getColor();
     setColor(next = 0xfff6f723);
-    navMesh->neuron(Camera::mainCamera()->ScreenToWorldPoint(Vec2::zero), p1);
-    navMesh->neuron(Camera::mainCamera()->ScreenToWorldPoint(Vec2(res.width, res.height)), p2);
+    navMesh->GetNeuron(Camera::ScreenToWorldPoint(Vec2::zero), p1);
+    navMesh->GetNeuron(Camera::ScreenToWorldPoint(Vec2(res.width, res.height)), p2);
     yDefault = p1.y;
     while (p1.x <= p2.x) {
         while (p1.y <= p2.y) {
-            p = navMesh->neuron(p1.x, p1.y);
+            p = navMesh->GetNeuron(p1);
             lastPoint = navMesh->PointToWorldPosition(p1);
-            next.r = !p || p->locked() ? 255 : 53;
-            next.g = p && p->total() ? 100 : 0;
+            if (!p || navMesh->neuronLocked(p1)) {
+                next.r = 255;
+                next.g = 0;
+                next.b = 0;
+            } else {
+                next.r = 53;
+                next.g = navMesh->neuronGetTotal(p1) ? 200 : 0;
+                next.b = 246;
+            }
             setColor(next);
             internal_drawPosition(lastPoint, 0.03f);
             ++p1.y;

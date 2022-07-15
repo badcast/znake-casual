@@ -159,7 +159,7 @@ const Vec2Int NavMesh::neuronGetPoint(const Neuron *neuron) {
     return {divide.quot, divide.rem};
 }
 
-void RoninEngine::AIPathFinder::NavMesh::neuronLock(const Runtime::Vec2Int &range, bool state) {
+void RoninEngine::AIPathFinder::NavMesh::neuronLock(const Runtime::Vec2Int &range, const bool state) {
     auto divide = std::div(range.x * heightSpace + range.y, 8);
     auto &&pointer = (reinterpret_cast<std::uint8_t *>(neurons) + segmentOffset) + divide.quot;
     divide.quot = (1 << divide.rem);

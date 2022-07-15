@@ -23,7 +23,7 @@ namespace RoninEngine::Runtime
 		virtual Vec2 GetSize() = 0;
 
 		virtual void Render(Render_info* render_info) = 0;
-		uint8_t zOrder;
+        int zOrder;
 	}; 
 }
 

@@ -35,8 +35,6 @@ void internal_drawLine(Vec2 a, Vec2 b) {
     SDL_RenderDrawLineF(Application::GetRenderer(), a.x, a.y, b.x, b.y);
 }
 
-void internal_drawPosition(Vec2 position, float size) {}
-
 Color Gizmos::getColor() {
     Color clb;
     SDL_GetRenderDrawColor(Application::GetRenderer(), &clb.r, &clb.g, &clb.b, &clb.a);
@@ -170,7 +168,7 @@ void Gizmos::DrawNavMesh(AIPathFinder::NavMesh* navMesh) {
                 next.b = 246;
             }
             setColor(next);
-            internal_drawPosition(lastPoint, 0.03f);
+            DrawPosition(lastPoint, 0.03f);
             ++p1.y;
         }
         p1.y = yDefault;

@@ -407,7 +407,7 @@ int GC::resource_bitmap(const std::string &resourceName, FolderKind pathOn, SDL_
 
         cat = path + iBitsource->second;
 
-        if (!std::filesystem::exists(cat.c_str())) {
+        if (!std::filesystem::exists(cat)) {
             SDL_LogError(SDL_LOG_CATEGORY_INPUT, "Texture not found. %s", cat.c_str());
             return GCInvalidID;
         }

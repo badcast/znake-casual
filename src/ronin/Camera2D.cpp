@@ -28,52 +28,54 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
     }
 
     auto stack = matrixSelection();
+
     // scale.x = Mathf::Min(Mathf::Max(scale.x, 0.f), 10.f);
     // scale.y = Mathf::Min(Mathf::Max(scale.y, 0.f), 10.f);
     //_scale = scale*squarePerPixels;
     SDL_RenderSetScale(renderer, scale.x, scale.y);
     // Render Objects
-    for (auto renderSource : *std::get<std::set<Renderer*>*>(stack)) {
-        // drawing
-        // clear
-        wrapper = {};
-        wrapper.renderer = renderer;
+    for (auto layer : *(std::get<0>(stack)))
+        for (auto renderSource : layer.second) {
+            // drawing
+            // clear
+            wrapper = {};
+            wrapper.renderer = renderer;
 
-        renderSource->Render(&wrapper);  // draw
-        if (wrapper.texture) {
-            Vec2 point = transform()->p;
-            Transform* rTrans = renderSource->transform();
+            renderSource->Render(&wrapper);  // draw
+            if (wrapper.texture) {
+                Vec2 point = transform()->p;
+                Transform* rTrans = renderSource->transform();
 
-            if (rTrans->m_parent && renderSource->transform()->m_parent != Level::self()->main_object->transform()) {
-                Vec2 direction = rTrans->p;
-                sourcePoint = Vec2::RotateAround(rTrans->m_parent->position(), direction, rTrans->angle() * Mathf::Deg2Rad);
-                //                rTrans->localPosition(
-                //                    Vec2::Max(direction, Vec2::RotateAround(Vec2::zero, direction, rTrans->angle() *
-                //                    Mathf::Deg2Rad)));
+                if (rTrans->m_parent && renderSource->transform()->m_parent != Level::self()->main_object->transform()) {
+                    Vec2 direction = rTrans->p;
+                    sourcePoint = Vec2::RotateAround(rTrans->m_parent->position(), direction, rTrans->angle() * Mathf::Deg2Rad);
+                    //                rTrans->localPosition(
+                    //                    Vec2::Max(direction, Vec2::RotateAround(Vec2::zero, direction, rTrans->angle() *
+                    //                    Mathf::Deg2Rad)));
 
-            } else {
-                sourcePoint = rTrans->position();
+                } else {
+                    sourcePoint = rTrans->position();
+                }
+
+                wrapper.dst.w *= pixelsPerPoint;  //_scale.x;
+                wrapper.dst.h *= pixelsPerPoint;  //_scale.y;
+
+                Vec2 arranged(wrapper.dst.x, wrapper.dst.y);
+                if (arranged != Vec2::zero)
+                    arranged = Vec2::RotateAround(sourcePoint, arranged, renderSource->transform()->angle() * Mathf::Deg2Rad);
+
+                //Положение по горизонтале
+                wrapper.dst.x = arranged.x + ((rect.w - wrapper.dst.w) / 2.0f - (point.x - sourcePoint.x) * pixelsPerPoint);
+                //Положение по вертикале
+                wrapper.dst.y = arranged.y + ((rect.h - wrapper.dst.h) / 2.0f + (point.y - sourcePoint.y) * pixelsPerPoint);
+
+                SDL_RenderCopyExF(renderer, wrapper.texture->native(), (SDL_Rect*)&wrapper.src,
+                                  reinterpret_cast<SDL_FRect*>(&wrapper.dst), renderSource->transform()->angle(), nullptr,
+                                  SDL_RendererFlip::SDL_FLIP_NONE);
             }
-
-            wrapper.dst.w *= pixelsPerPoint;  //_scale.x;
-            wrapper.dst.h *= pixelsPerPoint;  //_scale.y;
-
-            Vec2 arranged(wrapper.dst.x, wrapper.dst.y);
-            if (arranged != Vec2::zero)
-                arranged = Vec2::RotateAround(sourcePoint, arranged, renderSource->transform()->angle() * Mathf::Deg2Rad);
-
-            //Положение по горизонтале
-            wrapper.dst.x = arranged.x + ((rect.w - wrapper.dst.w) / 2.0f - (point.x - sourcePoint.x) * pixelsPerPoint);
-            //Положение по вертикале
-            wrapper.dst.y = arranged.y + ((rect.h - wrapper.dst.h) / 2.0f + (point.y - sourcePoint.y) * pixelsPerPoint);
-
-            SDL_RenderCopyExF(renderer, wrapper.texture->native(), (SDL_Rect*)&wrapper.src,
-                              reinterpret_cast<SDL_FRect*>(&wrapper.dst), renderSource->transform()->angle(), nullptr,
-                              SDL_RendererFlip::SDL_FLIP_NONE);
         }
-    }
     // Render Lights
-    for (auto lightSource : *std::get<std::set<Light*>*>(stack)) {
+    for (auto lightSource : *std::get<1>(stack)) {
         // drawing
         // clear
         wrapper = {};
@@ -129,15 +131,16 @@ void Camera2D::render(SDL_Renderer* renderer, Rect rect, GameObject* root) {
     }
 
     if (visibleObjects) {
-        for (auto face : (*std::get<std::set<Renderer*>*>(stack))) {
-            Vec2 p = face->transform()->position();
-            Vec2 sz = face->GetSize() * 2;
-            Gizmos::setColor(Color::blue);
-            Gizmos::DrawRectangleRounded(p, sz.x, sz.y, 5);
-            Gizmos::setColor(Color::black);
-            Gizmos::DrawPosition(p, 0.2f);
-            Gizmos::DrawTextOnPosition(p, face->gameObject()->m_name);
-        }
+        for (auto layer : (*std::get<0>(stack)))
+            for (auto face : layer.second) {
+                Vec2 p = face->transform()->position();
+                Vec2 sz = face->GetSize() * 2;
+                Gizmos::setColor(Color::blue);
+                Gizmos::DrawRectangleRounded(p, sz.x, sz.y, 5);
+                Gizmos::setColor(Color::black);
+                Gizmos::DrawPosition(p, 0.2f);
+                Gizmos::DrawTextOnPosition(p, face->gameObject()->m_name);
+            }
     }
 }
 }  // namespace RoninEngine::Runtime

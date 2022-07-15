@@ -39,8 +39,14 @@ Transform* Transform::child_of(int index) {
     return tf;
 }
 
+void Transform::LookAt(Transform* target) { LookAt(target, Vec2::up); }
+
+void Transform::LookAt(Transform* target, Vec2 axis) { LookAt(target->p, axis); }
+
+void Transform::LookAt(Vec2 target) { LookAt(target, Vec2::up); }
+
 void Transform::LookAt(Vec2 target, Vec2 axis) {
-    _angle = Vec2::Angle(axis, target - p) * Mathf::Rad2Deg;
+    _angle = Vec2::Angle(axis, target - position()) * Mathf::Rad2Deg;
 
     // normalize horz
     if (axis.x == 1) {
@@ -56,15 +62,9 @@ void Transform::LookAt(Vec2 target, Vec2 axis) {
     }
 }
 
-void Transform::LookAt(Transform* target) { LookAt(target, Vec2::up); }
-
-void Transform::LookAt(Transform* target, Vec2 axis) { LookAt(target->p, axis); }
-
-void Transform::LookAt(Vec2 target) { LookAt(target, Vec2::up); }
-
 void Transform::LookAtLerp(Vec2 target, float t) {
     Vec2 axis = Vec2::up;
-    float a = Vec2::Angle(axis, target - p) * Mathf::Rad2Deg;
+    float a = Vec2::Angle(axis, target - position()) * Mathf::Rad2Deg;
     // normalize
     if (axis.x == 1) {
         if (p.y < target.y) a = -a;

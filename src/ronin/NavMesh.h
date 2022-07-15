@@ -73,7 +73,7 @@ class NavMesh {
     inline const bool neuronEmpty(const Runtime::Vec2Int &point);
     inline const Runtime::Vec2Int neuronGetPoint(const Neuron *neuron);
 
-    void neuronLock(const Runtime::Vec2Int &point, bool state);
+    void neuronLock(const Runtime::Vec2Int &point, const bool state);
 
     inline const Runtime::Vec2Int WorldPointToPoint(const RoninEngine::Runtime::Vec2 &worldPoint);
 

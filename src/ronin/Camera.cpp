@@ -71,7 +71,7 @@ inline bool areaCast(Renderer* target, const Vec2Int& wpLeftTop, const Vec2Int& 
     return (pos.x + rSz.x >= wpLeftTop.x && pos.x - rSz.x <= wpRightBottom.x) &&
            (pos.y - rSz.y <= wpLeftTop.y && pos.y + rSz.y >= wpRightBottom.y);
 }
-std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
+std::tuple<std::map<int, std::set<Renderer*>>*, std::set<Light*>*> Camera::matrixSelection() {
     /*       This is projection
             x-------------------
             |                   |      = * - is Vector2 (point)
@@ -97,10 +97,7 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
              ' * * * * * * * * *'
     */
 
-    constexpr std::uint8_t Nz = 2;
-    std::list<Renderer*> layers[Nz];
-    std::uint8_t zN = 0;
-    if (__rendererOutResults.empty()) {
+    if (renders.empty()) {
         Resolution res = Application::getResolution();
         Vec2Int wpLeftTop = Vec2::RoundToInt(ScreenToWorldPoint(Vec2::zero));
         Vec2Int wpRightBottom = Vec2::RoundToInt(ScreenToWorldPoint(Vec2(res.width, res.height)));
@@ -112,7 +109,7 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
         //собираем оставшиеся которые прикреплены к видимости
         for (auto x = std::begin(prev); x != std::end(prev); ++x) {
             if (areaCast(*x, wpLeftTop, wpRightBottom)) {
-                if (__rendererOutResults.find((*x)) == std::end(__rendererOutResults)) __rendererOutResults.insert((*x));
+                renders[(*x)->zOrder].insert((*x));
             } else {
                 _removes.emplace_back((*x));
             }
@@ -120,18 +117,17 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
 
         for (Renderer* y : _removes) prev.erase(y);
 
-        // ordering and collect
-        /*std::list<Renderer*>* target;
-        while ((target = zN < Nz ? &layers[zN++] : nullptr)) {
-            for (Renderer* el : *target) {
-                __rendererOutResults.insert(el);
-                prev.insert(el);
+        // order by zOrder component
+
+        for (auto iter = std::begin(result); iter != std::end(result); ++iter) {
+            std::list<Renderer*> rends = (*iter)->gameObject()->getComponents<Renderer>();
+            if (!rends.empty()) {
+                for (auto x : rends) {
+                    renders[x->zOrder].insert(x);
+                }
+
+                prev.insert(rends.begin(), rends.end());
             }
-        }*/
-        for (Transform* el : result) {
-            std::list<Renderer*> rends = el->gameObject()->getComponents<Renderer>();
-            __rendererOutResults.insert(rends.begin(), rends.end());
-            prev.insert(rends.begin(), rends.end());
         }
     }
 
@@ -140,7 +136,7 @@ std::tuple<std::set<Renderer*>*, std::set<Light*>*> Camera::matrixSelection() {
                                   RoninEngine::Level::self()->_assoc_lightings.end());
     }
 
-    return make_tuple(&__rendererOutResults, &__lightsOutResults);
+    return make_tuple(&renders, &__lightsOutResults);
 }
 
 const Vec2 Camera::ScreenToWorldPoint(Vec2 screenPoint) {

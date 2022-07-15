@@ -109,7 +109,7 @@ void Level::render_info(int *culled, int *fullobjects) {
     if (!curCamera) return;
 
     if (culled) {
-        (*culled) = selfLevel->_assoc_renderers.size() - curCamera->__rendererOutResults.size();
+        (*culled) = selfLevel->_assoc_renderers.size() - curCamera->renders.size();
     }
 
     if (fullobjects) {
@@ -189,7 +189,7 @@ void Level::RenderLevel(SDL_Renderer *renderer) {
     if (cam) {
         Resolution res = Application::getResolution();
         // FlushCache last result
-        if (cam->targetClear) cam->__rendererOutResults.clear();
+        if (cam->targetClear) cam->renders.clear();
         // Рисуем в соотношение окна...
         cam->render(renderer, {0, 0, res.width, res.height}, main_object);
     }

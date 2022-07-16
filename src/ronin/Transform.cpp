@@ -120,7 +120,7 @@ void Transform::localPosition(const Vec2& value) {
     if (value == p) return;
     Vec2Int lastPoint = Vec2::RoundToInt(position());
     p = value;
-    Level::self()->matrix_nature(this, lastPoint);
+    if (gameObject()->isActive()) Level::self()->matrix_nature(this, lastPoint);
 }
 
 Vec2 Transform::position() { return (this->m_parent) ? this->m_parent->position() + p : p; }
@@ -129,14 +129,33 @@ void Transform::position(const Vec2& value) {
     if (value == position()) return;
     Vec2 lastPoint = position();
     p = (this->m_parent) ? this->m_parent->position() + value : value;  // set the position
-    Level::self()->matrix_nature(this, Vec2::RoundToInt(lastPoint));
+    if (gameObject()->isActive()) Level::self()->matrix_nature(this, Vec2::RoundToInt(lastPoint));
     for (Transform* chlid : hierarchy) chlid->parent_notify(lastPoint);
 }
 
 void Transform::parent_notify(Vec2 lastParentPoint) {
     Vec2 lastPoint = lastParentPoint + p;  // world cordinates
-    Level::self()->matrix_nature(this, Vec2::RoundToInt(lastPoint));
+    if (gameObject()->isActive()) Level::self()->matrix_nature(this, Vec2::RoundToInt(lastPoint));
     for (Transform* chlid : hierarchy) chlid->parent_notify(lastPoint);
+}
+
+void Transform::parent_notify_activeState(GameObject* from) {
+    Vec2Int pos = Vec2::RoundToInt(this->position());
+    if (!from->isActive()) {
+        decltype(Level::self()->matrixWorld)::iterator iter = Level::self()->matrixWorld.find(pos);
+        // Delete from matrix
+        if (iter != std::end(Level::self()->matrixWorld)) {
+            iter->second.erase(transform());
+            if (iter->second.empty()) {
+                Level::self()->matrixWorld.erase(iter);
+            }
+        }
+    } else {
+        // Add to matrix
+        Level::self()->matrixWorld[pos].insert(this);
+    }
+    // send in hierarchy
+    for (Transform* chlid : hierarchy) chlid->parent_notify_activeState(from);
 }
 
 float Transform::angle() { return (this->m_parent) ? this->m_parent->_angle + this->_angle : this->_angle; }
@@ -155,7 +174,7 @@ void Transform::localAngle(float value) {
 Transform* Transform::parent() { return m_parent; }
 
 void Transform::setParent(Transform* parent, bool worldPositionStays) {
-    if(this->m_parent == nullptr){
+    if (this->m_parent == nullptr) {
         throw std::runtime_error("This transform is not they are parent, or is main parent?");
     }
     Vec2 lastParentPoint = this->m_parent->position();

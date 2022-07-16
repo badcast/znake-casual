@@ -56,8 +56,8 @@ class GameObject final : public Object {
 
     bool isActive();
     bool isActiveHierarchy();
-    bool setActive(bool state);
-    bool setActiveRecursivelly(bool state);
+    void setActive(bool state);
+    void setActiveRecursivelly(bool state);
 
     Transform* transform();
 

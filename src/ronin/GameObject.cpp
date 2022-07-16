@@ -10,13 +10,13 @@ template SpriteRenderer* GameObject::addComponent<SpriteRenderer>();
 template Camera2D* GameObject::addComponent<Camera2D>();
 template Spotlight* GameObject::addComponent<Spotlight>();
 
-GameObject::GameObject() : GameObject("GameObject") {}
+GameObject::GameObject() : GameObject(typeid(*this).name()) {}
 
 GameObject::GameObject(const std::string& name) : Object(name) {
     m_components.push_back(create_empty_transform());
     m_components.front()->pin = this;
-    Level::self()->_gameObjects.emplace_back(this);
     m_active = true;
+    Level::self()->_gameObjects.emplace_back(this);
 }
 
 GameObject::~GameObject() {
@@ -27,6 +27,13 @@ GameObject::~GameObject() {
 }
 
 bool GameObject::isActive() { return m_active; }
+
+void GameObject::setActive(bool state) {
+    if (m_active == state) return;
+
+    m_active = state;
+    transform()->parent_notify_activeState(this);
+}
 
 inline Transform* GameObject::transform() {
     // NOTE: transform всегда первый объект из контейнера m_components

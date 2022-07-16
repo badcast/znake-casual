@@ -8,6 +8,7 @@
 namespace RoninEngine::Runtime {
 class Transform : public Component {
     friend class RoninEngine::Level;
+    friend class GameObject;
     friend class Camera;
     friend class Camera2D;
     friend class Physics2D;
@@ -21,6 +22,7 @@ class Transform : public Component {
     float _angle;
 
     void parent_notify(Vec2 lastParentPoint);
+    void parent_notify_activeState(GameObject* from);
 
     static void hierarchy_parent_change(Transform* from, Transform* newParent);
     static void hierarchy_remove(Transform* from, Transform* off);
@@ -63,14 +65,14 @@ class Transform : public Component {
     const Vec2 transformDirection(Vec2 direction);
     const Vec2 transformDirection(float x, float y);
 
-    //get position in world space
+    // get position in world space
     Vec2 position();
-    //set position in world space
+    // set position in world space
     void position(const Vec2& value);
 
-    //get position in local space from parent
+    // get position in local space from parent
     Vec2 localPosition();
-    //set position in local space from parent
+    // set position in local space from parent
     void localPosition(const Vec2& value);
 
     float angle();

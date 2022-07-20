@@ -207,11 +207,11 @@ void RoninEngine::Runtime::Gizmos::DrawTextOnPosition(Vec2 origin, const std::st
     UI::Render_String(Application::GetRenderer(), r, text.c_str(), text.length(), 2);
 }
 
-void Gizmos::DrawSphere(Vec2 origin, float distance) {
+void Gizmos::DrawCircle(Vec2 origin, float distance) {
     origin = Camera::mainCamera()->WorldToScreenPoint(origin);
     std::uint16_t x, y, r;
-    x = origin.x;
-    y = origin.y;
+    x = Mathf::number(origin.x);
+    y = Mathf::number(origin.y);
     r = static_cast<std::uint16_t>(distance * pixelsPerPoint);
     Color m_color = getColor();
     circleRGBA(Application::GetRenderer(), x, y, r, m_color.r, m_color.g, m_color.b, m_color.a);

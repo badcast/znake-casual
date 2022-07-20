@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(RoninEngine LANGUAGES CXX)
+project(RoninEngine LANGUAGES CXX VERSION 1.0)
 
-set(RUNTIME_OUTPUT_NAME "engine")
+set(RONINENGINE_VERSION_MIN 1.0)
+set(RUNTIME_OUTPUT_NAME "ronin.${RONINENGINE_VERSION_MIN}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -10,7 +11,7 @@ find_package(SDL2 REQUIRED)
 
 add_subdirectory(src/ronin) #get sources and linking from the "Sources" directory
 
-add_library(RoninEngine STATIC ${RONINE_ENGINE_HEADERS} ${RONIN_ENGINE_SOURCES})
+add_library(RoninEngine SHARED ${RONINE_ENGINE_HEADERS} ${RONIN_ENGINE_SOURCES})
 set_target_properties(RoninEngine PROPERTIES
     OUTPUT_NAME ${RUNTIME_OUTPUT_NAME})
 
@@ -23,13 +24,11 @@ target_link_libraries(RoninEngine SDL2::SDL2 SDL2_mixer SDL2_ttf SDL2_image SDL2
 
 #create link resources "data:resources"
 file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
 set(_DATA_DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data")
-
 if(NOT EXISTS "${_DATA_DESTINATION}")
     message(STATUS "Linking data to \"${_DATA_DESTINATION}\"")
     file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}/resources/data" "${_DATA_DESTINATION}" SYMBOLIC)
 else()
-    message(STATUS "Link exists - not required")
+    message(STATUS "Symbolic link exists - not required")
 endif()
 unset(_DATA_DESTINATION)

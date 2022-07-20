@@ -9,7 +9,7 @@ namespace RoninEngine::Runtime {
          public Component
    {
       public:
-         Behaviour() : Behaviour("Behaviour") {}
+         Behaviour() : Behaviour(typeid(*this).name()) {}
          Behaviour(const std::string& name) : Component(name) {}
          Behaviour(const Behaviour&) = delete;
          Behaviour(Behaviour&&) = delete;
@@ -19,6 +19,7 @@ namespace RoninEngine::Runtime {
          virtual void OnStart() {}
          virtual void OnUpdate() {}
          virtual void OnLateUpdate() {}
+         virtual void OnGizmos() {}
          virtual void OnDestroy() {}
    };
 }

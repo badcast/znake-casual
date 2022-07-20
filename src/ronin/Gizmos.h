@@ -18,7 +18,7 @@ class Gizmos {
     static void DrawNavMesh(AIPathFinder::NavMesh* map);
     static void DrawTriangle(Vec2 origin, float base, float height);
     static void DrawTextOnPosition(Vec2 origin, const std::string& text);
-    static void DrawSphere(Vec2 origin, float distance);
+    static void DrawCircle(Vec2 origin, float distance);
 
     static void DrawFill(Vec2 center, float width, float height);
     static void DrawFillSquare(Vec2 center, float width);

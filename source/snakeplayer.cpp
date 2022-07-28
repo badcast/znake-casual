@@ -31,8 +31,8 @@ void SnakePlayer::OnAwake() {
     tiles.emplace_back(body->transform());
 
     appendTile();
+    appendTile();
 
-    //     appendTile();
     //     appendTile();
     //     appendTile();
     //     appendTile();
@@ -74,33 +74,40 @@ void SnakePlayer::OnGizmos() {
     Gizmos::setColor(Color::green);
 
     static std::vector<Vec2> tempTiles(tiles.size(), Vec2::zero);
-    auto bound = ++bounds.begin();
+    auto bound = bounds.begin();
     static float keepDistance = 0.5;
-    Vec2 follow;
-    for (int x = 0; x < tempTiles.size(); ++x) {
+    Vec2 follow = bound->second.upperBound;
 
-        //Draw rotate state
-        if (bounds.size() > 1 && bound->first == x) {
-            Gizmos::setColor(Color::red);
-            Gizmos::DrawCircle(bound->second.upperBound, 0.25f);
-            Gizmos::DrawPosition(bound->second.upperBound, 0.25f);
-            Gizmos::setColor(Color::green);
-            ++bound;
-        }
+    for (int x = 0; x < tempTiles.size(); ++x) {
+        Vec2 last = follow;
+        // Draw rotate state
+        if (bounds.size() - 1 > bound->first) {
+            if (bound->first == x) {
+                ++bound;
+                follow = bound->second.upperBound;
+                Gizmos::setColor(Color::red);
+                Gizmos::DrawCircle(follow, 0.25f);
+                Gizmos::DrawPosition(follow, 0.25f);
+                Gizmos::setColor(Color::green);
+            }
+        } else
+            follow -= bound->second.direction * keepDistance;
+
+        Gizmos::DrawLine(last, follow);
     }
 }
 
-float getQuarterAngle(const Vec2& dir) {
-    float a = 0;
+float get_quarter_angle(const Vec2& dir) {
+    float x = 0;
 
     if (dir.y < 0)
-        a = 180;
+        x = 180;
     else if (dir.x > 0)
-        a = 270;
+        x = 270;
     else if (dir.x < 0)
-        a = 90;
+        x = 90;
 
-    return a;
+    return x;
 }
 
 void SnakePlayer::updatePosition() {
@@ -110,12 +117,11 @@ void SnakePlayer::updatePosition() {
     AIPathFinder::Neuron* nextNeuron =
         navmesh->GetNeuron(lastPosition + Vec2::Scale(*firstDirection, navmesh->worldScale), npoint);
 
-    //Удалить последний хвост который больше не требуется
-    if (bounds.back().first == tiles.size() + 1) bounds.pop_back();
-
     //Увеличить все части поворотов на 1, это когда все хвосты двигаются вперед
     for (auto x = ++std::begin(bounds); x != std::end(bounds); ++(*x++).first)
         ;
+    //Удалить последний хвост который больше не требуется
+    if (bounds.back().first == tiles.size() + 1) bounds.pop_back();
 
     //Произошло вращение
     if (*firstDirection != lastMovement) {
@@ -140,8 +146,8 @@ void SnakePlayer::updatePosition() {
     }
 
     *nextPoint = navmesh->PointToWorldPosition(nextNeuron);
-    head->transform()->angle(getQuarterAngle(*firstDirection));  // rotate head
-    transform()->position(*nextPoint);                           // move transform
+    head->transform()->angle(get_quarter_angle(*firstDirection));  // rotate head
+    transform()->position(*nextPoint);                             // move transform
 }
 
 void SnakePlayer::appendTile() { tiles.emplace_back(Instantiate(tiles.front()->gameObject())->transform()); }

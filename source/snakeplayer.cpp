@@ -33,11 +33,11 @@ void SnakePlayer::OnAwake() {
     appendTile();
     appendTile();
 
-    //     appendTile();
-    //     appendTile();
-    //     appendTile();
-    //     appendTile();
-    //     appendTile();
+    appendTile();
+    appendTile();
+    appendTile();
+    appendTile();
+    appendTile();
 }
 
 void SnakePlayer::OnStart() {
@@ -70,6 +70,8 @@ void SnakePlayer::OnUpdate() {
 }
 
 void SnakePlayer::OnGizmos() {
+    if (lastMovement != *firstDirection) return;
+
     // draw tiles
     Gizmos::setColor(Color::green);
 
@@ -90,6 +92,7 @@ void SnakePlayer::OnGizmos() {
                 Gizmos::DrawPosition(follow, 0.25f);
                 Gizmos::setColor(Color::green);
             }
+
         } else
             follow -= bound->second.direction * keepDistance;
 
@@ -116,12 +119,12 @@ void SnakePlayer::updatePosition() {
     Vec2Int npoint;
     AIPathFinder::Neuron* nextNeuron =
         navmesh->GetNeuron(lastPosition + Vec2::Scale(*firstDirection, navmesh->worldScale), npoint);
+    //Удалить последний хвост который больше не требуется
+    if (bounds.back().first == tiles.size()) bounds.pop_back();
 
     //Увеличить все части поворотов на 1, это когда все хвосты двигаются вперед
     for (auto x = ++std::begin(bounds); x != std::end(bounds); ++(*x++).first)
         ;
-    //Удалить последний хвост который больше не требуется
-    if (bounds.back().first == tiles.size() + 1) bounds.pop_back();
 
     //Произошло вращение
     if (*firstDirection != lastMovement) {

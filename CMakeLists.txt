@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.0)
 
 project(ZnakeCasual LANGUAGES CXX)
 
@@ -21,9 +21,5 @@ file(GLOB_RECURSE ZNAKE_HEADERS
 
 add_executable(ZnakeCasual ${ZNAKE_HEADERS} ${ZNAKE_SOURCES})
 set_target_properties(ZnakeCasual PROPERTIES OUTPUT_NAME znakegame)
-
-
-
-#set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-fsigned-char -finput-charset=UTF-8   -fexec-charset=CP1251")
 
 target_link_libraries(ZnakeCasual PUBLIC RoninEngine)

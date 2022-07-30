@@ -18,7 +18,7 @@ public:
     GameObject* arround;
     GameObject* loopbackTile;
     Terrain2D * terrain;
-    std::list<std::pair<int, TileDirection>> bounds;
+    std::list<std::pair<int, TileDirection>> znake_bounds;
     std::vector<Transform*> tiles;
     std::list<Transform*> arrounds;
 

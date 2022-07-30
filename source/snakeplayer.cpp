@@ -32,11 +32,6 @@ void SnakePlayer::OnAwake() {
 
     appendTile();
     appendTile();
-
-    appendTile();
-    appendTile();
-    appendTile();
-    appendTile();
     appendTile();
 }
 
@@ -44,8 +39,8 @@ void SnakePlayer::OnStart() {
     speed = 0.1;
     //Всегда направляющий первый
     TileDirection tinfo = {Vec2::up, transform()->position()};
-    lastMovement = *(firstDirection = &bounds.emplace_front(0, tinfo).second.direction);
-    nextPoint = &bounds.front().second.upperBound;
+    lastMovement = *(firstDirection = &znake_bounds.emplace_front(0, tinfo).second.direction);
+    nextPoint = &znake_bounds.front().second.upperBound;
     updatePosition();
 }
 
@@ -69,37 +64,6 @@ void SnakePlayer::OnUpdate() {
     updatePosition();
 }
 
-void SnakePlayer::OnGizmos() {
-    if (lastMovement != *firstDirection) return;
-
-    // draw tiles
-    Gizmos::setColor(Color::green);
-
-    static std::vector<Vec2> tempTiles(tiles.size(), Vec2::zero);
-    auto bound = bounds.begin();
-    static float keepDistance = 0.5;
-    Vec2 follow = bound->second.upperBound;
-
-    for (int x = 0; x < tempTiles.size(); ++x) {
-        Vec2 last = follow;
-        // Draw rotate state
-        if (bounds.size() - 1 > bound->first) {
-            if (bound->first == x) {
-                ++bound;
-                follow = bound->second.upperBound;
-                Gizmos::setColor(Color::red);
-                Gizmos::DrawCircle(follow, 0.25f);
-                Gizmos::DrawPosition(follow, 0.25f);
-                Gizmos::setColor(Color::green);
-            }
-
-        } else
-            follow -= bound->second.direction * keepDistance;
-
-        Gizmos::DrawLine(last, follow);
-    }
-}
-
 float get_quarter_angle(const Vec2& dir) {
     float x = 0;
 
@@ -113,24 +77,71 @@ float get_quarter_angle(const Vec2& dir) {
     return x;
 }
 
+
+void SnakePlayer::OnGizmos() {
+    if (lastMovement != *firstDirection) return;
+
+    // draw tiles
+    Gizmos::setColor(Color::green);
+
+    static float keepDistance = 0.5;
+    static std::vector<Vec2> tempTiles(tiles.size(), Vec2::zero);
+    auto currentBound = znake_bounds.begin();
+    Vec2 follow = currentBound->second.upperBound;
+
+    for (int x = 0, count = tiles.size(); x < count; ++x) {
+        Vec2 last = follow;
+        // направляем хвост
+        follow -= currentBound->second.direction * keepDistance;
+//        tiles[x]->position(follow);
+//        tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
+        // set position tiles
+        Gizmos::setColor(Color::blue);
+        Gizmos::DrawPosition(follow, 0.3f);
+        Gizmos::setColor(Color::green);
+        Gizmos::DrawLine(last, follow);
+
+        // Draw rotate state
+        if (znake_bounds.size() > 1 && currentBound != --std::end(znake_bounds)) {
+            if (currentBound->first == x) {
+                //select next bound
+                ++currentBound;
+
+                if (currentBound->first == 3) {
+                    int ccc = 0;
+                }
+                //assign bound position
+                follow = currentBound->second.upperBound;
+                Gizmos::setColor(Color::red);
+                Gizmos::DrawCircle(follow, 0.25f);
+                Gizmos::DrawPosition(follow, 0.25f);
+                Gizmos::setColor(Color::green);
+            }
+        }
+    }
+}
+
+
 void SnakePlayer::updatePosition() {
     auto navmesh = terrain->getNavMesh();
     Vec2 lastPosition = transform()->position();
     Vec2Int npoint;
     AIPathFinder::Neuron* nextNeuron =
         navmesh->GetNeuron(lastPosition + Vec2::Scale(*firstDirection, navmesh->worldScale), npoint);
-    //Удалить последний хвост который больше не требуется
-    if (bounds.back().first == tiles.size()) bounds.pop_back();
 
-    //Увеличить все части поворотов на 1, это когда все хвосты двигаются вперед
-    for (auto x = ++std::begin(bounds); x != std::end(bounds); ++(*x++).first)
+    //Удалить последний хвост который больше не требуется
+    if (znake_bounds.back().first == tiles.size()) znake_bounds.pop_back();
+
+    //Увеличить все части поворотов на 1, когда хвосты двигаются вперед
+    // Игнорировать 1 часть слежение, он же head
+    for (auto x = ++std::begin(znake_bounds); x != std::end(znake_bounds); ++(*x++).first)
         ;
 
     //Произошло вращение
     if (*firstDirection != lastMovement) {
-        //Создаем цикл для разделение из последнего направления движения и позиций в глобальных координатах
-        TileDirection tinfo = {lastMovement, lastPosition};
-        bounds.insert(++bounds.begin(), std::make_pair(1, tinfo));  // разделить хвосты с 0 точки, т.е первой
+        //Создать новую часть разделения, от изменения направление head
+        TileDirection newBound = {lastMovement, lastPosition};
+        znake_bounds.insert(++znake_bounds.begin(), std::make_pair(1, newBound));
         lastMovement = *firstDirection;
     }
 

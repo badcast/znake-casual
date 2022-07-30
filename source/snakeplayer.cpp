@@ -90,8 +90,8 @@ void SnakePlayer::OnGizmos() {
         Vec2 last = follow;
         // направляем хвост
         follow -= currentBound->second.direction * keepDistance;
-        tiles[x]->position(follow);
-        tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
+//        tiles[x]->position(follow);
+//        tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
         // set position tiles
         Gizmos::setColor(Color::blue);
         Gizmos::DrawPosition(follow, 0.3f);

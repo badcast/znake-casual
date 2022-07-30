@@ -63,7 +63,6 @@ void SnakePlayer::OnUpdate() {
     }
     updatePosition();
 }
-
 float get_quarter_angle(const Vec2& dir) {
     float x = 0;
 
@@ -76,8 +75,6 @@ float get_quarter_angle(const Vec2& dir) {
 
     return x;
 }
-
-
 void SnakePlayer::OnGizmos() {
     if (lastMovement != *firstDirection) return;
 
@@ -93,8 +90,8 @@ void SnakePlayer::OnGizmos() {
         Vec2 last = follow;
         // направляем хвост
         follow -= currentBound->second.direction * keepDistance;
-//        tiles[x]->position(follow);
-//        tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
+        tiles[x]->position(follow);
+        tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
         // set position tiles
         Gizmos::setColor(Color::blue);
         Gizmos::DrawPosition(follow, 0.3f);
@@ -120,6 +117,7 @@ void SnakePlayer::OnGizmos() {
         }
     }
 }
+
 
 
 void SnakePlayer::updatePosition() {

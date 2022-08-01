@@ -31,8 +31,7 @@ void SnakePlayer::OnAwake() {
     tiles.emplace_back(body->transform());
 
     appendTile();
-    appendTile();
-    appendTile();
+
 }
 
 void SnakePlayer::OnStart() {
@@ -88,22 +87,10 @@ void SnakePlayer::OnGizmos() {
     Vec2 last;
     // iteration for tiles
     for (int x = 0, count = tiles.size(); x < count; ++x) {
-        last = follow;  // save last position
-        // направляем хвост за связыванием (bound)
-        follow -= currentBound->second.direction * keepDistance;
 
-        // tiles[x]->position(follow);
-        // tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
-
-        // set position tiles
-        Gizmos::setColor(Color::blue);
-        Gizmos::DrawPosition(follow, 0.3f);
-        Gizmos::setColor(Color::green);
-        Gizmos::DrawLine(last, follow);
 
         // Draw rotate state
         if (znake_bounds.size() > 1 && currentBound != endBound) {
-
             if (std::next(currentBound)->first == x) {
                 // select next bound
                 ++currentBound;
@@ -116,6 +103,22 @@ void SnakePlayer::OnGizmos() {
                 Gizmos::setColor(Color::green);
             }
         }
+        last = follow;  // save last position
+        // направляем хвост за связыванием (bound)
+        follow -= currentBound->second.direction * keepDistance;
+
+
+        // tiles[x]->position(follow);
+        // tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
+
+        // set position tiles
+        if (x == tiles.size() - 1)
+            Gizmos::setColor(Color::red);
+        else
+            Gizmos::setColor(Color::blue);
+        Gizmos::DrawPosition(follow, 0.3f);
+        Gizmos::setColor(Color::green);
+        Gizmos::DrawLine(last, follow);
     }
 }
 

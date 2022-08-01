@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-
+#SET PROJECT NAME, VERSION
 project(RoninEngine LANGUAGES CXX VERSION 1.0)
 
 set(RONINENGINE_VERSION_MIN 1.0)

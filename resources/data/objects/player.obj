@@ -1,0 +1,36 @@
+object				"player"			// Object name 
+class 		"Player"			// Object type
+properties			//fixed image size of original 
+{
+	//default position 
+	position 		{0.0,0.0}
+	angle 			90.0
+	speed			1.0
+	components{
+		Spotlight
+		{
+				//Do params
+			range 		15.0
+			intensity	1.0
+		}
+		
+		SpriteRenderer
+		{
+			renderType 			"Simple" 
+			tileRenderPresent	"Fixed"
+			sprite 	{
+				texture 		"Snake-head"
+			}
+		}
+		
+		Camera2D
+		{
+			visibleBorders 	false
+			visibleGrids	false
+			visibleObjects	false
+			targetClear 	true
+			distanceEvcall	2
+		}     
+	}
+	
+}

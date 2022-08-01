@@ -43,7 +43,6 @@ void SnakePlayer::OnStart() {
 }
 
 void SnakePlayer::OnUpdate() {
-
     float curSpeed = input::get_key(SDL_SCANCODE_LSHIFT) ? (speed * 10) : speed;
     Vec2 axis = input::get_axis();
     if (axis != Vec2::zero) {

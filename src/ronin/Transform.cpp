@@ -161,8 +161,6 @@ void Transform::parent_notify_activeState(GameObject* from) {
 float Transform::angle() { return (this->m_parent) ? this->m_parent->_angle + this->_angle : this->_angle; }
 
 void Transform::angle(float value) {
-    while (value > 360) value -= 360;
-
     this->_angle = (this->m_parent) ? this->m_parent->angle() - value : value;
 }
 

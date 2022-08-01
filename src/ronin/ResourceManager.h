@@ -74,23 +74,23 @@ class GC {
     static void continue_gc();
 
    public:
-    [[deprecate]] static void LoadImages(const char *filename);
-    [[deprecate]] static void UnloadUnused();
+    [[deprecated]] static void LoadImages(const char *filename);
+    [[deprecated]] static void UnloadUnused();
 
-    [[deprecate]] static std::list<SDL_Surface *> *LoadSurfaces(const std::string &packName);
-    [[deprecate]] static std::list<Runtime::Texture *> *LoadTextures(const std::string &packName, bool autoUnload = true);
-    [[deprecate]] static SDL_Surface *GetSurface(const std::string &surfaceName);
-    [[deprecate]] static SDL_Surface *GetSurface(const std::string &surfaceName, FolderKind pathOn);
-    [[deprecate]] static Texture *GetTexture(const std::string &resourceName, FolderKind pathOn, bool autoUnload = true);
-    [[deprecate]] static Texture *GetTexture(const std::string &resourceName, bool autoUnload = true);
-    [[deprecate]] static Texture *GetTexture(const int w, const int h);
-    [[deprecate]] static Texture *GetTexture(const int w, const int h, const ::SDL_PixelFormatEnum format);
-    [[deprecate]] static Texture *GetTexture(const int w, const int h, const ::SDL_PixelFormatEnum format,
+    [[deprecated]] static std::list<SDL_Surface *> *LoadSurfaces(const std::string &packName);
+    [[deprecated]] static std::list<Runtime::Texture *> *LoadTextures(const std::string &packName, bool autoUnload = true);
+    [[deprecated]] static SDL_Surface *GetSurface(const std::string &surfaceName);
+    [[deprecated]] static SDL_Surface *GetSurface(const std::string &surfaceName, FolderKind pathOn);
+    [[deprecated]] static Texture *GetTexture(const std::string &resourceName, FolderKind pathOn, bool autoUnload = true);
+    [[deprecated]] static Texture *GetTexture(const std::string &resourceName, bool autoUnload = true);
+    [[deprecated]] static Texture *GetTexture(const int w, const int h);
+    [[deprecated]] static Texture *GetTexture(const int w, const int h, const ::SDL_PixelFormatEnum format);
+    [[deprecated]] static Texture *GetTexture(const int w, const int h, const ::SDL_PixelFormatEnum format,
                                              const ::SDL_TextureAccess access);
-    [[deprecate]] static SDL_Cursor *GetCursor(const std::string &resourceName, const Vec2Int &hotspot, bool autoUnload = true);
-    [[deprecate]] static SDL_Cursor *GetCursor(SDL_Surface *texture, const Vec2Int &hotspot);
+    [[deprecated]] static SDL_Cursor *GetCursor(const std::string &resourceName, const Vec2Int &hotspot, bool autoUnload = true);
+    [[deprecated]] static SDL_Cursor *GetCursor(SDL_Surface *texture, const Vec2Int &hotspot);
 
-    [[deprecate]] static Atlas *GetAtlas(const std::string &atlasName);
+    [[deprecated]] static Atlas *GetAtlas(const std::string &atlasName);
 
     static void *gc_malloc(std::size_t size);
 

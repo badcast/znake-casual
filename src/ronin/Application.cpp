@@ -33,7 +33,7 @@ void Application::Init(const std::uint32_t& width, const std::uint32_t& height) 
 
     if (!window) fail(SDL_GetErrorMsg(errorStr, 128));
 
-    renderer = SDL_CreateRenderer(window, -1,  SDL_RENDERER_ACCELERATED/*| SDL_RENDERER_PRESENTVSYNC*/);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED /*| SDL_RENDERER_PRESENTVSYNC*/);
     if (!renderer) fail(SDL_GetErrorMsg(errorStr, 128));
 
     // Brightness - Яркость
@@ -144,7 +144,7 @@ SDL_Surface* Application::ScreenShot() {
     SDL_RenderReadPixels(renderer, nullptr, SDL_PIXELFORMAT_RGBA8888, pixels, pitch);
 
     SDL_Surface* su =
-        SDL_CreateRGBSurfaceFrom(pixels, pitch / 4, rect.h - rect.y, 32, pitch,0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+        SDL_CreateRGBSurfaceFrom(pixels, pitch / 4, rect.h - rect.y, 32, pitch, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
     return su;
 }
 
@@ -174,7 +174,7 @@ bool Application::Simulate() {
     int firstStep;
     char _title[128];
     float fps;
-    float fpsRound = 0;
+   // float fpsRound = 0;
     int delayed;
     SDL_WindowFlags wndFlags;
     SDL_DisplayMode displayMode = Application::getDisplayMode();
@@ -239,7 +239,8 @@ bool Application::Simulate() {
         ++Time::m_frames;  // framecounter
         if (Time::m_frames == 0) Time::m_frames = 1;
 
-        if (Time::startUpTime() > fpsRound) {
+        // if (Time::startUpTime() > fpsRound)
+        {
             fps = (Time::m_frames) / Time::startUpTime();
             std::sprintf(_title,
                          "Ronin Engine (Debug) FPS:%d Memory:%luMiB, "
@@ -247,7 +248,7 @@ bool Application::Simulate() {
                          static_cast<int>(fps), get_process_sizeMemory() / 1024 / 1024, GC::gc_total_allocated(),
                          SDL_GetNumAllocations());
             SDL_SetWindowTitle(Application::GetWindow(), _title);
-            fpsRound = Time::startUpTime() + 1;  // updater per 1 seconds
+           // fpsRound = Time::startUpTime() + 1;  // updater per 1 seconds
         }
 
         Time::m_deltaTime = delayed / secPerFrame;  // get deltas
@@ -291,4 +292,3 @@ void Application::fail(const std::string& message) {
 
 void Application::fail_OutOfMemory() { fail("Out of memory!"); }
 }  // namespace RoninEngine
-

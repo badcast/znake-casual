@@ -233,7 +233,7 @@ void GC::UnloadAll(bool immediate) {
 void GC::CheckResources() {
       std::string p = dataPath();
       char *membuf = (char *)GC::gc_malloc(256);
-      membuf[0] = '\0';
+      *membuf = '\0';
       if (!std::filesystem::exists(p)) {
           SDL_strlcat(membuf, "\"Data\" is not found", 256);
           Application::fail(membuf);

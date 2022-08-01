@@ -7,8 +7,6 @@ set(RUNTIME_OUTPUT_NAME "ronin.${RONINENGINE_VERSION_MIN}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#UPS
-ERROR
 find_package(SDL2 REQUIRED)
 
 add_subdirectory(src/ronin) #get sources and linking from the "Sources" directory

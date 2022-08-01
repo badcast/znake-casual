@@ -30,8 +30,7 @@ void SnakePlayer::OnAwake() {
     arrounds.emplace_back(arround->transform());
     tiles.emplace_back(body->transform());
 
-    appendTile();
-
+    for (int x = 0; x < 10; x++) appendTile();
 }
 
 void SnakePlayer::OnStart() {
@@ -44,6 +43,7 @@ void SnakePlayer::OnStart() {
 }
 
 void SnakePlayer::OnUpdate() {
+
     float curSpeed = input::get_key(SDL_SCANCODE_LSHIFT) ? (speed * 10) : speed;
     Vec2 axis = input::get_axis();
     if (axis != Vec2::zero) {
@@ -57,7 +57,7 @@ void SnakePlayer::OnUpdate() {
         }
     }
 
-    if (Time::frame() % 30 != 0) {
+    if (Time::frame() % (input::get_key(SDL_SCANCODE_LSHIFT) ? 5 : 30) != 0) {
         return;
     }
     updatePosition();
@@ -77,48 +77,26 @@ float get_quarter_angle(const Vec2& dir) {
 void SnakePlayer::OnGizmos() {
     if (lastMovement != *firstDirection) return;
 
-    // draw tiles
-    Gizmos::setColor(Color::green);
+    Vec2 last = transform()->position();
 
-    static float keepDistance = 0.5;
-    auto currentBound = znake_bounds.begin();
-    auto endBound = --znake_bounds.end();
-    Vec2 follow = currentBound->second.upperBound;
-    Vec2 last;
     // iteration for tiles
-    for (int x = 0, count = tiles.size(); x < count; ++x) {
-
-
-        // Draw rotate state
-        if (znake_bounds.size() > 1 && currentBound != endBound) {
-            if (std::next(currentBound)->first == x) {
-                // select next bound
-                ++currentBound;
-
-                // assign bound position
-                follow = currentBound->second.upperBound;
-                Gizmos::setColor(Color::red);
-                Gizmos::DrawCircle(follow, 0.25f);
-                Gizmos::DrawPosition(follow, 0.25f);
-                Gizmos::setColor(Color::green);
-            }
-        }
-        last = follow;  // save last position
-        // направляем хвост за связыванием (bound)
-        follow -= currentBound->second.direction * keepDistance;
-
-
-        // tiles[x]->position(follow);
-        // tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
-
+    for (int x = 0; x < tiles.size(); ++x) {
         // set position tiles
         if (x == tiles.size() - 1)
             Gizmos::setColor(Color::red);
         else
             Gizmos::setColor(Color::blue);
-        Gizmos::DrawPosition(follow, 0.3f);
+        Gizmos::DrawPosition(tiles[x]->position(), 0.3f);
         Gizmos::setColor(Color::green);
-        Gizmos::DrawLine(last, follow);
+        Gizmos::DrawLine(last, tiles[x]->position());
+        last = tiles[x]->position();
+    }
+
+    // draw bounds
+    for (auto bound = ++znake_bounds.begin(); bound != znake_bounds.end(); ++bound) {
+        Gizmos::setColor(Color::red);
+        Gizmos::DrawCircle(bound->second.upperBound, 0.25f);
+        Gizmos::DrawPosition(bound->second.upperBound, 0.25f);
     }
 }
 
@@ -162,6 +140,28 @@ void SnakePlayer::updatePosition() {
     *nextPoint = navmesh->PointToWorldPosition(nextNeuron);
     head->transform()->angle(get_quarter_angle(*firstDirection));  // rotate head
     transform()->position(*nextPoint);                             // move transform
+
+    static float keepDistance = 0.5;
+    auto currentBound = znake_bounds.begin();
+    auto endBound = --znake_bounds.end();
+    Vec2 follow = currentBound->second.upperBound;
+    // iteration for tiles
+    for (int x = 0, count = tiles.size(); x < count; ++x) {
+        // Draw rotate state
+        if (znake_bounds.size() > 1 && currentBound != endBound && std::next(currentBound)->first == x) {
+            // select next bound
+            ++currentBound;
+
+            // assign bound position
+            follow = currentBound->second.upperBound;
+        }
+
+        // направляем хвост за связыванием (bound)
+        follow -= currentBound->second.direction * keepDistance;
+
+        tiles[x]->position(follow);
+        tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
+    }
 }
 
 void SnakePlayer::appendTile() { tiles.emplace_back(Instantiate(tiles.front()->gameObject())->transform()); }

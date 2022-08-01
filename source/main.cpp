@@ -10,7 +10,7 @@ using namespace std;
 int main() {
     using namespace RoninEngine;
 
-    Application::Init(800, 600);
+    Application::Init(1366, 768);
 
     GameLevel level;
     Application::LoadLevel(&level);

@@ -63,7 +63,6 @@ void SnakePlayer::OnUpdate() {
     }
     updatePosition();
 }
-
 float get_quarter_angle(const Vec2& dir) {
     float x = 0;
 
@@ -76,8 +75,6 @@ float get_quarter_angle(const Vec2& dir) {
 
     return x;
 }
-
-
 void SnakePlayer::OnGizmos() {
     if (lastMovement != *firstDirection) return;
 
@@ -85,16 +82,19 @@ void SnakePlayer::OnGizmos() {
     Gizmos::setColor(Color::green);
 
     static float keepDistance = 0.5;
-    static std::vector<Vec2> tempTiles(tiles.size(), Vec2::zero);
     auto currentBound = znake_bounds.begin();
+    auto endBound = --znake_bounds.end();
     Vec2 follow = currentBound->second.upperBound;
-
+    Vec2 last;
+    // iteration for tiles
     for (int x = 0, count = tiles.size(); x < count; ++x) {
-        Vec2 last = follow;
-        // направляем хвост
+        last = follow;  // save last position
+        // направляем хвост за связыванием (bound)
         follow -= currentBound->second.direction * keepDistance;
-//        tiles[x]->position(follow);
-//        tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
+
+        // tiles[x]->position(follow);
+        // tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
+
         // set position tiles
         Gizmos::setColor(Color::blue);
         Gizmos::DrawPosition(follow, 0.3f);
@@ -102,15 +102,13 @@ void SnakePlayer::OnGizmos() {
         Gizmos::DrawLine(last, follow);
 
         // Draw rotate state
-        if (znake_bounds.size() > 1 && currentBound != --std::end(znake_bounds)) {
-            if (currentBound->first == x) {
-                //select next bound
+        if (znake_bounds.size() > 1 && currentBound != endBound) {
+
+            if (std::next(currentBound)->first == x) {
+                // select next bound
                 ++currentBound;
 
-                if (currentBound->first == 3) {
-                    int ccc = 0;
-                }
-                //assign bound position
+                // assign bound position
                 follow = currentBound->second.upperBound;
                 Gizmos::setColor(Color::red);
                 Gizmos::DrawCircle(follow, 0.25f);
@@ -120,7 +118,6 @@ void SnakePlayer::OnGizmos() {
         }
     }
 }
-
 
 void SnakePlayer::updatePosition() {
     auto navmesh = terrain->getNavMesh();

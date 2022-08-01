@@ -3,6 +3,8 @@
 Vec2* firstDirection;
 Vec2* nextPoint;
 Vec2 lastMovement;
+float keepDistance = 0.64f;
+float keepArroundDistance = 0.4f;
 
 void SnakePlayer::OnAwake() {
     playerCamera = gameObject()->addComponent<Camera2D>();
@@ -30,7 +32,7 @@ void SnakePlayer::OnAwake() {
     arrounds.emplace_back(arround->transform());
     tiles.emplace_back(body->transform());
 
-    for (int x = 0; x < 10; x++) appendTile();
+    for (int x = 0; x < 5; x++) appendTile();
 }
 
 void SnakePlayer::OnStart() {
@@ -62,20 +64,33 @@ void SnakePlayer::OnUpdate() {
     updatePosition();
 }
 float get_quarter_angle(const Vec2& dir) {
-    float x = 0;
-
+    float alpha;
     if (dir.y < 0)
-        x = 180;
+        alpha = 180;
     else if (dir.x > 0)
-        x = 270;
+        alpha = 270;
     else if (dir.x < 0)
-        x = 90;
-
-    return x;
+        alpha = 90;
+    else
+        alpha = 0;
+    return alpha;
+}
+float get_arroung_angle(const Vec2& dir) {
+    float alpha;
+    if (dir.y < 0)
+        alpha = 180;
+    else if (dir.x > 0)
+        alpha = 270;
+    else if (dir.x < 0)
+        alpha = 90;
+    else
+        alpha = 0;
+    return alpha;
 }
 void SnakePlayer::OnGizmos() {
     if (lastMovement != *firstDirection) return;
 
+    // save last position
     Vec2 last = transform()->position();
 
     // iteration for tiles
@@ -119,6 +134,8 @@ void SnakePlayer::updatePosition() {
         //Создать новую часть разделения, от изменения направление head
         TileDirection newBound = {lastMovement, lastPosition};
         znake_bounds.insert(++znake_bounds.begin(), std::make_pair(1, newBound));
+        arround->transform()->position(lastPosition);
+        arround->transform()->angle(get_arroung_angle(*firstDirection));
         lastMovement = *firstDirection;
     }
 
@@ -139,24 +156,23 @@ void SnakePlayer::updatePosition() {
     *nextPoint = navmesh->PointToWorldPosition(nextNeuron);
     head->transform()->angle(get_quarter_angle(*firstDirection));  // rotate head
     transform()->position(*nextPoint);                             // move transform
-
-    static float keepDistance = 0.5;
     auto currentBound = znake_bounds.begin();
     auto endBound = --znake_bounds.end();
     Vec2 follow = currentBound->second.upperBound;
+    if (currentBound != endBound && std::next(currentBound)->first == 1)
+        follow -= currentBound->second.direction * keepArroundDistance;
     // iteration for tiles
     for (int x = 0, count = tiles.size(); x < count; ++x) {
         // Draw rotate state
-        if (znake_bounds.size() > 1 && currentBound != endBound && std::next(currentBound)->first == x) {
+        if (currentBound != endBound && std::next(currentBound)->first == x) {
             // select next bound
             ++currentBound;
 
             // assign bound position
-            follow = currentBound->second.upperBound;
-        }
-
-        // направляем хвост за связыванием (bound)
-        follow -= currentBound->second.direction * keepDistance;
+            follow = currentBound->second.upperBound - keepArroundDistance * currentBound->second.upperBound;
+        } else
+            // направляем хвост за связыванием (bound)
+            follow -= currentBound->second.direction * keepDistance;
 
         tiles[x]->position(follow);
         tiles[x]->angle(get_quarter_angle(currentBound->second.direction));

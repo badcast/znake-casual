@@ -8,7 +8,17 @@ namespace RoninEngine::Runtime {
 
 float Gizmos::angle;
 
-void internal_drawLine(Vec2 a, Vec2 b) {
+Color Gizmos::getColor() {
+    Color clb;
+    SDL_GetRenderDrawColor(Application::GetRenderer(), &clb.r, &clb.g, &clb.b, &clb.a);
+    return clb;
+}
+
+void Gizmos::setColor(const Color& newColor) {
+    SDL_SetRenderDrawColor(Application::GetRenderer(), newColor.r, newColor.g, newColor.b, newColor.a);
+}
+
+void Gizmos::DrawLine(Vec2 a, Vec2 b) {
     if (!Camera::mainCamera()) return;
 
     Vec2 p = Camera::mainCamera()->transform()->position();
@@ -34,18 +44,6 @@ void internal_drawLine(Vec2 a, Vec2 b) {
 
     SDL_RenderDrawLineF(Application::GetRenderer(), a.x, a.y, b.x, b.y);
 }
-
-Color Gizmos::getColor() {
-    Color clb;
-    SDL_GetRenderDrawColor(Application::GetRenderer(), &clb.r, &clb.g, &clb.b, &clb.a);
-    return clb;
-}
-
-void Gizmos::setColor(const Color& newColor) {
-    SDL_SetRenderDrawColor(Application::GetRenderer(), newColor.r, newColor.g, newColor.b, newColor.a);
-}
-
-void Gizmos::DrawLine(Vec2 a, Vec2 b) { internal_drawLine(a, b); }
 void drawBox() {
     Vec2 a, b;
 
@@ -53,49 +51,49 @@ void drawBox() {
     a.y = pixelsPerPoint;
     b.x = -pixelsPerPoint;
     b.y = pixelsPerPoint;
-    internal_drawLine(std::move(a), std::move(b));
+    Gizmos::DrawLine(std::move(a), std::move(b));
 
     a.x = pixelsPerPoint;
     a.y = -pixelsPerPoint;
     b.x = -pixelsPerPoint;
     b.y = -pixelsPerPoint;
-    internal_drawLine(std::move(a), std::move(b));
+    Gizmos::DrawLine(std::move(a), std::move(b));
 
     a.x = -pixelsPerPoint;
     a.y = pixelsPerPoint;
     b.x = -pixelsPerPoint;
     b.y = -pixelsPerPoint;
-    internal_drawLine(std::move(a), std::move(b));
+    Gizmos::DrawLine(std::move(a), std::move(b));
 
     a.x = pixelsPerPoint;
     a.y = pixelsPerPoint;
     b.x = pixelsPerPoint;
     b.y = -pixelsPerPoint;
-    internal_drawLine(std::move(a), std::move(b));
+    Gizmos::DrawLine(std::move(a), std::move(b));
 }
 
 void Gizmos::DrawPosition(const Vec2& origin, float scalar) {
-    Vec2 a = Vec2::zero, b = Vec2::zero;
+    Vec2 a, b;
 
     // Draw Line H
     b = a = origin;
     a.x -= scalar;
     b.x += scalar;
 
-    internal_drawLine(std::move(a), std::move(b));
+    DrawLine(std::move(a), std::move(b));
 
     // Draw Line V
     b = a = origin;
     a.y -= scalar;
     b.y += scalar;
-    internal_drawLine(std::move(a), std::move(b));
+    DrawLine(std::move(a), std::move(b));
 }
 
 void Gizmos::DrawSquare(Vec2 origin, float width) { DrawRectangle(origin, width, width); }
 
 void Gizmos::DrawRectangle(Vec2 origin, float width, float height) {
-    origin = Camera::mainCamera()->WorldToScreenPoint(origin);
     std::uint16_t x, y;
+    origin = Camera::mainCamera()->WorldToScreenPoint(origin);
     width *= pixelsPerPoint;
     height *= pixelsPerPoint;
     x = origin.x - width / 2;
@@ -108,8 +106,8 @@ void Gizmos::DrawSquareRounded(Vec2 origin, float width, std::uint16_t radius) {
 }
 
 void Gizmos::DrawRectangleRounded(Vec2 origin, float width, float height, std::uint16_t radius) {
-    origin = Camera::mainCamera()->WorldToScreenPoint(origin);
     std::uint16_t x, y;
+    origin = Camera::mainCamera()->WorldToScreenPoint(origin);
     width *= pixelsPerPoint;
     height *= pixelsPerPoint;
     x = origin.x - width / 2;

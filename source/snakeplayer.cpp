@@ -75,17 +75,16 @@ float get_quarter_angle(const Vec2& dir) {
         alpha = 0;
     return alpha;
 }
-float get_arroung_angle(const Vec2& dir) {
-    float alpha;
-    if (dir.y < 0)
-        alpha = 180;
-    else if (dir.x > 0)
-        alpha = 270;
-    else if (dir.x < 0)
-        alpha = 90;
+float get_arroung_angle(const Vec2& alpha, const Vec2& beta) {
+    float delta;
+    if(alpha.x > 0){
+        if(!beta.x){
+
+        }
+    }
     else
-        alpha = 0;
-    return alpha;
+        delta = 0;  // default state
+    return delta;
 }
 void SnakePlayer::OnGizmos() {
     if (lastMovement != *firstDirection) return;
@@ -135,7 +134,7 @@ void SnakePlayer::updatePosition() {
         TileDirection newBound = {lastMovement, lastPosition};
         znake_bounds.insert(++znake_bounds.begin(), std::make_pair(1, newBound));
         arround->transform()->position(lastPosition);
-        arround->transform()->angle(get_arroung_angle(*firstDirection));
+        arround->transform()->angle(get_arroung_angle(*firstDirection, lastMovement));
         lastMovement = *firstDirection;
     }
 
@@ -157,19 +156,19 @@ void SnakePlayer::updatePosition() {
     head->transform()->angle(get_quarter_angle(*firstDirection));  // rotate head
     transform()->position(*nextPoint);                             // move transform
     auto currentBound = znake_bounds.begin();
-    auto endBound = --znake_bounds.end();
+    auto backBound = --znake_bounds.end();
     Vec2 follow = currentBound->second.upperBound;
-    if (currentBound != endBound && std::next(currentBound)->first == 1)
+    if (currentBound != backBound && std::next(currentBound)->first == 1)
         follow -= currentBound->second.direction * keepArroundDistance;
     // iteration for tiles
     for (int x = 0, count = tiles.size(); x < count; ++x) {
         // Draw rotate state
-        if (currentBound != endBound && std::next(currentBound)->first == x) {
+        if (currentBound != backBound && std::next(currentBound)->first == x) {
             // select next bound
             ++currentBound;
 
             // assign bound position
-            follow = currentBound->second.upperBound - keepArroundDistance * currentBound->second.upperBound;
+            follow = currentBound->second.upperBound - keepArroundDistance * currentBound->second.direction;
         } else
             // направляем хвост за связыванием (bound)
             follow -= currentBound->second.direction * keepDistance;

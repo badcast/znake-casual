@@ -7,8 +7,8 @@ Vec2 lastMovement;
 float keepDistance = 0.64f;
 float keepArroundDistance = 0.4f;
 
-Transform* pushNewArroud(SnakePlayer *player){
-    Transform * newArround = Instantiate(player->arround)->transform();
+Transform* pushNewArroud(SnakePlayer* player) {
+    Transform* newArround = Instantiate(player->arround)->transform();
     player->arrounds.emplace_back(newArround);
     return newArround;
 }
@@ -86,7 +86,7 @@ float get_quarter_angle(const Vec2& dir) {
 
 // TODO: optimizing
 float get_arroung_angle(const Vec2& alpha, const Vec2& beta) {
-    int delta;
+    float delta;
     // turn on right
     if (alpha.x > 0) {
         if (beta.y > 0)
@@ -118,8 +118,9 @@ float get_arroung_angle(const Vec2& alpha, const Vec2& beta) {
             delta = 270;
     } else {
         Application::fail("unassigned angle for arround.");
+        delta = 0;
     }
-    return static_cast<float>(delta);
+    return delta;
 }
 void SnakePlayer::OnGizmos() {
     Gizmos::setColor(Color::blue);
@@ -172,7 +173,7 @@ void SnakePlayer::updatePosition() {
         //Создать новую часть разделения, от изменения направление head
         TileDirection newBound = {lastMovement, lastPosition};
         znake_bounds.insert(++znake_bounds.begin(), std::make_pair(1, newBound));
-        Transform * newArround = pushNewArroud(this);
+        Transform* newArround = pushNewArroud(this);
         newArround->transform()->position(lastPosition);
         newArround->transform()->angle(get_arroung_angle(*firstDirection, lastMovement));
         lastMovement = *firstDirection;
@@ -222,8 +223,8 @@ void SnakePlayer::updatePosition() {
         tiles[y]->angle(get_quarter_angle(currentBound->second.direction));
         ++y;
     }
-    //disallow isn't tiles
-    for(;y<tiles.size(); ++y){
+    // disallow isn't tiles
+    for (; y < tiles.size(); ++y) {
         tiles[y]->transform()->position(Vec2::infinity);
     }
 }

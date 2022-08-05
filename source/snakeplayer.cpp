@@ -1,10 +1,17 @@
 #include "snakeplayer.h"
 
+constexpr int tiles = 10;
 Vec2* firstDirection;
 Vec2* nextPoint;
 Vec2 lastMovement;
 float keepDistance = 0.64f;
 float keepArroundDistance = 0.4f;
+
+Transform* pushNewArroud(SnakePlayer *player){
+    Transform * newArround = Instantiate(player->arround)->transform();
+    player->arrounds.emplace_back(newArround);
+    return newArround;
+}
 
 void SnakePlayer::OnAwake() {
     playerCamera = gameObject()->addComponent<Camera2D>();
@@ -32,7 +39,7 @@ void SnakePlayer::OnAwake() {
     arrounds.emplace_back(arround->transform());
     tiles.emplace_back(body->transform());
 
-    for (int x = 0; x < 5; x++) appendTile();
+    for (int x = 0; x < ::tiles; x++) appendTile();
 }
 
 void SnakePlayer::OnStart() {
@@ -63,6 +70,7 @@ void SnakePlayer::OnUpdate() {
     }
     updatePosition();
 }
+// TODO: optimizing
 float get_quarter_angle(const Vec2& dir) {
     float alpha;
     if (dir.y < 0)
@@ -75,18 +83,49 @@ float get_quarter_angle(const Vec2& dir) {
         alpha = 0;
     return alpha;
 }
-float get_arroung_angle(const Vec2& alpha, const Vec2& beta) {
-    float delta;
-    if(alpha.x > 0){
-        if(!beta.x){
 
-        }
+// TODO: optimizing
+float get_arroung_angle(const Vec2& alpha, const Vec2& beta) {
+    int delta;
+    // turn on right
+    if (alpha.x > 0) {
+        if (beta.y > 0)
+            delta = 270;
+        else if (beta.y < 0)
+            delta = 0;
+
     }
-    else
-        delta = 0;  // default state
-    return delta;
+    // turn on left
+    else if (alpha.x < 0) {
+        if (beta.y > 0)
+            delta = 180;
+        else if (beta.y < 0)
+            delta = 90;
+
+    }
+    // turn on up
+    else if (alpha.y > 0) {
+        if (beta.x > 0)
+            delta = 90;
+        else if (beta.x < 0)
+            delta = 0;
+    }
+    // turn on down
+    else if (alpha.y < 0) {
+        if (beta.x > 0)
+            delta = 180;
+        else if (beta.x < 0)
+            delta = 270;
+    } else {
+        Application::fail("unassigned angle for arround.");
+    }
+    return static_cast<float>(delta);
 }
 void SnakePlayer::OnGizmos() {
+    Gizmos::setColor(Color::blue);
+
+    Gizmos::DrawArrow(transform()->position(), *firstDirection);
+
     if (lastMovement != *firstDirection) return;
 
     // save last position
@@ -133,8 +172,9 @@ void SnakePlayer::updatePosition() {
         //Создать новую часть разделения, от изменения направление head
         TileDirection newBound = {lastMovement, lastPosition};
         znake_bounds.insert(++znake_bounds.begin(), std::make_pair(1, newBound));
-        arround->transform()->position(lastPosition);
-        arround->transform()->angle(get_arroung_angle(*firstDirection, lastMovement));
+        Transform * newArround = pushNewArroud(this);
+        newArround->transform()->position(lastPosition);
+        newArround->transform()->angle(get_arroung_angle(*firstDirection, lastMovement));
         lastMovement = *firstDirection;
     }
 
@@ -155,26 +195,36 @@ void SnakePlayer::updatePosition() {
     *nextPoint = navmesh->PointToWorldPosition(nextNeuron);
     head->transform()->angle(get_quarter_angle(*firstDirection));  // rotate head
     transform()->position(*nextPoint);                             // move transform
+
     auto currentBound = znake_bounds.begin();
     auto backBound = --znake_bounds.end();
     Vec2 follow = currentBound->second.upperBound;
-    if (currentBound != backBound && std::next(currentBound)->first == 1)
+    int x, y = 0;
+    if (currentBound != backBound && std::next(currentBound)->first == 1) {
         follow -= currentBound->second.direction * keepArroundDistance;
+        x = 1;
+    } else
+        x = 0;
     // iteration for tiles
-    for (int x = 0, count = tiles.size(); x < count; ++x) {
+    for (; x < tiles.size(); ++x) {
         // Draw rotate state
         if (currentBound != backBound && std::next(currentBound)->first == x) {
             // select next bound
             ++currentBound;
-
             // assign bound position
             follow = currentBound->second.upperBound - keepArroundDistance * currentBound->second.direction;
-        } else
-            // направляем хвост за связыванием (bound)
+        }
+        // направляем хвост за связыванием (bound)
+        else {
             follow -= currentBound->second.direction * keepDistance;
-
-        tiles[x]->position(follow);
-        tiles[x]->angle(get_quarter_angle(currentBound->second.direction));
+        }
+        tiles[y]->position(follow);
+        tiles[y]->angle(get_quarter_angle(currentBound->second.direction));
+        ++y;
+    }
+    //disallow isn't tiles
+    for(;y<tiles.size(); ++y){
+        tiles[y]->transform()->position(Vec2::infinity);
     }
 }
 

@@ -215,6 +215,20 @@ void Gizmos::DrawCircle(Vec2 origin, float distance) {
     circleRGBA(Application::GetRenderer(), x, y, r, m_color.r, m_color.g, m_color.b, m_color.a);
 }
 
+void Gizmos::DrawArrow(Vec2 alpha, Vec2 beta, float width, float length) {
+    beta = alpha + beta * length;
+    DrawLine(alpha, beta);
+
+    return;
+//TODO: НЕ ЗАКОНЧЕННАЯ ЧАСТЬ КОДА
+
+    float ang = Vec2::Angle(alpha, beta);
+    Vec2 rotate = Vec2::Rotate(beta, ang);
+    alpha = beta + rotate;
+    beta = beta - rotate;
+    DrawLine(alpha, beta);
+}
+
 void Gizmos::DrawFill(Vec2 center, float width, float height) {
     center = Camera::WorldToScreenPoint(center);
     width *= pixelsPerPoint;

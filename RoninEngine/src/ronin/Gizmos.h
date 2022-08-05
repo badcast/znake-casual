@@ -6,7 +6,7 @@ class Gizmos {
    public:
     static float angle;
     static Color getColor();
-    static void setColor(const Color &newColor);
+    static void setColor(const Color& newColor);
 
     static void DrawLine(Vec2 a, Vec2 b);
     static void DrawPosition(const Vec2& origin, float scalar = maxWorldScalar);
@@ -19,6 +19,7 @@ class Gizmos {
     static void DrawTriangle(Vec2 origin, float base, float height);
     static void DrawTextOnPosition(Vec2 origin, const std::string& text);
     static void DrawCircle(Vec2 origin, float distance);
+    static void DrawArrow(Vec2 origin, Vec2 direction, float width = 1.f / 5, float length = 1.f);
 
     static void DrawFill(Vec2 center, float width, float height);
     static void DrawFillSquare(Vec2 center, float width);

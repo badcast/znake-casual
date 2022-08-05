@@ -178,7 +178,7 @@ bool Application::Simulate() {
     int delayed;
     SDL_WindowFlags wndFlags;
     SDL_DisplayMode displayMode = Application::getDisplayMode();
-    float secPerFrame = 1000.f / displayMode.refresh_rate;
+    float secPerFrame = 1000.f / displayMode.refresh_rate; // координация по кадрам на монитор
     Time::Init_TimeEngine();
 
     if (m_level == nullptr) {

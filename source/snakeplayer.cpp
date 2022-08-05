@@ -43,10 +43,9 @@ void SnakePlayer::OnAwake() {
 }
 
 void SnakePlayer::OnStart() {
-    speed = 0.1;
-    //Всегда направляющий первый
     TileDirection tinfo = {Vec2::up, transform()->position()};
     lastMovement = *(firstDirection = &znake_bounds.emplace_front(0, tinfo).second.direction);
+    speed = 0.1;
     nextPoint = &znake_bounds.front().second.upperBound;
     updatePosition();
 }

@@ -1,8 +1,0 @@
-menu_game           "Игра"
-menu_start_game     "Начать игру"
-menu_settings 		"Настройки"
-menu_aboutus 		"О нас"
-menu_quit			"Выйти из игры"
-menu_sound_volume	"Уровень звука"
-menu_music_volume	"Уровень музыки"
-menu_details        "Справка"

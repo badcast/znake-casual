@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Znake game from engine: RoninEngine",
   "dependencies": {
-    "ronin-engine": "github:badcast/ronin-engine#semver:1.0.0",
+    "badcast/ronin-engine": "1.0.0",
     "badcast/JNOParser": "1.0.0"
   }
 }

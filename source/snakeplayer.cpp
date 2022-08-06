@@ -1,76 +1,16 @@
 #include "snakeplayer.h"
 
-constexpr int tiles = 1;
-Vec2* firstDirection;
-Vec2* nextPoint;
-Vec2 lastMovement;
+constexpr int tiles = 10;
+Vec2 currentAxis;
+Vec2* headDirection;
+Vec2* headUpperBound;
+Vec2 lastDirection;
 float keepDistance = 0.64f;
 float keepArroundDistance = 0.4f;
 
-Transform* pushNewArroud(SnakePlayer* player) {
-    Transform* newArround = Instantiate(player->arround)->transform();
-    player->arrounds.emplace_back(newArround);
-    return newArround;
-}
-
-void SnakePlayer::OnAwake() {
-    playerCamera = gameObject()->addComponent<Camera2D>();
-    head = CreateGameObject("Head");
-    head->transform()->setParent(transform());
-    SpriteRenderer* sel = head->addComponent<SpriteRenderer>();
-    sel->zOrder = 100;
-    Texture* selTexture = GC::GetTexture("snake-head");
-    sel->setSpriteFromTextureToGC(selTexture);
-
-    body = CreateGameObject("Body");
-    // body->transform()->setParent(transform());
-    body->transform()->localPosition(Vec2::minusOne * 0.9f);
-    sel = body->addComponent<SpriteRenderer>();
-    selTexture = GC::GetTexture("snake-body");
-    sel->setSpriteFromTextureToGC(selTexture);
-
-    arround = CreateGameObject("Around");
-    // arround->transform()->setParent(transform());
-    arround->transform()->localPosition(Vec2::down * 2);
-    sel = arround->addComponent<SpriteRenderer>();
-    selTexture = GC::GetTexture("snake-arround");
-    sel->setSpriteFromTextureToGC(selTexture);
-
-    arrounds.emplace_back(arround->transform());
-    tiles.emplace_back(body->transform());
-
-    for (int x = 0; x < ::tiles; x++) appendTile();
-}
-
-void SnakePlayer::OnStart() {
-    TileDirection tinfo = {Vec2::up, transform()->position()};
-    lastMovement = *(firstDirection = &znake_bounds.emplace_front(0, tinfo).second.direction);
-    speed = 0.1;
-    nextPoint = &znake_bounds.front().second.upperBound;
-    updatePosition();
-}
-
-void SnakePlayer::OnUpdate() {
-    float curSpeed = input::get_key(SDL_SCANCODE_LSHIFT) ? (speed * 10) : speed;
-    Vec2 axis = input::get_axis();
-    if (axis != Vec2::zero) {
-        if (axis.x != axis.y) {
-            if (axis.x - firstDirection->x != 0 && axis.y - firstDirection->y != 0) *firstDirection = axis;
-
-            if (firstDirection->x != 0)
-                firstDirection->y = 0;
-            else if (firstDirection->y != 0)
-                firstDirection->x = 0;
-        }
-    }
-
-    if (Time::frame() % (input::get_key(SDL_SCANCODE_LSHIFT) ? 5 : 30) != 0) {
-        return;
-    }
-    updatePosition();
-}
 // TODO: optimizing
-float get_quarter_angle(const Vec2& dir) {
+float get_quarter_angle(const Vec2& dir)
+{
     float alpha;
     if (dir.y < 0)
         alpha = 180;
@@ -84,8 +24,9 @@ float get_quarter_angle(const Vec2& dir) {
 }
 
 // TODO: optimizing
-float get_arroung_angle(const Vec2& alpha, const Vec2& beta) {
-    float delta;
+float get_arroung_angle(const Vec2& alpha, const Vec2& beta)
+{
+    float delta = 0;
     // turn on right
     if (alpha.x > 0) {
         if (beta.y > 0)
@@ -116,116 +57,226 @@ float get_arroung_angle(const Vec2& alpha, const Vec2& beta) {
         else if (beta.x < 0)
             delta = 270;
     } else {
-        Application::fail("unassigned angle for arround.");
-        delta = 0;
+        RoninEngine::Application::fail("unassigned angle for arround.");
     }
     return delta;
 }
-void SnakePlayer::OnGizmos() {
+
+void SnakePlayer::OnAwake()
+{
+    playerCamera = gameObject()->add_component<Camera2D>();
+    // create head
+    head = create_game_object("Head");
+    head->transform()->setParent(transform());
+    SpriteRenderer* sel = head->add_component<SpriteRenderer>();
+    sel->renderOut = SpriteRenderOut::Origin;
+    sel->transform()->layer = 100;
+
+    auto src = ResourceManager::GetSurface("snake-head");
+    sel->setSpriteFromTextureToGC(src);
+    // create body
+    body = create_game_object("Body");
+    // body->transform()->setParent(transform());
+    body->transform()->localPosition(Vec2::minusOne * 0.9f);
+    sel = body->add_component<SpriteRenderer>();
+    src = ResourceManager::GetSurface("snake-body");
+    sel->setSpriteFromTextureToGC(src);
+    sel->renderOut = SpriteRenderOut::Origin;
+    sel->renderType = SpriteRenderType::Simple;
+    sel->renderPresentMode = SpriteRenderPresentMode::Place;
+    // create arround
+    arround = create_game_object("Around");
+    arround->transform()->localPosition(Vec2::down * 2);
+    sel = arround->add_component<SpriteRenderer>();
+    src = ResourceManager::GetSurface("snake-arround");
+    sel->renderOut = SpriteRenderOut::Origin;
+    sel->setSpriteFromTextureToGC(src);
+
+    znake_tiles.emplace_back(body->transform());
+
+    for (int x = 1; x < ::tiles; x++)
+        appendTile();
+
+    create_game_object()->add_component<Camera2D>();
+}
+
+void SnakePlayer::OnStart()
+{
+    ZnakeBound tinfo = { 0, Vec2::up, transform()->position(), arround->transform() };
+    currentAxis = lastDirection = *(headDirection = &znake_bounds.emplace_front(tinfo).direction);
+    speed = 0.1;
+    headUpperBound = &znake_bounds.front().upperBound;
+    arround->transform()->position(Vec2::infinity);
+    updatePosition();
+}
+
+void SnakePlayer::OnUpdate()
+{
+    // float curSpeed = input::get_key(SDL_SCANCODE_LSHIFT) ? (speed * 10) : speed;
+    Vec2 newAxis = input::get_axis();
+    if (newAxis != Vec2::zero && newAxis != *headDirection) {
+        if (newAxis.x != 0)
+            newAxis.y = 0;
+        else if (newAxis.y != 0)
+            newAxis.x = 0;
+
+        if (newAxis.x - headDirection->x != 0 && newAxis.y - headDirection->y != 0)
+            currentAxis = newAxis;
+    }
+
+    static float testTime = 0;
+
+    if (TimeEngine::time() < testTime) { //|| false && Time::frame() % (input::get_key(SDL_SCANCODE_LSHIFT) ? 1 : 30) != 0) {
+        return;
+    }
+    testTime = TimeEngine::time() + 0.1; // delay 1 seconds
+
+    if (*headDirection != currentAxis)
+        *headDirection = currentAxis;
+    updatePosition();
+}
+
+void SnakePlayer::OnGizmos()
+{
+    int x;
+
     Gizmos::setColor(Color::blue);
 
-    Gizmos::DrawArrow(transform()->position(), *firstDirection);
+    // Draw next line
+    Gizmos::DrawLine(transform()->position(), transform()->position() + *headDirection);
 
-    if (lastMovement != *firstDirection) return;
+    if (lastDirection != *headDirection)
+        return;
 
     // save last position
     Vec2 last = transform()->position();
 
     // iteration for tiles
-    for (int x = 0; x < tiles.size(); ++x) {
+    for (x = 0; x < znake_tiles.size(); ++x) {
         // set position tiles
-        if (x == tiles.size() - 1)
+        if (x == znake_tiles.size() - 1)
             Gizmos::setColor(Color::red);
         else
             Gizmos::setColor(Color::blue);
-        Gizmos::DrawPosition(tiles[x]->position(), 0.3f);
+        Gizmos::DrawPosition(znake_tiles[x]->position(), 0.3f);
         Gizmos::setColor(Color::green);
-        Gizmos::DrawLine(last, tiles[x]->position());
-        last = tiles[x]->position();
+        Gizmos::DrawLine(last, znake_tiles[x]->position());
+        Gizmos::DrawTextOnPosition_Legacy(znake_tiles[x]->position(), std::to_string(x));
+        last = znake_tiles[x]->position();
     }
 
     // draw bounds
     for (auto bound = ++znake_bounds.begin(); bound != znake_bounds.end(); ++bound) {
         Gizmos::setColor(Color::red);
-        Gizmos::DrawCircle(bound->second.upperBound, 0.25f);
-        Gizmos::DrawPosition(bound->second.upperBound, 0.25f);
+        Gizmos::DrawCircle(bound->upperBound, 0.25f);
+        Gizmos::DrawPosition(bound->upperBound, 0.25f);
     }
 }
 
-void SnakePlayer::updatePosition() {
-    auto navmesh = terrain->getNavMesh();
+void SnakePlayer::updatePosition()
+{
+    /* ***Variables*** */
+    int x, y;
+    auto navmesh = terrain->surfaceMesh();
+    std::remove_reference_t<decltype(znake_bounds)>::iterator thisBound, backBound, nextBound;
     Vec2 lastPosition = transform()->position();
     Vec2Int npoint;
-    AIPathFinder::Neuron* nextNeuron =
-        navmesh->GetNeuron(lastPosition + Vec2::Scale(*firstDirection, navmesh->worldScale), npoint);
+    auto nextNeuron = navmesh->GetNeuron(lastPosition + Vec2::Scale(*headDirection, navmesh->worldScale), npoint);
+    /*********/
 
-    //Удалить последний хвост который больше не требуется
-    if (znake_bounds.back().first == tiles.size()) znake_bounds.pop_back();
+    // Удалить последний хвост который больше не требуется
+    if (znake_bounds.back().boundIndex == znake_tiles.size()) {
+        // Выбрать последний элемент
+        znake_bounds.back().arroundGraphic->position(Vec2::infinity);
+        znake_bounds.pop_back();
+    }
+    // Увеличить поворотные хвосты на единицу, концепция задумана как увелечение и пропуск хвостов
+    // Игнорировать первую часть слежение, он же head
+    for (thisBound = ++std::begin(znake_bounds); thisBound != std::end(znake_bounds);)
+        ++(*thisBound++).boundIndex;
 
-    //Увеличить все части поворотов на 1, когда хвосты двигаются вперед
-    // Игнорировать 1 часть слежение, он же head
-    for (auto x = ++std::begin(znake_bounds); x != std::end(znake_bounds); ++(*x++).first)
-        ;
-
-    //Произошло вращение
-    if (*firstDirection != lastMovement) {
-        //Создать новую часть разделения, от направление head
-        TileDirection newBound = {lastMovement, lastPosition};
-        znake_bounds.insert(++znake_bounds.begin(), std::make_pair(1, newBound));
-        Transform* newArround = pushNewArroud(this);
+    // Данная концепция определяет новую направления для HEAD
+    if (*headDirection != lastDirection) {
+        Transform* newArround = instantiate(arround)->transform();
+        // Создать новую часть разделения, от направление head
+        //  Вставить новый хвост между HEAD и след 'хвостом'
+        znake_bounds.insert(++znake_bounds.begin(), { 1, lastDirection, lastPosition, newArround });
         newArround->transform()->position(lastPosition);
-        newArround->transform()->angle(get_arroung_angle(*firstDirection, lastMovement));
-        lastMovement = *firstDirection;
+        newArround->transform()->angle(get_arroung_angle(*headDirection, lastDirection));
+        lastDirection = *headDirection;
     }
 
+    // get inside <next position>
     if (!nextNeuron) {
         if (npoint.y < 0)
-            npoint.y = navmesh->heightSpace;
-        else if (npoint.y > navmesh->heightSpace)
+            npoint.y = navmesh->Height();
+        else if (npoint.y > navmesh->Height())
             npoint.y = 0;
 
         if (npoint.x < 0)
-            npoint.x = navmesh->widthSpace;
-        else if (npoint.x > navmesh->widthSpace)
+            npoint.x = navmesh->Width();
+        else if (npoint.x > navmesh->Width())
             npoint.x = 0;
 
         nextNeuron = navmesh->GetNeuron(npoint);
     }
 
-    *nextPoint = navmesh->PointToWorldPosition(nextNeuron);
-    head->transform()->angle(get_quarter_angle(*firstDirection));  // rotate head
-    transform()->position(*nextPoint);                             // move transform
+    *headUpperBound = navmesh->PointToWorldPosition(nextNeuron);
+    head->transform()->angle(get_quarter_angle(*headDirection)); // rotate head
+    transform()->position(*headUpperBound); // move transform
 
-    auto currentBound = znake_bounds.begin();
-    auto backBound = --znake_bounds.end();
-    Vec2 follow = currentBound->second.upperBound;
-    int x, y = 0;
-    if (currentBound != backBound && std::next(currentBound)->first == 1) {
-        follow -= currentBound->second.direction * keepArroundDistance;
-        x = 1;
-    } else
-        x = 0;
-    // iteration for tiles
-    for (; x < tiles.size(); ++x) {
-        // Draw rotate state
-        if (currentBound != backBound && std::next(currentBound)->first == x) {
-            // select next bound
-            ++currentBound;
-            // assign bound position
-            follow = currentBound->second.upperBound - keepArroundDistance * currentBound->second.direction;
+    /*
+        У проекций змеи, имеються схожие 2 вида хвоста
+            1 - Обычные, линейные.
+            2 - Поворотные на 90 градусов.
+    */
+    thisBound = znake_bounds.begin(); // first iterator
+    backBound = --znake_bounds.end(); // last iterator
+    nextBound = std::next(thisBound); // next iterator
+    // Концепция направляющего
+    Vec2 heuristic = thisBound->upperBound;
+    //    //Главный HEAD элемент не единственный и следующий элемент, эти контексты для предоставления головы как [head->next]
+    //    if (thisBound != backBound && std::next(thisBound)->first == 1) {
+    //        //проигнорировать первый хвост, так как пространство для первого хваста был замещен поворотным хвостом
+    //        x = 1;
+    //    } else {
+    //        //Ничего не произошло
+    //        follow = thisBound->second.upperBound;
+    //        x = 0;
+    //    }
+
+    // Выделить для каждого N видимых и N повортных 'хвостов' в 'пространстве'
+    //  y - 'хвосты' которые зедействованы
+    for (y = 0, x = 0; x < znake_tiles.size(); ++x) {
+        // Концепция: текущий направляющий заканчивается последним хвостом, далее переходим к след. поворотному хвосту
+        if (nextBound != znake_bounds.end() && nextBound->boundIndex - 1 == x) {
+            // Переход к следующему поворотному хвосту
+            ++thisBound;
+            // Концепция дать пространство для arround (поворотной части хвоста)
+            heuristic = thisBound->upperBound - thisBound->direction * keepArroundDistance;
+
+            // Существует след. поворотный хвост после, данного?
+            nextBound = std::next(thisBound);
+            if (nextBound != std::end(znake_bounds)) {
+                if (nextBound->boundIndex == thisBound->boundIndex + 1)
+                    continue;
+            } else {
+            }
+        } else {
+            // Задаем положение хвоста в пространстве
+            heuristic -= thisBound->direction * keepDistance;
         }
-        // направляем хвост за связыванием (bound)
-        else {
-            follow -= currentBound->second.direction * keepDistance;
-        }
-        tiles[y]->position(follow);
-        tiles[y]->angle(get_quarter_angle(currentBound->second.direction));
+
+        // установка хвоста в положение
+        znake_tiles[y]->position(heuristic);
+        znake_tiles[y]->angle(get_quarter_angle(thisBound->direction));
         ++y;
     }
-    // disallow isn't tiles
-    for (; y < tiles.size(); ++y) {
-        tiles[y]->transform()->position(Vec2::infinity);
+
+    // Убрать хвосты, которые не вошли в концепцию, они не вошли из за занятой ими поворотных хвостов
+    for (; y < znake_tiles.size(); ++y) {
+        znake_tiles[y]->transform()->position(Vec2::infinity);
     }
 }
 
-void SnakePlayer::appendTile() { tiles.emplace_back(Instantiate(tiles.front()->gameObject())->transform()); }
+void SnakePlayer::appendTile() { znake_tiles.emplace_back(Instantiate(znake_tiles.front()->gameObject())->transform()); }

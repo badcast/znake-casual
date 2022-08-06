@@ -1,23 +1,29 @@
-#include "testlevel.h"
 #include <ronin/Transform.h>
+#include "testlevel.h"
+
 struct {
-    id_t quitButton;
-    id_t clickButton;
-    id_t restore = -1;
-    id_t text;
+    uid quitButton;
+    uid clickButton;
+    uid restore = -1;
+    uid text;
 } mids;
 
-TestLevel::TestLevel() : Level("ZNake Game Level") {}
-
-void callback(const id_t& uid, void* userData) {
-    if (uid == mids.quitButton)
-        Application::RequestQuit();
-    else if (uid == mids.clickButton) {
-        Rect r = guiInstance->Rect(uid);
+typedef ResourceManager GC;
+TestLevel::TestLevel()
+    : Level("ZNake Game Level")
+{
+}
+GUI* ui;
+void callback_ui(uid id, void* userData)
+{
+    if (id == mids.quitButton)
+        Application::requestQuit();
+    else if (id == mids.clickButton) {
+        Rect r = ui->get_rect(id);
         r.w = 200;
-        guiInstance->Rect(uid, r);
+        ui->set_rect(id, r);
         auto damaged = Level::matrixCheckDamaged();
-        guiInstance->Text(uid, "Damaged: " + std::to_string(damaged.size()));
+        guiInstance->set_text(id, "Damaged: " + std::to_string(damaged.size()));
 
         if (mids.restore == -1) {
             r.x += r.w;
@@ -25,31 +31,33 @@ void callback(const id_t& uid, void* userData) {
             mids.restore = guiInstance->Push_Button("Restore", r);
         }
 
-        guiInstance->Visible(mids.restore, true);
+        guiInstance->set_visible(mids.restore, true);
 
-    } else if (uid == mids.restore) {
-        guiInstance->Visible(mids.restore, false);
-        Level::matrixRestore();
+    } else if (id == mids.restore) {
+        ui->set_visible(mids.restore, false);
+        Level::matrix_restore();
     }
 }
 
-std::vector<GameObject*> apples;
-Player* player;
-void TestLevel::start() {
+std::vector<GameObject*> apples_for;
+Player* aPlayer;
+void TestLevel::start()
+{
+    ui = this->ui;
     // create a menu
     Texture* appleTexture = GC::GetTexture("apple");
     if (true) {
         Rect t(0, 0, 100, 32);
-        mids.quitButton = guiInstance->Push_Button("Quit", t);
+        mids.quitButton = ui->Push_Button("Quit", t);
         t.x += t.x + t.w;
-        mids.clickButton = guiInstance->Push_Button("Check", t);
+        mids.clickButton = ui->Push_Button("Check", t);
         t.x += t.x + t.w;
 
         t.w = t.h = 32;
 
-        guiInstance->Push_TextureStick(appleTexture, t);
+        ui->Push_TextureStick(appleTexture, t);
 
-        guiInstance->Register_Callback(&callback, nullptr);
+        ui->register_callback(&callback_ui, nullptr);
 
         Resolution res = Application::getResolution();
         t.w = 200;
@@ -57,30 +65,30 @@ void TestLevel::start() {
         mids.text = guiInstance->Push_Button("", t);
     }
     // instance games
-    Texture* floorTexture = GC::GetTexture("concrete");
-    Texture* snakeheadTexture = GC::GetTexture("snake-head");
+    auto floorSrc = GC::GetSurface("concrete");
+    auto snakeheadSrc = GC::GetSurface("snake-head");
 
-    GameObject* floor = CreateGameObject("Floor");
-    SpriteRenderer* view = floor->addComponent<SpriteRenderer>();
-    view->setSpriteFromTextureToGC(floorTexture);
+    GameObject* floor = create_game_object("Floor");
+    SpriteRenderer* view = floor->add_component<SpriteRenderer>();
+    view->setSpriteFromTextureToGC(floorSrc);
     view->size = Vec2::one * 7;
     // view->renderType = SpriteRenderType::Tile;
-    view->renderTilePresent = SpriteRenderPresentTiles::Place;
+    view->renderPresentMode = SpriteRenderPresentMode::Place;
     view->transform()->position(Vec2::infinity);
 
     GameObject* playerGameObject = CreateGameObject("Player");
-    player = playerGameObject->addComponent<Player>();
-    player->playerCamera->visibleObjects = true;  // show objects in level
-    player->spriteRenderer->setSpriteFromTextureToGC(snakeheadTexture);
-    player->spriteRenderer->size = Vec2::one * 0.5f;
-    player->spriteRenderer->zOrder = 1;
+    aPlayer = playerGameObject->add_component<Player>();
+    // player->playerCamera->visibleObjects = true;  // show objects in level
+    aPlayer->spriteRenderer->setSpriteFromTextureToGC(snakeheadSrc);
+    aPlayer->spriteRenderer->size = Vec2::one * 0.5f;
+    aPlayer->transform()->layer = 1;
 
     SpriteRenderer* tail = CreateGameObject("Tail")->addComponent<SpriteRenderer>();
-    Texture* curTexture = GC::GetTexture("snake-tail");
-    tail->setSpriteFromTextureToGC(curTexture);
-    tail->size = player->spriteRenderer->size;
+    auto curSrc = GC::GetSurface("snake-tail");
+    tail->setSpriteFromTextureToGC(curSrc);
+    tail->size = aPlayer->spriteRenderer->size;
     tail->transform()->setParent(playerGameObject->transform());
-    tail->transform()->position(Vec2::minusOne/2);
+    tail->transform()->position(Vec2::minusOne / 2);
 
     Transform* t = Instantiate(playerGameObject)->transform();
     t->position(Vec2::one);
@@ -96,67 +104,72 @@ void TestLevel::start() {
     t->angle(90);
 
     // Создаем N яблоко
-    int n = 100;
+    int n = 50000;
     int x;
     float range = 50;
     GameObject* appleObject = CreateGameObject("apple");
-    SpriteRenderer* view2 = appleObject->addComponent<SpriteRenderer>();
-    view2->setSpriteFromTextureToGC(appleTexture);
-    apples.reserve(n + 1);
-    apples.emplace_back(appleObject);
+    SpriteRenderer* view2 = appleObject->add_component<SpriteRenderer>();
+    view2->setSpriteFromTextureToGC(GC::GetSurface("appleTexture"));
+    apples_for.reserve(n + 1);
+    apples_for.emplace_back(appleObject);
     for (x = 0; x < n; ++x) {
         appleObject = Instantiate(appleObject);
         appleObject->transform()->position(Vec2(Random::range(-range, range), Random::range(-range, range)));
-        apples.emplace_back(appleObject);
+        apples_for.emplace_back(appleObject);
     }
 }
 
-void TestLevel::update() {
+void TestLevel::update()
+{
     char mv[100];
 
     int culled, full;
     Level::render_info(&culled, &full);
-    guiInstance->Text(mids.text, "Render: " + std::to_string(full - culled));
+    guiInstance->set_text(mids.text, "Render: " + std::to_string(full - culled));
 
-    if (Time::frame() % 30 == 0) {
+    if (TimeEngine::frame() % 30 == 0) {
         auto xx = matrixCheckDamaged().size();
-        guiInstance->Text(mids.clickButton, "Damaged " + std::to_string(xx));
+        guiInstance->set_text(mids.clickButton, "Damaged " + std::to_string(xx));
     }
-    auto cmpnt = player->gameObject()->getComponents<SpriteRenderer>();
+    auto cmpnt = aPlayer->gameObject()->get_components<SpriteRenderer>();
     // cmpnt.back()->offsetFromWorldPosition(Camera2D::ScreenToWorldPoint(input::getMousePointF()));
 
     return;
-    apples[0]->transform()->position(Camera2D::ScreenToWorldPoint(input::getMousePointF()));
+    apples_for[0]->transform()->position(Camera2D::ScreenToWorldPoint(input::getMousePointF()));
 
-    if (apples.size() == 1) return;
+    if (apples_for.size() == 1)
+        return;
 
-    for (int i = 1; false && i < apples.size(); ++i) {
-        apples[i]->transform()->position(Vec2(Random::range(-10, 10), Random::range(-10, 10)));
+    for (int i = 1; false && i < apples_for.size(); ++i) {
+        apples_for[i]->transform()->position(Vec2(Random::range(-10, 10), Random::range(-10, 10)));
     }
 }
 
-void TestLevel::onDrawGizmos() {
+void TestLevel::onDrawGizmos()
+{
     Gizmos::Draw2DWorldSpace(Vec2::zero);
 
     float distance = 3;
     Gizmos::setColor(0x88241dff);
 
-    Gizmos::DrawCircle(player->transform()->position(), distance);
+    Gizmos::DrawCircle(aPlayer->transform()->position(), distance);
 
-    auto finded = Physics2D::sphereCast(player->transform()->position(), distance);
+    auto finded = Physics2D::sphereCast(aPlayer->transform()->position(), distance);
 
     Transform* t = nullptr;
     for (Transform* f : finded) {
-        if (f->gameObject()->name() != "apple (clone)") continue;
+        if (f->gameObject()->name() != "apple (clone)")
+            continue;
 
-        f->transform()->position(Vec2::MoveTowards(f->transform()->position(), player->transform()->position(), 0.01f));
-        if (!t && Vec2::Distance(player->transform()->position(), f->position()) < 0.3f) t = f;
-        Gizmos::DrawLine(f->position(), player->transform()->position());
+        f->transform()->position(Vec2::MoveTowards(f->transform()->position(), aPlayer->transform()->position(), 0.01f));
+        if (!t && Vec2::Distance(aPlayer->transform()->position(), f->position()) < 0.3f)
+            t = f;
+        Gizmos::DrawLine(f->position(), aPlayer->transform()->position());
     }
 
     if (t) {
         t->position(Vec2::infinity);
     }
     return;
-    Gizmos::DrawStorm(Vec2::zero, Mathf::number(Mathf::ceil(distance)));
+    Gizmos::DrawStorm(Vec2::zero, Math::number(Math::ceil(distance)));
 }

@@ -1,25 +1,68 @@
+#define USE_SINGLE_RUN 0
+#if USE_SINGLE_RUN
+#include <fcntl.h>
+#include <semaphore.h>
+#include <signal.h>
+#endif
+
 #include <exception>
 #include <iostream>
 
-#include "levels/testlevel.h"
 #include "levels/gamelevel.h"
 #include "levels/terrain2deditor.h"
+#include "levels/testlevel.h"
 
 using namespace std;
 
-int main() {
+#if USE_SINGLE_RUN
+constexpr char semaphore_identifier[] = "roninengine.znakeq";
+sem_t* sem;
+void signal_out(int)
+{
+    if (sem)
+        sem_unlink(semaphore_identifier);
+    exit(EXIT_FAILURE);
+}
+#endif
+#if WIN32
+typedef void* HINSTANCE;
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lpCmdLine, int nShowCmd)
+#else
+int main()
+#endif
+{
     using namespace RoninEngine;
+    setlocale(LC_ALL, "");
+#if USE_SINGLE_RUN
+    if ((sem = sem_open(semaphore_identifier, 0)) == SEM_FAILED) {
+        sem = sem_open(semaphore_identifier, O_CREAT | O_EXCL, 0644, 1);
+        if (sem == SEM_FAILED) {
+            Application::fail(strerror(errno));
+            return EXIT_FAILURE;
+        }
+    } else {
+        Application::show_message("The application has already been launched.");
+        return EXIT_FAILURE;
+    }
+#endif
 
-    auto locale = setlocale(LC_ALL, nullptr);
-    std::cout << "Current locale: " << locale << std::endl;
-    Application::Init(1366, 768);
+    Application::init();
+    Application::createWindow(1024, 600);
 
-    Terrain2DEditor level;
-    Application::LoadLevel(&level);
+    auto level = new GameLevel;
 
-    Application::Simulate();
+    Application::loadLevel(level);
+
+    Application::simulate();
+
+    delete level;
 
     Application::Quit();
 
-    return 0;
+#if USE_SINGLE_RUN
+    sem_close(sem);
+    sem_unlink(semaphore_identifier);
+#endif
+
+    return EXIT_SUCCESS;
 }

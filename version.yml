@@ -1,0 +1,4 @@
+name: ZnakeCasual
+
+ - uses: badcast/ronin-engine
+ - uses: badcast/JNOParser

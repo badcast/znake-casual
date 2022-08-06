@@ -9,8 +9,6 @@ rm -rf ./RoninEngine
 
 git subtree add --prefix=RoninEngine https://github.com/badcast/ronin-engine.git master
 
-
-git fetch engine
 mkdir -p ./RoninEngine
 git subtree pull --prefix=RoninEngine/ engine master
 git pull -v engine master

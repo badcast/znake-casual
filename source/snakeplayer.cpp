@@ -124,7 +124,7 @@ float get_arroung_angle(const Vec2& alpha, const Vec2& beta) {
 void SnakePlayer::OnGizmos() {
     Gizmos::setColor(Color::blue);
 
-    Gizmos::DrawArrow(transform()->position(), *firstDirection);
+    Gizmos::DrawLine(transform()->position(), transform()->position()+*firstDirection);
 
     if (lastMovement != *firstDirection) return;
 

@@ -1,0 +1,8 @@
+{
+  "name": "znake-casual",
+  "version": "1.0.0",
+  "description": "Znake game from engine: RoninEngine",
+  "dependencies": {
+    "badcast/ronin-engine": "1.0.0"
+  }
+}

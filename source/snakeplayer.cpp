@@ -1,6 +1,6 @@
 #include "snakeplayer.h"
 
-constexpr int tiles = 10;
+constexpr int tiles = 1;
 Vec2* firstDirection;
 Vec2* nextPoint;
 Vec2 lastMovement;
@@ -169,7 +169,7 @@ void SnakePlayer::updatePosition() {
 
     //Произошло вращение
     if (*firstDirection != lastMovement) {
-        //Создать новую часть разделения, от изменения направление head
+        //Создать новую часть разделения, от направление head
         TileDirection newBound = {lastMovement, lastPosition};
         znake_bounds.insert(++znake_bounds.begin(), std::make_pair(1, newBound));
         Transform* newArround = pushNewArroud(this);

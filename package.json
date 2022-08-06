@@ -4,9 +4,5 @@
   "description": "Znake game from engine: RoninEngine",
   "dependencies": {
     "ronin-engine": "1.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/badcast/ronin-engine.git"
   }
 }

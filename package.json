@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Znake game from engine: RoninEngine",
   "dependencies": {
+    "chalk": "github:chalk/chalk#semver:^2.4.1",
     "ronin-engine": "github:badcast/ronin-engine",
     "badcast/JNOParser": "1.0.0"
   }

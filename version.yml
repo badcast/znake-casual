@@ -1,3 +1,5 @@
 name: ZnakeCasual
-uses: badcast/ronin-engine@1.0.0
-uses: badcast/JNOParser@1.0.0
+jobs:
+    steps:
+      - uses: badcast/ronin-engine@1.0.0
+      - uses: badcast/JNOParser@1.0.0

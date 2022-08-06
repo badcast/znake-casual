@@ -1,0 +1,32 @@
+missions		"Миссия %s"
+difficult		"Сложность %s"
+easy			"легкий"
+middle			"средний"
+hard			"трудный"
+bonus           "бонус"
+none            "один"
+ntwo            "два"
+nthree          "три"
+nfour           "четыре"
+nfive           "пять"
+nsix            "шесть"
+nseven          "семь"
+neight          "восемь"
+nnine           "девять"
+nten            "десять"
+leveln          "Уровень %s"
+
+//levels 
+level1           
+{
+    level_name1						"Уровень 1"
+    level_description1				""
+
+}
+
+level2 
+{
+    level_name1						"Уровень 2"
+    level_description1				""
+
+}

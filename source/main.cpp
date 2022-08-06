@@ -10,9 +10,11 @@ using namespace std;
 int main() {
     using namespace RoninEngine;
 
+    auto locale = setlocale(LC_ALL, nullptr);
+    std::cout << "Current locale: " << locale << std::endl;
     Application::Init(1366, 768);
 
-    GameLevel level;
+    Terrain2DEditor level;
     Application::LoadLevel(&level);
 
     Application::Simulate();

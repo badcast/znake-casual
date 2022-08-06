@@ -3,20 +3,26 @@
 using namespace RoninEngine::Runtime;
 namespace ai = RoninEngine::AIPathFinder;
 struct {
-    Color defaultNeuron = Color(0xffad8f21);
+    Color defaultNeuron = Color(0xfff6f723);
     Color defaultBackground = Color(0xff1e1e1e);
     Color deafultFore = Color(0xff90791C);
     Color line = Color::red;
     Color pointStart = Color::red;
 } navMeshColorSchemes;
 
-ai::NavMesh navMesh(50, 50);
+ai::NavMesh navMesh(1000, 1000);
 void Terrain2DEditor::start() {
     CreateGameObject()->addComponent<Camera2D>();
-    navMesh.worldScale /= 4;
+    navMesh.worldScale /= 6;
 }
 
-void drawnavmesh() {
+void Terrain2DEditor::update()
+{
+    Transform * t = Camera::mainCamera()->transform();
+    t->position(Vec2::MoveTowards(t->position(), t->position()+input::get_axis(), Time::deltaTime()));
+}
+
+void Plot() {
     Vec2 lastPoint, a, b;
     AIPathFinder::Neuron* p;
     Runtime::Vec2Int p1, p2;
@@ -27,10 +33,11 @@ void drawnavmesh() {
 
     res = Application::getResolution();
     prev = Gizmos::getColor();
-    Gizmos::setColor(next = 0xfff6f723);
+    Gizmos::setColor(next=navMeshColorSchemes.defaultNeuron);
     p1 = navMesh.WorldPointToPoint(Camera::ScreenToWorldPoint(Vec2::minusOne));
     p2 = navMesh.WorldPointToPoint(Camera::ViewportToWorldPoint(Vec2::one));
     yDefault = p1.y;
+    //select draw from viewport neurons
     while (p1.x <= p2.x) {
         while (p1.y <= p2.y) {
             p = navMesh.GetNeuron(p1);
@@ -56,12 +63,12 @@ void drawnavmesh() {
 }
 
 void Terrain2DEditor::onDrawGizmos() {
-    static Vec2 rtf = (Vec2::up + Vec2::right) * 2;
+    static Vec2 alpha = (Vec2::up + Vec2::right) * 2;
     static float angle = 0;
 
     ai::NavResult result;
     Vec2 first = Camera::ViewportToWorldPoint(Vec2::half);
-    Vec2 last = Vec2::RotateAround(first, rtf, angle * Mathf::Deg2Rad);
+    Vec2 last = Vec2::RotateAround(first, alpha, angle * Mathf::Deg2Rad);
 
     if (input::isMouseDown()) {
         auto ner = navMesh.neuronGetPoint(navMesh.GetNeuron(Camera::ScreenToWorldPoint(input::getMousePointF())));
@@ -71,15 +78,14 @@ void Terrain2DEditor::onDrawGizmos() {
     if (Time::frame() % 10 == 0) {
         angle += 13;
         if (angle > 360) angle -= 360;
+        navMesh.randomGenerate(323232);
     }
-    if (Time::frame() % 10 == 0)
-        navMesh.randomGenerate(565656);
     else
         navMesh.clear();
     navMesh.find(result, ai::NavMethodRule::NavigationIntelegency, first, last);
 
-    Gizmos::setColor(navMeshColorSchemes.defaultNeuron);
-    drawnavmesh();
+    //Draw nav mesh
+    Plot();
 
     Gizmos::setColor(Color::red);
     Gizmos::DrawCircle(last, 0.2f);

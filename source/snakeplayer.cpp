@@ -2,19 +2,13 @@
 
 constexpr int tiles = 1;
 Vec2* firstDirection;
-Vec2* nextPoint;
+Vec2* firstUpperBound;
 Vec2 lastMovement;
 float keepDistance = 0.64f;
 float keepArroundDistance = 0.4f;
 
-Transform* pushNewArroud(SnakePlayer* player) {
-    Transform* newArround = Instantiate(player->arround)->transform();
-    player->arrounds.emplace_back(newArround);
-    return newArround;
-}
-
 void SnakePlayer::OnAwake() {
-    playerCamera = gameObject()->addComponent<Camera2D>();
+    // playerCamera = gameObject()->addComponent<Camera2D>();
     head = CreateGameObject("Head");
     head->transform()->setParent(transform());
     SpriteRenderer* sel = head->addComponent<SpriteRenderer>();
@@ -39,14 +33,16 @@ void SnakePlayer::OnAwake() {
     arrounds.emplace_back(arround->transform());
     tiles.emplace_back(body->transform());
 
-    for (int x = 0; x < ::tiles; x++) appendTile();
+    for (int x = 1; x < ::tiles; x++) appendTile();
+
+    CreateGameObject()->addComponent<Camera2D>();
 }
 
 void SnakePlayer::OnStart() {
     TileDirection tinfo = {Vec2::up, transform()->position()};
     lastMovement = *(firstDirection = &znake_bounds.emplace_front(0, tinfo).second.direction);
     speed = 0.1;
-    nextPoint = &znake_bounds.front().second.upperBound;
+    firstUpperBound = &znake_bounds.front().second.upperBound;
     updatePosition();
 }
 
@@ -64,11 +60,29 @@ void SnakePlayer::OnUpdate() {
         }
     }
 
-    if (Time::frame() % (input::get_key(SDL_SCANCODE_LSHIFT) ? 5 : 30) != 0) {
+    static float testTime = 0;
+
+    if (Time::time() < testTime || false && Time::frame() % (input::get_key(SDL_SCANCODE_LSHIFT) ? 1 : 30) != 0) {
         return;
     }
+    testTime = Time::time() + 1;
     updatePosition();
 }
+
+Transform* pushNewArroud(SnakePlayer* player) {
+    Transform* newArround;
+    auto iter = player->arrounds.begin();
+    std::advance(iter, player->znake_bounds.size() - 2);
+    if (iter == std::end(player->arrounds)) {
+        newArround = Instantiate(player->arround)->transform();
+        player->arrounds.emplace_front(newArround);
+    } else {
+        newArround = *iter;
+    }
+
+    return newArround;
+}
+
 // TODO: optimizing
 float get_quarter_angle(const Vec2& dir) {
     float alpha;
@@ -121,10 +135,11 @@ float get_arroung_angle(const Vec2& alpha, const Vec2& beta) {
     }
     return delta;
 }
+
 void SnakePlayer::OnGizmos() {
     Gizmos::setColor(Color::blue);
 
-    Gizmos::DrawLine(transform()->position(), transform()->position()+*firstDirection);
+    Gizmos::DrawLine(transform()->position(), transform()->position() + *firstDirection);
 
     if (lastMovement != *firstDirection) return;
 
@@ -160,8 +175,12 @@ void SnakePlayer::updatePosition() {
         navmesh->GetNeuron(lastPosition + Vec2::Scale(*firstDirection, navmesh->worldScale), npoint);
 
     //Удалить последний хвост который больше не требуется
-    if (znake_bounds.back().first == tiles.size()) znake_bounds.pop_back();
-
+    if (znake_bounds.back().first == tiles.size()) {
+        auto iter = arrounds.begin();
+        std::advance(iter, znake_bounds.size() - 2);
+        (*iter)->position(Vec2::infinity);
+        znake_bounds.pop_back();
+    }
     //Увеличить все части поворотов на 1, когда хвосты двигаются вперед
     // Игнорировать 1 часть слежение, он же head
     for (auto x = ++std::begin(znake_bounds); x != std::end(znake_bounds); ++(*x++).first)
@@ -192,9 +211,9 @@ void SnakePlayer::updatePosition() {
         nextNeuron = navmesh->GetNeuron(npoint);
     }
 
-    *nextPoint = navmesh->PointToWorldPosition(nextNeuron);
+    *firstUpperBound = navmesh->PointToWorldPosition(nextNeuron);
     head->transform()->angle(get_quarter_angle(*firstDirection));  // rotate head
-    transform()->position(*nextPoint);                             // move transform
+    transform()->position(*firstUpperBound);                       // move transform
 
     auto currentBound = znake_bounds.begin();
     auto backBound = --znake_bounds.end();

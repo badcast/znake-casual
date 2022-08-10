@@ -9,6 +9,9 @@ struct TileDirection {
 };
 
 class SnakePlayer : public RoninEngine::Runtime::Behaviour {
+   private:
+    void updatePosition();
+
    public:
     float speed;
     Camera2D* playerCamera;
@@ -26,8 +29,6 @@ class SnakePlayer : public RoninEngine::Runtime::Behaviour {
     void OnStart() override;
     void OnUpdate() override;
     void OnGizmos() override;
-
-    void updatePosition();
 
     void appendTile();
 };

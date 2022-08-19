@@ -20,10 +20,7 @@ file(GLOB_RECURSE ZNAKE_HEADERS
 
 
 add_executable(ZnakeCasual ${ZNAKE_HEADERS} ${ZNAKE_SOURCES})
+
 set_target_properties(ZnakeCasual PROPERTIES OUTPUT_NAME znakegame)
-
-
-
-#set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-fsigned-char -finput-charset=UTF-8   -fexec-charset=CP1251")
 
 target_link_libraries(ZnakeCasual PUBLIC RoninEngine)

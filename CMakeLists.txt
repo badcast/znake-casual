@@ -23,4 +23,15 @@ add_executable(ZnakeCasual ${ZNAKE_HEADERS} ${ZNAKE_SOURCES})
 
 set_target_properties(ZnakeCasual PROPERTIES OUTPUT_NAME znakegame)
 
-target_link_libraries(ZnakeCasual PUBLIC RoninEngine)
+target_link_libraries(ZnakeCasual PUBLIC RoninEngineLib)
+
+#create link resources "data:resources"
+file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set(_DATA_DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data")
+if(NOT EXISTS "${_DATA_DESTINATION}")
+    message(STATUS "Linking data to \"${_DATA_DESTINATION}\"")
+    file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}/resources/data" "${_DATA_DESTINATION}" SYMBOLIC)
+else()
+    message(STATUS "Symbolic link exists - not required")
+endif()
+unset(_DATA_DESTINATION)

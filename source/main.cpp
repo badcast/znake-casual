@@ -13,7 +13,7 @@ int main() {
     std::cout << "Current locale: " << locale << std::endl;
     Application::Init(1366, 768);
 
-    TestLevel level;
+    GameLevel level;
     Application::LoadLevel(&level);
 
     Application::Simulate();

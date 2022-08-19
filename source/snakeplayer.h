@@ -1,11 +1,12 @@
-#ifndef SNAKEPLAYER_H
-#define SNAKEPLAYER_H
+#pragma once
 
 #include <ronin/framework.h>
 
-struct TileDirection {
+struct ZnakeBound {
+    int boundIndex;
     Vec2 direction;
     Vec2 upperBound;
+    Transform* arroundGraphic;
 };
 
 class SnakePlayer : public RoninEngine::Runtime::Behaviour {
@@ -20,10 +21,9 @@ class SnakePlayer : public RoninEngine::Runtime::Behaviour {
     GameObject* arround;
     GameObject* loopbackTile;
     Terrain2D* terrain;
-    std::list<std::pair<int, TileDirection>> znake_bounds;
 
-    std::vector<Transform*> tiles;
-    std::list<Transform*> arrounds;
+    std::vector<Transform*> znake_tiles;
+    std::list<ZnakeBound> znake_bounds;
 
     void OnAwake() override;
     void OnStart() override;
@@ -32,5 +32,3 @@ class SnakePlayer : public RoninEngine::Runtime::Behaviour {
 
     void appendTile();
 };
-
-#endif  // SNAKEPLAYER_H

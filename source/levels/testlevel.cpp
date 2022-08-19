@@ -70,7 +70,7 @@ void TestLevel::start() {
 
     GameObject* playerGameObject = CreateGameObject("Player");
     player = playerGameObject->addComponent<Player>();
-    player->playerCamera->visibleObjects = true;  // show objects in level
+    //player->playerCamera->visibleObjects = true;  // show objects in level
     player->spriteRenderer->setSpriteFromTextureToGC(snakeheadTexture);
     player->spriteRenderer->size = Vec2::one * 0.5f;
     player->spriteRenderer->zOrder = 1;
@@ -96,7 +96,7 @@ void TestLevel::start() {
     t->angle(90);
 
     // Создаем N яблоко
-    int n = 100;
+    int n = 50000;
     int x;
     float range = 50;
     GameObject* appleObject = CreateGameObject("apple");

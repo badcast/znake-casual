@@ -73,7 +73,7 @@ void TestLevel::start() {
     //player->playerCamera->visibleObjects = true;  // show objects in level
     player->spriteRenderer->setSpriteFromTextureToGC(snakeheadTexture);
     player->spriteRenderer->size = Vec2::one * 0.5f;
-    player->spriteRenderer->zOrder = 1;
+    player->transform()->layer = 1;
 
     SpriteRenderer* tail = CreateGameObject("Tail")->addComponent<SpriteRenderer>();
     Texture* curTexture = GC::GetTexture("snake-tail");

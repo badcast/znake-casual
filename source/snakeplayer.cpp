@@ -1,9 +1,9 @@
 #include "snakeplayer.h"
 
-constexpr int tiles = 53;
+constexpr int tiles = 10;
 Vec2 currentAxis;
-Vec2* firstDirection;
-Vec2* firstUpperBound;
+Vec2* headDirection;
+Vec2* headUpperBound;
 Vec2 lastDirection;
 float keepDistance = 0.64f;
 float keepArroundDistance = 0.4f;
@@ -66,7 +66,7 @@ void SnakePlayer::OnAwake() {
     head = CreateGameObject("Head");
     head->transform()->setParent(transform());
     SpriteRenderer* sel = head->addComponent<SpriteRenderer>();
-    sel->zOrder = 100;
+    sel->transform()->layer = 100;
     Texture* selTexture = GC::GetTexture("snake-head");
     sel->setSpriteFromTextureToGC(selTexture);
 
@@ -76,9 +76,10 @@ void SnakePlayer::OnAwake() {
     sel = body->addComponent<SpriteRenderer>();
     selTexture = GC::GetTexture("snake-body");
     sel->setSpriteFromTextureToGC(selTexture);
+    sel->renderType = SpriteRenderType::Tile;
+    sel->renderTilePresent = SpriteRenderPresentTiles::Fixed;
 
     arround = CreateGameObject("Around");
-    // arround->transform()->setParent(transform());
     arround->transform()->localPosition(Vec2::down * 2);
     sel = arround->addComponent<SpriteRenderer>();
     selTexture = GC::GetTexture("snake-arround");
@@ -93,9 +94,9 @@ void SnakePlayer::OnAwake() {
 
 void SnakePlayer::OnStart() {
     ZnakeBound tinfo = {0, Vec2::up, transform()->position(), arround->transform()};
-    currentAxis = lastDirection = *(firstDirection = &znake_bounds.emplace_front(tinfo).direction);
+    currentAxis = lastDirection = *(headDirection = &znake_bounds.emplace_front(tinfo).direction);
     speed = 0.1;
-    firstUpperBound = &znake_bounds.front().upperBound;
+    headUpperBound = &znake_bounds.front().upperBound;
     arround->transform()->position(Vec2::infinity);
     updatePosition();
 }
@@ -103,13 +104,13 @@ void SnakePlayer::OnStart() {
 void SnakePlayer::OnUpdate() {
     // float curSpeed = input::get_key(SDL_SCANCODE_LSHIFT) ? (speed * 10) : speed;
     Vec2 newAxis = input::get_axis();
-    if (newAxis != Vec2::zero && newAxis != *firstDirection) {
+    if (newAxis != Vec2::zero && newAxis != *headDirection) {
         if (newAxis.x != 0)
             newAxis.y = 0;
         else if (newAxis.y != 0)
             newAxis.x = 0;
 
-        if (newAxis.x - firstDirection->x != 0 && newAxis.y - firstDirection->y != 0) currentAxis = newAxis;
+        if (newAxis.x - headDirection->x != 0 && newAxis.y - headDirection->y != 0) currentAxis = newAxis;
     }
 
     static float testTime = 0;
@@ -119,7 +120,7 @@ void SnakePlayer::OnUpdate() {
     }
     testTime = Time::time() + 1;  // delay 1 seconds
 
-    if (*firstDirection != currentAxis) *firstDirection = currentAxis;
+    if (*headDirection != currentAxis) *headDirection = currentAxis;
     updatePosition();
 }
 
@@ -129,9 +130,9 @@ void SnakePlayer::OnGizmos() {
     Gizmos::setColor(Color::blue);
 
     // Draw next line
-    Gizmos::DrawLine(transform()->position(), transform()->position() + *firstDirection);
+    Gizmos::DrawLine(transform()->position(), transform()->position() + *headDirection);
 
-    if (lastDirection != *firstDirection) return;
+    if (lastDirection != *headDirection) return;
 
     // save last position
     Vec2 last = transform()->position();
@@ -164,7 +165,7 @@ void SnakePlayer::updatePosition() {
     std::remove_reference_t<decltype(znake_bounds)>::iterator thisBound, backBound, nextBound;
     Vec2 lastPosition = transform()->position();
     Vec2Int npoint;
-    auto nextNeuron = navmesh->GetNeuron(lastPosition + Vec2::Scale(*firstDirection, navmesh->worldScale), npoint);
+    auto nextNeuron = navmesh->GetNeuron(lastPosition + Vec2::Scale(*headDirection, navmesh->worldScale), npoint);
     /*********/
 
     //Удалить последний хвост который больше не требуется
@@ -178,14 +179,14 @@ void SnakePlayer::updatePosition() {
     for (thisBound = ++std::begin(znake_bounds); thisBound != std::end(znake_bounds);) ++(*thisBound++).boundIndex;
 
     //Данная концепция определяет новую направления для HEAD
-    if (*firstDirection != lastDirection) {
+    if (*headDirection != lastDirection) {
         Transform* newArround = Instantiate(arround)->transform();
         //Создать новую часть разделения, от направление head
         // Вставить новый хвост между HEAD и след 'хвостом'
         znake_bounds.insert(++znake_bounds.begin(), {1, lastDirection, lastPosition, newArround});
         newArround->transform()->position(lastPosition);
-        newArround->transform()->angle(get_arroung_angle(*firstDirection, lastDirection));
-        lastDirection = *firstDirection;
+        newArround->transform()->angle(get_arroung_angle(*headDirection, lastDirection));
+        lastDirection = *headDirection;
     }
 
     // get inside <next position>
@@ -203,9 +204,9 @@ void SnakePlayer::updatePosition() {
         nextNeuron = navmesh->GetNeuron(npoint);
     }
 
-    *firstUpperBound = navmesh->PointToWorldPosition(nextNeuron);
-    head->transform()->angle(get_quarter_angle(*firstDirection));  // rotate head
-    transform()->position(*firstUpperBound);                       // move transform
+    *headUpperBound = navmesh->PointToWorldPosition(nextNeuron);
+    head->transform()->angle(get_quarter_angle(*headDirection));  // rotate head
+    transform()->position(*headUpperBound);                       // move transform
 
     /*
         У проекций змеи, имеються схожие 2 вида хвоста
@@ -229,6 +230,7 @@ void SnakePlayer::updatePosition() {
 
     //Выделить для каждого N видимых и N повортных 'хвостов' в 'пространстве'
     // y - 'хвосты' которые зедействованы
+    SpriteRenderer* flipperTile = nullptr;
     for (y = 0, x = 0; x < znake_tiles.size(); ++x) {
         //Концепция: текущий направляющий заканчивается последним хвостом, далее переходим к след. поворотному хвосту
         if (nextBound != znake_bounds.end() && nextBound->boundIndex - 1 == x) {
@@ -239,7 +241,18 @@ void SnakePlayer::updatePosition() {
 
             //Существует след. поворотный хвост после, данного?
             nextBound = std::next(thisBound);
-            if (nextBound != std::end(znake_bounds) && nextBound->boundIndex == thisBound->boundIndex + 1) continue;
+            if (nextBound != std::end(znake_bounds)) {
+                if (nextBound->boundIndex == thisBound->boundIndex + 1)
+                    continue;
+                else {
+                    if (flipperTile != nullptr) {
+                        // TODO: restoure prev flipping size
+                        flipperTile->size.y = 1;
+                    }
+                    flipperTile = znake_tiles[y]->gameObject()->getComponent<SpriteRenderer>();
+                    flipperTile->size.y = 1.f/ 2;
+                }
+            }
         } else {
             //Задаем положение хвоста в пространстве
             heuristic -= thisBound->direction * keepDistance;

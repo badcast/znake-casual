@@ -16,7 +16,7 @@ void GameLevel::start() {
     ground->setSpriteFromTextureToGC(GC::GetTexture("concrete"));
     ground->size = Vec2::one * 12;
     ground->renderType = SpriteRenderType::Tile;
-    ground->zOrder = -1;
+    ground->transform()->layer = -1;
 }
 
 void GameLevel::update() {

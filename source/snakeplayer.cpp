@@ -76,8 +76,8 @@ void SnakePlayer::OnAwake() {
     sel = body->addComponent<SpriteRenderer>();
     selTexture = GC::GetTexture("snake-body");
     sel->setSpriteFromTextureToGC(selTexture);
-    sel->renderType = SpriteRenderType::Tile;
-    sel->renderTilePresent = SpriteRenderPresentTiles::Fixed;
+    sel->renderType = SpriteRenderType::Simple;
+    sel->renderTilePresent = SpriteRenderPresentTiles::Place;
 
     arround = CreateGameObject("Around");
     arround->transform()->localPosition(Vec2::down * 2);

@@ -55,8 +55,8 @@ float get_arroung_angle(const Vec2& alpha, const Vec2& beta) {
         else if (beta.x < 0)
             delta = 270;
     } else {
-        Application::fail("unassigned angle for arround.");
         delta = 0;
+        Application::fail("unassigned angle for arround.");
     }
     return delta;
 }

@@ -1,23 +1,23 @@
 #include "testlevel.h"
 #include <ronin/Transform.h>
 struct {
-    ID quitButton;
-    ID clickButton;
-    ID restore = -1;
-    ID text;
+    uid quitButton;
+    uid clickButton;
+    uid restore = -1;
+    uid text;
 } mids;
 
 TestLevel::TestLevel() : Level("ZNake Game Level") {}
 
-void callback(const ID& uid, void* userData) {
-    if (uid == mids.quitButton)
+void callback(uid id, void* userData) {
+    if (id == mids.quitButton)
         Application::RequestQuit();
-    else if (uid == mids.clickButton) {
-        Rect r = guiInstance->Rect(uid);
+    else if (id == mids.clickButton) {
+        Rect r = guiInstance->Rect(id);
         r.w = 200;
-        guiInstance->Rect(uid, r);
+        guiInstance->Rect(id, r);
         auto damaged = Level::matrixCheckDamaged();
-        guiInstance->Text(uid, "Damaged: " + std::to_string(damaged.size()));
+        guiInstance->Text(id, "Damaged: " + std::to_string(damaged.size()));
 
         if (mids.restore == -1) {
             r.x += r.w;
@@ -27,7 +27,7 @@ void callback(const ID& uid, void* userData) {
 
         guiInstance->Visible(mids.restore, true);
 
-    } else if (uid == mids.restore) {
+    } else if (id == mids.restore) {
         guiInstance->Visible(mids.restore, false);
         Level::matrixRestore();
     }
@@ -158,5 +158,5 @@ void TestLevel::onDrawGizmos() {
         t->position(Vec2::infinity);
     }
     return;
-    Gizmos::DrawStorm(Vec2::zero, Mathf::number(Mathf::ceil(distance)));
+    Gizmos::DrawStorm(Vec2::zero, Math::number(Math::ceil(distance)));
 }

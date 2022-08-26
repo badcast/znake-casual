@@ -68,7 +68,7 @@ void Terrain2DEditor::onDrawGizmos() {
 
     ai::NavResult result;
     Vec2 first = Camera::ViewportToWorldPoint(Vec2::half);
-    Vec2 last = Vec2::RotateAround(first, alpha, angle * Mathf::Deg2Rad);
+    Vec2 last = Vec2::RotateAround(first, alpha, angle * Math::Deg2Rad);
 
     if (input::isMouseDown()) {
         auto ner = navMesh.neuronGetPoint(navMesh.GetNeuron(Camera::ScreenToWorldPoint(input::getMousePointF())));

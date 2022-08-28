@@ -10,11 +10,23 @@ void GameLevel::start() {
     std::vector<float> coins = {1, 2, 6, 12, 24, 120};
     Vec2Int p;
     p.x = 900;
-    p.y = 40;
+    p.y = 100;
     ui->Push_DropDown(coins, p);
-    p.y += 40;
+    p.y += 100;
     std::vector<std::string> el1 = {"Элемент 1", "Элемент 2"};
     ui->Push_DropDown(el1, p);
+    p.y += 100;
+
+    std::vector<std::string> el2 = {"Твой друг 1", "Твой друг 2"};
+    ui->Push_DropDown(el2, 1, p);
+    p.y += 100;
+    std::vector<std::string> el3 = {"Элемент 1", "Элемент 2"};
+    ui->Push_DropDown(el3, p);
+    p.y += 100;
+
+    ui->Push_Edit("This is text", p);
+
+
 
     terrain = CreateGameObject("Test")->addComponent<Terrain2D>();
     terrain->getNavMesh()->worldScale /= 2;

@@ -13,11 +13,11 @@ void callback(uid id, void* userData) {
     if (id == mids.quitButton)
         Application::RequestQuit();
     else if (id == mids.clickButton) {
-        Rect r = guiInstance->Rect(id);
+        Rect r = guiInstance->getRect(id);
         r.w = 200;
-        guiInstance->Rect(id, r);
+        guiInstance->setRect(id, r);
         auto damaged = Level::matrixCheckDamaged();
-        guiInstance->Text(id, "Damaged: " + std::to_string(damaged.size()));
+        guiInstance->setText(id, "Damaged: " + std::to_string(damaged.size()));
 
         if (mids.restore == -1) {
             r.x += r.w;
@@ -25,10 +25,10 @@ void callback(uid id, void* userData) {
             mids.restore = guiInstance->Push_Button("Restore", r);
         }
 
-        guiInstance->Visible(mids.restore, true);
+        guiInstance->setVisible(mids.restore, true);
 
     } else if (id == mids.restore) {
-        guiInstance->Visible(mids.restore, false);
+        guiInstance->setVisible(mids.restore, false);
         Level::matrixRestore();
     }
 }
@@ -116,11 +116,11 @@ void TestLevel::update() {
 
     int culled, full;
     Level::render_info(&culled, &full);
-    guiInstance->Text(mids.text, "Render: " + std::to_string(full - culled));
+    guiInstance->setText(mids.text, "Render: " + std::to_string(full - culled));
 
     if (Time::frame() % 30 == 0) {
         auto xx = matrixCheckDamaged().size();
-        guiInstance->Text(mids.clickButton, "Damaged " + std::to_string(xx));
+        guiInstance->setText(mids.clickButton, "Damaged " + std::to_string(xx));
     }
     auto cmpnt = player->gameObject()->getComponents<SpriteRenderer>();
     // cmpnt.back()->offsetFromWorldPosition(Camera2D::ScreenToWorldPoint(input::getMousePointF()));

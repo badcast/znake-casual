@@ -21,7 +21,7 @@ file(GLOB_RECURSE ZNAKE_HEADERS
 
 add_executable(ZnakeCasual ${ZNAKE_HEADERS} ${ZNAKE_SOURCES})
 
-set_target_properties(ZnakeCasual PROPERTIES OUTPUT_NAME znakegame)
+set_target_properties(ZnakeCasual PROPERTIES OUTPUT_NAME znake)
 
 target_link_libraries(ZnakeCasual PUBLIC RoninEngineLib)
 

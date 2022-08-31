@@ -65,7 +65,7 @@ void TestLevel::start() {
     view->setSpriteFromTextureToGC(floorTexture);
     view->size = Vec2::one * 7;
     // view->renderType = SpriteRenderType::Tile;
-    view->renderTilePresent = SpriteRenderPresentTiles::Place;
+    view->renderPresentMode = SpriteRenderPresentMode::Place;
     view->transform()->position(Vec2::infinity);
 
     GameObject* playerGameObject = CreateGameObject("Player");

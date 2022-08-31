@@ -1,5 +1,9 @@
+#define USE_SINGLE_RUN 0
+#if USE_SINGLE_RUN
 #include <fcntl.h>
 #include <semaphore.h>
+#include <signal.h>
+#endif
 
 #include <exception>
 #include <iostream>
@@ -12,10 +16,23 @@ constexpr char semaphore_identifier[] = "znakeq";
 
 using namespace std;
 
+#if USE_SINGLE_RUN
+sem_t* sem;
+void signal_out(int) {
+    if (sem) sem_unlink(semaphore_identifier);
+    exit(EXIT_FAILURE);
+}
+#endif
+
+void test(void);
+
 int main() {
     using namespace RoninEngine;
-    sem_t* sem;
+
+    test();
+
     setlocale(LC_ALL, "");
+#if USE_SINGLE_RUN
     if ((sem = sem_open(semaphore_identifier, 0)) == SEM_FAILED) {
         sem = sem_open(semaphore_identifier, O_CREAT | O_EXCL, 0644, 1);
         if (sem == SEM_FAILED) {
@@ -26,11 +43,14 @@ int main() {
         Application::show_message("The application has already been launched.");
         return EXIT_FAILURE;
     }
+#endif
 
-    // goto err500;
+    auto mut = SDL_CreateMutex();
+
     Application::Init(1366, 768);
 
     GameLevel* level = new GameLevel;
+    auto nn = level->name();
     Application::LoadLevel(level);
 
     Application::Simulate();
@@ -39,8 +59,10 @@ int main() {
 
     Application::Quit();
 
+#if USE_SINGLE_RUN
     sem_close(sem);
     sem_unlink(semaphore_identifier);
+#endif
 
     return EXIT_SUCCESS;
 }

@@ -77,7 +77,7 @@ void SnakePlayer::OnAwake() {
     selTexture = GC::GetTexture("snake-body");
     sel->setSpriteFromTextureToGC(selTexture);
     sel->renderType = SpriteRenderType::Simple;
-    sel->renderTilePresent = SpriteRenderPresentTiles::Place;
+    sel->renderPresentMode = SpriteRenderPresentMode::Place;
 
     arround = CreateGameObject("Around");
     arround->transform()->localPosition(Vec2::down * 2);
@@ -246,11 +246,12 @@ void SnakePlayer::updatePosition() {
                     continue;
                 else {
                     if (flipperTile != nullptr) {
-                        // TODO: restoure prev flipping size
+                        // TODO: restore prev flipping size
                         flipperTile->size.y = 1;
                     }
                     flipperTile = znake_tiles[y]->gameObject()->getComponent<SpriteRenderer>();
-                    flipperTile->size.y = 1.f/ 2;
+                    flipperTile->size.y = 0.1f / keepDistance;
+                    flipperTile->size.y = Math::max(0.f, Math::min(1.f, flipperTile->size.y));
                 }
             }
         } else {

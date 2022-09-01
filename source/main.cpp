@@ -24,12 +24,9 @@ void signal_out(int) {
 }
 #endif
 
-void test(void);
-
 int main() {
     using namespace RoninEngine;
 
-    test();
 
     setlocale(LC_ALL, "");
 #if USE_SINGLE_RUN
@@ -45,12 +42,11 @@ int main() {
     }
 #endif
 
-    auto mut = SDL_CreateMutex();
 
     Application::Init(1366, 768);
 
     GameLevel* level = new GameLevel;
-    auto nn = level->name();
+
     Application::LoadLevel(level);
 
     Application::Simulate();

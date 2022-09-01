@@ -246,11 +246,11 @@ void SnakePlayer::updatePosition() {
                     continue;
                 else {
                     if (flipperTile != nullptr) {
-                        // TODO: restore prev flipping size
+                        // TODO: Востановить предыдущий. размер хвоста до нормальных размеров
                         flipperTile->size.y = 1;
                     }
                     flipperTile = znake_tiles[y]->gameObject()->getComponent<SpriteRenderer>();
-                    flipperTile->size.y = 0.1f / keepDistance;
+                    //flipperTile->size.y = 0.1f / keepDistance;
                     flipperTile->size.y = Math::max(0.f, Math::min(1.f, flipperTile->size.y));
                 }
             }

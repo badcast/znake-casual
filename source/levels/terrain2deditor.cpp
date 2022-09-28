@@ -16,10 +16,9 @@ void Terrain2DEditor::start() {
     navMesh.worldScale /= 6;
 }
 
-void Terrain2DEditor::update()
-{
-    Transform * t = Camera::mainCamera()->transform();
-    t->position(Vec2::MoveTowards(t->position(), t->position()+input::get_axis(), Time::deltaTime()));
+void Terrain2DEditor::update() {
+    Transform* t = Camera::mainCamera()->transform();
+    t->position(Vec2::MoveTowards(t->position(), t->position() + input::get_axis(), Time::deltaTime()));
 }
 
 void Plot() {
@@ -29,15 +28,14 @@ void Plot() {
     Resolution res;
     Color prev, next;
     int yDefault;
-    float max = 0;
 
     res = Application::getResolution();
     prev = Gizmos::getColor();
-    Gizmos::setColor(next=navMeshColorSchemes.defaultNeuron);
+    Gizmos::setColor(next = navMeshColorSchemes.defaultNeuron);
     p1 = navMesh.WorldPointToPoint(Camera::ScreenToWorldPoint(Vec2::minusOne));
     p2 = navMesh.WorldPointToPoint(Camera::ViewportToWorldPoint(Vec2::one));
     yDefault = p1.y;
-    //select draw from viewport neurons
+    // select draw from viewport neurons
     while (p1.x <= p2.x) {
         while (p1.y <= p2.y) {
             p = navMesh.GetNeuron(p1);
@@ -60,6 +58,18 @@ void Plot() {
         ++p1.x;
     }
     Gizmos::setColor(prev);
+
+    static std::uint32_t maxTotal = 0;
+    static float upplow = 0;
+    if (Time::time() > upplow) {
+        maxTotal = 0;
+        upplow = Time::time() + 1;
+    }
+    auto totalC = navMesh.getCachedSize();
+    maxTotal = std::max(maxTotal, totalC);
+
+    Gizmos::DrawTextOnPosition(Camera::ScreenToWorldPoint(Vec2::zero),
+                               "Cached " + std::to_string(totalC) + " (" + std::to_string(maxTotal) + ")");
 }
 
 void Terrain2DEditor::onDrawGizmos() {
@@ -79,12 +89,11 @@ void Terrain2DEditor::onDrawGizmos() {
         angle += 13;
         if (angle > 360) angle -= 360;
         navMesh.randomGenerate(323232);
-    }
-    else
+    } else
         navMesh.clear();
     navMesh.find(result, ai::NavMethodRule::NavigationIntelegency, first, last);
 
-    //Draw nav mesh
+    // Draw nav mesh
     Plot();
 
     Gizmos::setColor(Color::red);

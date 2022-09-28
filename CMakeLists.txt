@@ -23,7 +23,7 @@ add_executable(ZnakeCasual ${ZNAKE_HEADERS} ${ZNAKE_SOURCES})
 
 set_target_properties(ZnakeCasual PROPERTIES OUTPUT_NAME znake)
 
-target_link_libraries(ZnakeCasual PUBLIC RoninEngineLib)
+target_link_libraries(ZnakeCasual PUBLIC RoninEngineLibrary)
 
 #create link resources "data:resources"
 file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

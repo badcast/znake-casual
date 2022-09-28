@@ -27,7 +27,6 @@ void signal_out(int) {
 int main() {
     using namespace RoninEngine;
 
-
     setlocale(LC_ALL, "");
 #if USE_SINGLE_RUN
     if ((sem = sem_open(semaphore_identifier, 0)) == SEM_FAILED) {
@@ -42,10 +41,9 @@ int main() {
     }
 #endif
 
+    Application::Init(1024, 600);
 
-    Application::Init(1366, 768);
-
-    GameLevel* level = new GameLevel;
+    auto level = new Terrain2DEditor;
 
     Application::LoadLevel(level);
 

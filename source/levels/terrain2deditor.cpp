@@ -25,13 +25,8 @@ void Terrain2DEditor::update() {
     Transform* t = Camera::mainCamera()->transform();
     t->position(Vec2::MoveTowards(t->position(), t->position() + input::get_axis(), Time::deltaTime()));
 
-    float v = Math::max(0.05f,*(float*)ui->getResources(slider));
-    if (v != navMesh->widthSpace / 1000.f) {
-        Vec2 scl = navMesh->worldScale;
-        delete navMesh;
-        navMesh = new ai::NavMesh(1000 * v, 1000 * v);
-        navMesh->worldScale = scl;
-    }
+    float v = Math::max(0.05f, *(float*)ui->getResources(slider));
+    navMesh->worldScale = Vec2::one * v;
 }
 
 void Plot() {
@@ -63,8 +58,8 @@ void Plot() {
                 next.b = 246;
             }
             Gizmos::setColor(next);
-            Gizmos::DrawFill(lastPoint, navMesh->worldScale.x - (navMesh->worldScale.x * 0.1f),
-                             navMesh->worldScale.y - navMesh->worldScale.y * 0.1f);
+            Gizmos::DrawTriangle(lastPoint, navMesh->worldScale.x - (navMesh->worldScale.x * 0.1f),
+                                 navMesh->worldScale.y - navMesh->worldScale.y * 0.1f, true);
             ++p1.y;
         }
         p1.y = yDefault;
@@ -89,7 +84,6 @@ void Plot() {
 void Terrain2DEditor::onDrawGizmos() {
     static Vec2 alpha = (Vec2::up + Vec2::right) * 2;
     static float angle = 0;
-
     ai::NavResult result;
     Vec2 first = Camera::ViewportToWorldPoint(Vec2::half);
     Vec2 last = Vec2::RotateAround(first, alpha, angle * Math::Deg2Rad);

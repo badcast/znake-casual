@@ -7,6 +7,7 @@ GameLevel::GameLevel() : Level("ZNake Game Level") {}
 Terrain2D *terrain;
 SnakePlayer *snakeplayer;
 SpriteRenderer *spr;
+uid uiSlider;
 void GameLevel::start() {
     Vec2Int p;
     p.x = Application::getResolution().width - 240;
@@ -16,6 +17,9 @@ void GameLevel::start() {
     p.y += 64;
 
     ui->Push_Edit("This is text", p);
+    p.y += 64;
+    uiSlider = ui->Push_Slider(0.5f, p);
+
 
     terrain = CreateGameObject("Test")->addComponent<Terrain2D>();
     terrain->getNavMesh()->worldScale /= 2;
@@ -43,7 +47,7 @@ void GameLevel::start() {
 
 void GameLevel::update() {
     Vec2 ms = Camera::ScreenToWorldPoint(input::getMousePointF());
-    spr->size.y = Math::Clamp01(-ms.y);
+    spr->size.y = *(float*)ui->getResources(uiSlider);
 }
 
 void GameLevel::onDrawGizmos() { Gizmos::DrawNavMesh(terrain->getNavMesh()); }

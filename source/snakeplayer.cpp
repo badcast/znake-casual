@@ -195,13 +195,13 @@ void SnakePlayer::updatePosition() {
     // get inside <next position>
     if (!nextNeuron) {
         if (npoint.y < 0)
-            npoint.y = navmesh->heightSpace;
-        else if (npoint.y > navmesh->heightSpace)
+            npoint.y = navmesh->getHeight();
+        else if (npoint.y > navmesh->getHeight())
             npoint.y = 0;
 
         if (npoint.x < 0)
-            npoint.x = navmesh->widthSpace;
-        else if (npoint.x > navmesh->widthSpace)
+            npoint.x = navmesh->getWidth();
+        else if (npoint.x > navmesh->getWidth())
             npoint.x = 0;
 
         nextNeuron = navmesh->GetNeuron(npoint);

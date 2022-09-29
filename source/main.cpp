@@ -43,7 +43,7 @@ int main() {
 
     Application::Init(1024, 600);
 
-    auto level = new Terrain2DEditor;
+    auto level = new GameLevel;
 
     Application::LoadLevel(level);
 

@@ -1,5 +1,6 @@
-#include "testlevel.h"
 #include <ronin/Transform.h>
+#include "testlevel.h"
+
 struct {
     uid quitButton;
     uid clickButton;
@@ -70,7 +71,7 @@ void TestLevel::start() {
 
     GameObject* playerGameObject = CreateGameObject("Player");
     player = playerGameObject->addComponent<Player>();
-    //player->playerCamera->visibleObjects = true;  // show objects in level
+    // player->playerCamera->visibleObjects = true;  // show objects in level
     player->spriteRenderer->setSpriteFromTextureToGC(snakeheadTexture);
     player->spriteRenderer->size = Vec2::one * 0.5f;
     player->transform()->layer = 1;
@@ -80,7 +81,7 @@ void TestLevel::start() {
     tail->setSpriteFromTextureToGC(curTexture);
     tail->size = player->spriteRenderer->size;
     tail->transform()->setParent(playerGameObject->transform());
-    tail->transform()->position(Vec2::minusOne/2);
+    tail->transform()->position(Vec2::minusOne / 2);
 
     Transform* t = Instantiate(playerGameObject)->transform();
     t->position(Vec2::one);

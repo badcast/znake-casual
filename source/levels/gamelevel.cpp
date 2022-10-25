@@ -6,32 +6,37 @@ GameLevel::GameLevel() : Level("ZNake Game Level") {}
 
 Terrain2D *terrain;
 SnakePlayer *snakeplayer;
+SpriteRenderer *spr;
+uid uiSlider;
 void GameLevel::start() {
-    std::vector<float> coins = {1, 2, 6, 12, 24, 120};
     Vec2Int p;
-    p.x = 900;
-    p.y = 100;
-    ui->Push_DropDown(coins, p);
-    p.y += 100;
+    p.x = Application::getResolution().width - 240;
+    p.y = 0;
     std::vector<std::string> el1 = {"Элемент 1", "Элемент 2"};
     ui->Push_DropDown(el1, p);
-    p.y += 100;
-
-    std::vector<std::string> el2 = {"Твой друг 1", "Твой друг 2"};
-    ui->Push_DropDown(el2, 1, p);
-    p.y += 100;
-    std::vector<std::string> el3 = {"Элемент 1", "Элемент 2"};
-    ui->Push_DropDown(el3, p);
-    p.y += 100;
+    p.y += 64;
 
     ui->Push_Edit("This is text", p);
-
+    p.y += 64;
+    uiSlider = ui->Push_Slider(0.5f, p);
 
 
     terrain = CreateGameObject("Test")->addComponent<Terrain2D>();
     terrain->getNavMesh()->worldScale /= 2;
+
+    spr = CreateGameObject()->addComponent<SpriteRenderer>();
+    spr->setSpriteFromTextureToGC(GC::GetTexture("snake-body"));
+    spr->renderPresentMode = SpriteRenderPresentMode::Place;
+    spr->renderOut = SpriteRenderOut::Origin;
+
     snakeplayer = CreateGameObject("Player")->addComponent<SnakePlayer>();
     snakeplayer->terrain = terrain;
+    snakeplayer->transform()->position(Vec2::right * 2);
+    auto _ = ((Camera2D *)Camera::mainCamera());
+    _->visibleGrids = true;
+    _->visibleBorders = true;
+    _->visibleObjects = true;
+    return;
 
     auto ground = CreateGameObject("Ground")->addComponent<SpriteRenderer>();
     ground->setSpriteFromTextureToGC(GC::GetTexture("concrete"));
@@ -40,6 +45,9 @@ void GameLevel::start() {
     ground->transform()->layer = -1;
 }
 
-void GameLevel::update() {}
+void GameLevel::update() {
+    Vec2 ms = Camera::ScreenToWorldPoint(input::getMousePointF());
+    spr->size.y = *(float*)ui->getResources(uiSlider);
+}
 
 void GameLevel::onDrawGizmos() { Gizmos::DrawNavMesh(terrain->getNavMesh()); }

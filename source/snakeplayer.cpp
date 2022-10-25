@@ -1,6 +1,6 @@
 #include "snakeplayer.h"
 
-constexpr int tiles = 10;
+constexpr int tiles = 3;
 Vec2 currentAxis;
 Vec2* headDirection;
 Vec2* headUpperBound;
@@ -66,6 +66,7 @@ void SnakePlayer::OnAwake() {
     head = CreateGameObject("Head");
     head->transform()->setParent(transform());
     SpriteRenderer* sel = head->addComponent<SpriteRenderer>();
+    sel->renderOut = SpriteRenderOut::Origin;
     sel->transform()->layer = 100;
     Texture* selTexture = GC::GetTexture("snake-head");
     sel->setSpriteFromTextureToGC(selTexture);
@@ -76,6 +77,7 @@ void SnakePlayer::OnAwake() {
     sel = body->addComponent<SpriteRenderer>();
     selTexture = GC::GetTexture("snake-body");
     sel->setSpriteFromTextureToGC(selTexture);
+    sel->renderOut = SpriteRenderOut::Origin;
     sel->renderType = SpriteRenderType::Simple;
     sel->renderPresentMode = SpriteRenderPresentMode::Place;
 
@@ -83,6 +85,7 @@ void SnakePlayer::OnAwake() {
     arround->transform()->localPosition(Vec2::down * 2);
     sel = arround->addComponent<SpriteRenderer>();
     selTexture = GC::GetTexture("snake-arround");
+    sel->renderOut = SpriteRenderOut::Origin;
     sel->setSpriteFromTextureToGC(selTexture);
 
     znake_tiles.emplace_back(body->transform());
@@ -192,13 +195,13 @@ void SnakePlayer::updatePosition() {
     // get inside <next position>
     if (!nextNeuron) {
         if (npoint.y < 0)
-            npoint.y = navmesh->heightSpace;
-        else if (npoint.y > navmesh->heightSpace)
+            npoint.y = navmesh->getHeight();
+        else if (npoint.y > navmesh->getHeight())
             npoint.y = 0;
 
         if (npoint.x < 0)
-            npoint.x = navmesh->widthSpace;
-        else if (npoint.x > navmesh->widthSpace)
+            npoint.x = navmesh->getWidth();
+        else if (npoint.x > navmesh->getWidth())
             npoint.x = 0;
 
         nextNeuron = navmesh->GetNeuron(npoint);
@@ -230,7 +233,6 @@ void SnakePlayer::updatePosition() {
 
     //Выделить для каждого N видимых и N повортных 'хвостов' в 'пространстве'
     // y - 'хвосты' которые зедействованы
-    SpriteRenderer* flipperTile = nullptr;
     for (y = 0, x = 0; x < znake_tiles.size(); ++x) {
         //Концепция: текущий направляющий заканчивается последним хвостом, далее переходим к след. поворотному хвосту
         if (nextBound != znake_bounds.end() && nextBound->boundIndex - 1 == x) {
@@ -242,17 +244,7 @@ void SnakePlayer::updatePosition() {
             //Существует след. поворотный хвост после, данного?
             nextBound = std::next(thisBound);
             if (nextBound != std::end(znake_bounds)) {
-                if (nextBound->boundIndex == thisBound->boundIndex + 1)
-                    continue;
-                else {
-                    if (flipperTile != nullptr) {
-                        // TODO: Востановить предыдущий. размер хвоста до нормальных размеров
-                        flipperTile->size.y = 1;
-                    }
-                    flipperTile = znake_tiles[y]->gameObject()->getComponent<SpriteRenderer>();
-                    //flipperTile->size.y = 0.1f / keepDistance;
-                    flipperTile->size.y = Math::max(0.f, Math::min(1.f, flipperTile->size.y));
-                }
+                if (nextBound->boundIndex == thisBound->boundIndex + 1) continue;
             }
         } else {
             //Задаем положение хвоста в пространстве

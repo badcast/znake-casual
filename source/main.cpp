@@ -12,11 +12,11 @@
 #include "levels/terrain2deditor.h"
 #include "levels/testlevel.h"
 
-constexpr char semaphore_identifier[] = "znakeq";
 
 using namespace std;
 
 #if USE_SINGLE_RUN
+constexpr char semaphore_identifier[] = "roninengine.znakeq";
 sem_t* sem;
 void signal_out(int) {
     if (sem) sem_unlink(semaphore_identifier);
@@ -26,7 +26,6 @@ void signal_out(int) {
 
 int main() {
     using namespace RoninEngine;
-
 
     setlocale(LC_ALL, "");
 #if USE_SINGLE_RUN
@@ -42,10 +41,9 @@ int main() {
     }
 #endif
 
+    Application::Init(1024, 600);
 
-    Application::Init(1366, 768);
-
-    GameLevel* level = new GameLevel;
+    auto level = new GameLevel;
 
     Application::LoadLevel(level);
 

@@ -150,6 +150,7 @@ void SnakePlayer::OnGizmos() {
         Gizmos::DrawPosition(znake_tiles[x]->position(), 0.3f);
         Gizmos::setColor(Color::green);
         Gizmos::DrawLine(last, znake_tiles[x]->position());
+        Gizmos::DrawTextOnPosition_Legacy(znake_tiles[x]->position(), std::to_string(x));
         last = znake_tiles[x]->position();
     }
 
@@ -245,6 +246,9 @@ void SnakePlayer::updatePosition() {
             nextBound = std::next(thisBound);
             if (nextBound != std::end(znake_bounds)) {
                 if (nextBound->boundIndex == thisBound->boundIndex + 1) continue;
+            }
+            else{
+
             }
         } else {
             //Задаем положение хвоста в пространстве

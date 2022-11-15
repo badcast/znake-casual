@@ -4,22 +4,33 @@
 
 GameLevel::GameLevel() : Level("ZNake Game Level") {}
 
+void index_changed(uid id, int index) {
+    int x = 0;
+    1 + 1;
+}
+
 Terrain2D *terrain;
 SnakePlayer *snakeplayer;
 SpriteRenderer *spr;
+
+uid uiSliderAngle;
 uid uiSlider;
+uid selRndr;
+
 void GameLevel::start() {
     Vec2Int p;
-    p.x = Application::getResolution().width - 240;
-    p.y = 0;
-    std::vector<std::string> el1 = {"Элемент 1", "Элемент 2"};
-    ui->Push_DropDown(el1, p);
-    p.y += 64;
-
+    p.x = Application::getResolution().width - 245;
+    p.y = 64;
     ui->Push_Edit("This is text", p);
     p.y += 64;
     uiSlider = ui->Push_Slider(0.5f, p);
 
+    p.y += 32;
+    uiSliderAngle = ui->Push_Slider(0.5f, p);
+
+    p.y += 32;
+    selRndr =
+        ui->Push_DropDown(std::list<std::string>({"Исходный", "Центрированный"}), 0, p, (event_index_changed *)&index_changed);
 
     terrain = CreateGameObject("Test")->addComponent<Terrain2D>();
     terrain->getNavMesh()->worldScale /= 2;
@@ -31,7 +42,7 @@ void GameLevel::start() {
 
     snakeplayer = CreateGameObject("Player")->addComponent<SnakePlayer>();
     snakeplayer->terrain = terrain;
-    snakeplayer->transform()->position(Vec2::right * 2);
+    snakeplayer->transform()->position(Vec2::right * 20);
     auto _ = ((Camera2D *)Camera::mainCamera());
     _->visibleGrids = true;
     _->visibleBorders = true;
@@ -47,7 +58,9 @@ void GameLevel::start() {
 
 void GameLevel::update() {
     Vec2 ms = Camera::ScreenToWorldPoint(input::getMousePointF());
-    spr->size.y = *(float*)ui->getResources(uiSlider);
+    spr->size.y = *(float *)ui->getResources(uiSlider);
+
+    spr->transform()->angle(*(float*)ui->getResources(uiSliderAngle) * 360);
 }
 
 void GameLevel::onDrawGizmos() { Gizmos::DrawNavMesh(terrain->getNavMesh()); }

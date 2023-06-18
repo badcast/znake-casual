@@ -1,5 +1,6 @@
 #define USE_SINGLE_RUN 0
 #if USE_SINGLE_RUN
+#include <cstring>
 #include <fcntl.h>
 #include <semaphore.h>
 #include <signal.h>
@@ -9,8 +10,8 @@
 #include <iostream>
 
 #include "levels/gamelevel.h"
-#include "levels/terrain2deditor.h"
-#include "levels/testlevel.h"
+// #include "levels/terrain2deditor.h"
+// #include "levels/testlevel.h"
 
 using namespace std;
 
@@ -20,7 +21,7 @@ sem_t* sem;
 void signal_out(int)
 {
     if (sem)
-        sem_unlink(semaphore_identifier);
+        sem_unlink(semaphore_identifier);q
     exit(EXIT_FAILURE);
 }
 #endif
@@ -46,18 +47,20 @@ int main()
     }
 #endif
 
-    Application::init();
-    Application::createWindow(1024, 600);
+    RoninSimulator::init();
 
-    auto level = new GameLevel;
+    Resolution res { 1024, 600 };
+    RoninSimulator::show(res, false);
 
-    Application::loadLevel(level);
+    auto world = new AppleEatGameLevel;
 
-    Application::simulate();
+    RoninSimulator::load_world(world);
 
-    delete level;
+    RoninSimulator::simulate();
 
-    Application::Quit();
+    delete world;
+
+    RoninSimulator::utilize();
 
 #if USE_SINGLE_RUN
     sem_close(sem);

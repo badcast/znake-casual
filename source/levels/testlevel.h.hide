@@ -6,10 +6,11 @@ using namespace RoninEngine::Runtime;
 using namespace RoninEngine::AIPathFinder;
 using namespace RoninEngine::UI;
 
-class TestLevel : public Level {
-   public:
+class TestLevel : public World
+{
+public:
     TestLevel();
-    void start() override;
-    void update() override;
-    void onDrawGizmos() override;
+    void on_start();
+    void on_update();
+    void on_gizmo();
 };

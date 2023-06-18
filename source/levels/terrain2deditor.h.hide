@@ -1,0 +1,11 @@
+#pragma once
+
+#include <ronin/framework.h>
+
+class Terrain2DEditor : public RoninEngine::Runtime::World
+{
+public:
+    void on_start();
+    void on_update();
+    void on_gizmo();
+};

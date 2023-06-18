@@ -7,13 +7,11 @@ using namespace RoninEngine::Runtime;
 using namespace RoninEngine::AIPathFinder;
 using namespace RoninEngine::UI;
 
-class GameLevel : public Level {
-   protected:
-    void start() override;
-    void update() override;
-    void onDrawGizmos() override;
-
-   public:
+class GameLevel : public World
+{
+public:
     GameLevel();
-    ~GameLevel() = default;
+    void on_start();
+    void on_update();
+    void on_gizmo();
 };

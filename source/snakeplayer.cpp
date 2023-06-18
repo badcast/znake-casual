@@ -57,40 +57,43 @@ float get_arroung_angle(const Vec2& alpha, const Vec2& beta)
         else if (beta.x < 0)
             delta = 270;
     } else {
-        RoninEngine::Application::fail("unassigned angle for arround.");
+        RoninEngine::RoninSimulator::fail("unassigned angle for arround.");
     }
     return delta;
 }
 
 void SnakePlayer::OnAwake()
 {
-    playerCamera = gameObject()->add_component<Camera2D>();
+    playerCamera = game_object()->add_component<Camera2D>();
     // create head
     head = create_game_object("Head");
-    head->transform()->setParent(transform());
+    head->transform()->set_parent(transform());
     SpriteRenderer* sel = head->add_component<SpriteRenderer>();
     sel->renderOut = SpriteRenderOut::Origin;
     sel->transform()->layer = 100;
 
-    auto src = ResourceManager::GetSurface("snake-head");
-    sel->setSpriteFromTextureToGC(src);
+    std::string default_path = "./data/sprites/";
+
+    auto src = ResourceManager::GetSurface(default_path + "snake-head.png");
+    sel->set_sprite(ResourceManager::make_sprite(src));
     // create body
     body = create_game_object("Body");
     // body->transform()->setParent(transform());
-    body->transform()->localPosition(Vec2::minusOne * 0.9f);
+    body->transform()->local_position(Vec2::minusOne * 0.9f);
     sel = body->add_component<SpriteRenderer>();
-    src = ResourceManager::GetSurface("snake-body");
-    sel->setSpriteFromTextureToGC(src);
+    src = ResourceManager::GetSurface(default_path + "snake-body.png");
+    sel->set_sprite(ResourceManager::make_sprite(src));
+
     sel->renderOut = SpriteRenderOut::Origin;
     sel->renderType = SpriteRenderType::Simple;
     sel->renderPresentMode = SpriteRenderPresentMode::Place;
     // create arround
     arround = create_game_object("Around");
-    arround->transform()->localPosition(Vec2::down * 2);
+    arround->transform()->local_position(Vec2::down * 2);
     sel = arround->add_component<SpriteRenderer>();
-    src = ResourceManager::GetSurface("snake-arround");
+    src = ResourceManager::GetSurface(default_path + "snake-arround.png");
     sel->renderOut = SpriteRenderOut::Origin;
-    sel->setSpriteFromTextureToGC(src);
+    sel->set_sprite(ResourceManager::make_sprite(src));
 
     znake_tiles.emplace_back(body->transform());
 
@@ -113,7 +116,7 @@ void SnakePlayer::OnStart()
 void SnakePlayer::OnUpdate()
 {
     // float curSpeed = input::get_key(SDL_SCANCODE_LSHIFT) ? (speed * 10) : speed;
-    Vec2 newAxis = input::get_axis();
+    Vec2 newAxis = Input::get_axis();
     if (newAxis != Vec2::zero && newAxis != *headDirection) {
         if (newAxis.x != 0)
             newAxis.y = 0;
@@ -140,10 +143,10 @@ void SnakePlayer::OnGizmos()
 {
     int x;
 
-    Gizmos::setColor(Color::blue);
+    Gizmos::set_color(Color::blue);
 
     // Draw next line
-    Gizmos::DrawLine(transform()->position(), transform()->position() + *headDirection);
+    Gizmos::draw_line(transform()->position(), transform()->position() + *headDirection);
 
     if (lastDirection != *headDirection)
         return;
@@ -155,21 +158,21 @@ void SnakePlayer::OnGizmos()
     for (x = 0; x < znake_tiles.size(); ++x) {
         // set position tiles
         if (x == znake_tiles.size() - 1)
-            Gizmos::setColor(Color::red);
+            Gizmos::set_color(Color::red);
         else
-            Gizmos::setColor(Color::blue);
-        Gizmos::DrawPosition(znake_tiles[x]->position(), 0.3f);
-        Gizmos::setColor(Color::green);
-        Gizmos::DrawLine(last, znake_tiles[x]->position());
-        Gizmos::DrawTextOnPosition_Legacy(znake_tiles[x]->position(), std::to_string(x));
+            Gizmos::set_color(Color::blue);
+        Gizmos::draw_position(znake_tiles[x]->position(), 0.3f);
+        Gizmos::set_color(Color::green);
+        Gizmos::draw_line(last, znake_tiles[x]->position());
+        Gizmos::draw_text(znake_tiles[x]->position(), std::to_string(x));
         last = znake_tiles[x]->position();
     }
 
     // draw bounds
     for (auto bound = ++znake_bounds.begin(); bound != znake_bounds.end(); ++bound) {
-        Gizmos::setColor(Color::red);
-        Gizmos::DrawCircle(bound->upperBound, 0.25f);
-        Gizmos::DrawPosition(bound->upperBound, 0.25f);
+        Gizmos::set_color(Color::red);
+        Gizmos::draw_circle(bound->upperBound, 0.25f);
+        Gizmos::draw_position(bound->upperBound, 0.25f);
     }
 }
 
@@ -177,11 +180,11 @@ void SnakePlayer::updatePosition()
 {
     /* ***Variables*** */
     int x, y;
-    auto navmesh = terrain->surfaceMesh();
+    auto navmesh = terrain->get_navmesh2D();
     std::remove_reference_t<decltype(znake_bounds)>::iterator thisBound, backBound, nextBound;
     Vec2 lastPosition = transform()->position();
     Vec2Int npoint;
-    auto nextNeuron = navmesh->GetNeuron(lastPosition + Vec2::Scale(*headDirection, navmesh->worldScale), npoint);
+    auto nextNeuron = navmesh->get_neuron(lastPosition + Vec2::scale(*headDirection, navmesh->worldScale), npoint);
     /*********/
 
     // Удалить последний хвост который больше не требуется
@@ -209,19 +212,19 @@ void SnakePlayer::updatePosition()
     // get inside <next position>
     if (!nextNeuron) {
         if (npoint.y < 0)
-            npoint.y = navmesh->Height();
-        else if (npoint.y > navmesh->Height())
+            npoint.y = navmesh->height();
+        else if (npoint.y > navmesh->height())
             npoint.y = 0;
 
         if (npoint.x < 0)
-            npoint.x = navmesh->Width();
-        else if (npoint.x > navmesh->Width())
+            npoint.x = navmesh->width();
+        else if (npoint.x > navmesh->width())
             npoint.x = 0;
 
-        nextNeuron = navmesh->GetNeuron(npoint);
+        nextNeuron = navmesh->get_neuron(npoint);
     }
 
-    *headUpperBound = navmesh->PointToWorldPosition(nextNeuron);
+    *headUpperBound = navmesh->point_to_world_position(nextNeuron);
     head->transform()->angle(get_quarter_angle(*headDirection)); // rotate head
     transform()->position(*headUpperBound); // move transform
 
@@ -279,4 +282,4 @@ void SnakePlayer::updatePosition()
     }
 }
 
-void SnakePlayer::appendTile() { znake_tiles.emplace_back(Instantiate(znake_tiles.front()->gameObject())->transform()); }
+void SnakePlayer::appendTile() { znake_tiles.emplace_back(instantiate(znake_tiles.front()->game_object())->transform()); }

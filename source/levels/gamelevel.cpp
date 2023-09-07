@@ -20,31 +20,31 @@ uid uiSliderAngle;
 uid uiSlider;
 uid selRndr;
 
-void GameLevel::on_start()
+void GameLevel::OnStart()
 {
     Vec2Int p;
-    Resolution res = RoninSimulator::get_current_resolution();
+    Resolution res = RoninSimulator::GetCurrentResolution();
     const std::string defpath = "./data/sprites/";
     p.x = res.width - 245;
     p.y = 64;
     // ui->Push_Edit("This is text", p);
     // p.y += 64;
-    uiSlider = get_gui()->push_slider(0.5f, p);
+    uiSlider = getGUI()->PushSlider(0.5f, p);
     p.y += 32;
-    uiSliderAngle = get_gui()->push_slider(0.5f, p);
+    uiSliderAngle = getGUI()->PushSlider(0.5f, p);
 
     p.y += 32;
-    selRndr = get_gui()->push_drop_down(std::list<std::string>({ "Исходный", "Центрированный" }), 0, p, index_changed);
+    selRndr = getGUI()->PushDropDown(std::list<std::string>({ "Исходный", "Центрированный" }), 0, p, index_changed);
 
-    terrain = create_game_object("Test")->add_component<Terrain2D>();
+    terrain = create_game_object("Test")->AddComponent<Terrain2D>();
     terrain->get_navmesh2D()->worldScale /= 2;
 
-    spr = create_game_object()->add_component<SpriteRenderer>();
+    spr = create_game_object()->AddComponent<SpriteRenderer>();
     spr->set_sprite(ResourceManager::make_sprite(ResourceManager::GetSurface(defpath + "snake-body.png")));
     spr->renderPresentMode = SpriteRenderPresentMode::Place;
     spr->renderOut = SpriteRenderOut::Origin;
 
-    snakeplayer = create_game_object("Player")->add_component<SnakePlayer>();
+    snakeplayer = create_game_object("Player")->AddComponent<SnakePlayer>();
     snakeplayer->terrain = terrain;
     snakeplayer->transform()->position(Vec2::right);
     auto _ = static_cast<Camera2D*>(Camera::main_camera());
@@ -54,19 +54,19 @@ void GameLevel::on_start()
 
     return;
 
-    auto ground = create_game_object("Ground")->add_component<SpriteRenderer>();
+    auto ground = create_game_object("Ground")->AddComponent<SpriteRenderer>();
     ground->set_sprite(ResourceManager::make_sprite(ResourceManager::GetSurface(defpath + "concrete.jpg")));
     ground->size = Vec2::one * 12;
     ground->renderType = SpriteRenderType::Tile;
     ground->transform()->layer = -1;
 }
 
-void GameLevel::on_update()
+void GameLevel::OnUpdate()
 {
-    Vec2 ms = Camera::screen_to_world(Input::get_mouse_pointf());
-    spr->size.y = get_gui()->get_slider_value(uiSlider);
+    Vec2 ms = Camera::ScreenToWorldPoint(Input::GetMousePointf());
+    spr->size.y = getGUI()->SliderGetValue(uiSlider);
 
-    spr->transform()->angle(get_gui()->get_slider_value(uiSliderAngle) * 360);
+    spr->transform()->angle(getGUI()->SliderGetValue(uiSliderAngle) * 360);
 }
 
-void GameLevel::on_gizmo() { Gizmos::draw_nav_mesh(terrain->get_navmesh2D()); }
+void GameLevel::OnGizmos() { Gizmos::DrawNavMesh(terrain->get_navmesh2D()); }

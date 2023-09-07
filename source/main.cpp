@@ -47,20 +47,20 @@ int main()
     }
 #endif
 
-    RoninSimulator::init();
+    RoninSimulator::Init();
 
     Resolution res { 1024, 600 };
-    RoninSimulator::show(res, false);
+    RoninSimulator::Show(res, false);
 
     auto world = new AppleEatGameLevel;
 
-    RoninSimulator::load_world(world);
+    RoninSimulator::LoadWorld(world);
 
-    RoninSimulator::simulate();
+    RoninSimulator::Simulate();
 
     delete world;
 
-    RoninSimulator::utilize();
+    RoninSimulator::Finalize();
 
 #if USE_SINGLE_RUN
     sem_close(sem);

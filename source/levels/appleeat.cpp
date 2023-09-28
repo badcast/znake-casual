@@ -4,12 +4,15 @@
 struct
 {
     uid quitButton;
+    uid reloadButton;
     uid clickButton;
     uid restore = -1;
     uid text;
 } mids;
-int maxWidth = 25;
-NavMesh navigation(1000, 1000);
+
+int maxWidth = 7;
+int createWith = 3;
+int createStart = 1000;
 
 AppleEatGameLevel::AppleEatGameLevel() : World("Apple Eater")
 {
@@ -41,6 +44,10 @@ void callback(uid id, void *userData)
         gui_instance->SetElementVisible(mids.restore, false);
         World::self()->matrix_restore();
     }
+    else if(id == mids.reloadButton)
+    {
+        RoninSimulator::ReloadWorld();
+    }
 }
 
 std::vector<GameObject *> apples;
@@ -49,12 +56,17 @@ MoveController2D *player;
 Transform *radar_foreground;
 void AppleEatGameLevel::OnStart()
 {
+    apples = {};
     gui_instance = getGUI();
     const std::string defpath = "./data/sprites/";
     // create a menu
     auto appleTexture = ResourceManager::GetSurface(defpath + "apple.png");
     Rect t(0, 0, 100, 32);
     mids.quitButton = getGUI()->PushButton("Quit", t);
+    float y = t.y;
+    t.y += t.y + t.h;
+    mids.reloadButton = getGUI()->PushButton("Reload world", t);
+    t.y = y;
     t.x += t.x + t.w;
     mids.clickButton = getGUI()->PushButton("Check", t);
     t.x += t.x + t.w;
@@ -88,32 +100,32 @@ void AppleEatGameLevel::OnStart()
     view->size = Vec2::one * 7;
     // view->renderType = SpriteRenderType::Tile;
     view->renderPresentMode = SpriteRenderPresentMode::Place;
-    floor->transform()->layer = -1;
+    floor->transform()->layer(-10);
     //  view->transform()->position(Vec2::infinity);
 
     GameObject *playerGameObject = create_game_object("Player");
     player = playerGameObject->AddComponent<MoveController2D>();
     player->AddComponent<SpriteRenderer>();
-    player->spriteRenderer()->transform()->layer = 100;
+    player->spriteRenderer()->transform()->layer(100);
 
     GameObject *radarObject = create_game_object("Radar");
-    radarObject->transform()->set_parent(player->transform());
+    radarObject->transform()->setParent(player->transform());
     SpriteRenderer *radar = radarObject->AddComponent<SpriteRenderer>();
     // radar->set_sprite(ResourceManager::make_sprite(ResourceManager::GetSurface(defpath + "radar_background.png")));
     Vec2 offset = radarObject->transform()->position();
     radarObject->transform()->position(offset);
     radarObject = Instantiate(radarObject);
-    radarObject->transform()->set_parent(radar->transform(), false);
+    radarObject->transform()->setParent(radar->transform(), false);
     radarObject->spriteRenderer()->set_sprite(ResourceManager::make_sprite(ResourceManager::GetSurface(defpath + "radar_foreground.png")));
     radar_foreground = radarObject->transform();
     create_game_object("Tail")->AddComponent<SpriteRenderer>();
 
     // Создаем N яблоко
-    int n = 100000;
+    int n = createStart;
     int x;
     float range = maxWidth;
     GameObject *appleObject = create_game_object("apple");
-    appleObject->transform()->layer = 1;
+    appleObject->transform()->layer(1);
     SpriteRenderer *view2 = appleObject->AddComponent<SpriteRenderer>();
     view2->set_sprite(ResourceManager::make_sprite(appleTexture));
     view2->size = Vec2::half;
@@ -122,7 +134,7 @@ void AppleEatGameLevel::OnStart()
     for(x = 0; x < n; ++x)
     {
         appleObject = Instantiate(appleObject);
-        appleObject->transform()->position(Vec2(Random::range(-range, range), Random::range(-range, range)));
+        appleObject->transform()->position(Vec2(Random::Range(-range, range), Random::Range(-range, range)));
         apples.emplace_back(appleObject);
     }
 }
@@ -132,7 +144,6 @@ int target_n = 0;
 float distance = 3;
 void AppleEatGameLevel::OnUpdate()
 {
-
     int culled = this->GetCulled();
     getGUI()->SetElementText(mids.text, "Render: " + std::to_string(culled));
 
@@ -141,12 +152,12 @@ void AppleEatGameLevel::OnUpdate()
     temp += std::to_string(score);
     getGUI()->SetElementText(mids.text, temp);
 
-    auto v = Camera::main_camera()->transform()->position();
+    Vec2 cameraPosition = Camera::mainCamera()->transform()->position();
 
-    Camera::main_camera()->transform()->position(Vec2::Lerp(v, player->transform()->position(), 9 * TimeEngine::deltaTime()));
+    Camera::mainCamera()->transform()->position(Vec2::Lerp(cameraPosition, player->transform()->position(), 9 * TimeEngine::deltaTime()));
 
     std::vector<Transform *> finded = Physics2D::GetCircleCast<std::vector<Transform *>>(player->transform()->position(), distance, 1);
-    for(int x = 0, y = Math::min<int>(128, finded.size()); x < y; ++x)
+    for(int x = 0, y = Math::Min<int>(128, finded.size()); x < y; ++x)
     {
         Transform *t;
         Transform *f = finded.at(x);
@@ -185,37 +196,19 @@ void AppleEatGameLevel::OnUpdate()
     if(Input::GetMouseUp(MouseState::MouseMiddle))
         ___c = !___c;
 
-    for(int x = 0; ___c && x < 2; ++x)
+    for(int x = 0; ___c && x < createWith; ++x)
     {
         Vec2 newPoint;
         Vec2 j = Camera::ViewportToWorldPoint(Vec2::zero);
         Vec2 k = Camera::ViewportToWorldPoint(Vec2::one);
-        newPoint.x = Math::outside(Random::range((float) -maxWidth, (float) maxWidth), j.x, k.x);
-        newPoint.y = Math::outside(Random::range((float) -maxWidth, (float) maxWidth), j.y, k.y);
+        newPoint.x = Math::Outside(Random::Range((float) -maxWidth, (float) maxWidth), j.x, k.x);
+        newPoint.y = Math::Outside(Random::Range((float) -maxWidth, (float) maxWidth), j.y, k.y);
         Instantiate(apples[0], newPoint);
-    }
-    return;
-    apples[0]->transform()->position(Camera2D::ScreenToWorldPoint(Input::GetMousePointf()));
-
-    if(apples.size() == 1)
-        return;
-
-    for(int i = 1; false && i < apples.size(); ++i)
-    {
-        apples[i]->transform()->position(Vec2(Random::range(-maxWidth, maxWidth), Random::range(-maxWidth, maxWidth)));
     }
 }
 
 void AppleEatGameLevel::OnGizmos()
 {
-    //    std::string tree = this->get_hierarchy_as_tree();
-
-    //    std::ofstream ofs {"/tmp/tree_live.txt"};
-    //    ofs << tree;
-    //    ofs.close();
-
-    //  Gizmos::draw_2D_world_space(Vec2::zero);
-
     Gizmos::SetColor(0x88241dff);
 
     // draw line
@@ -227,14 +220,10 @@ void AppleEatGameLevel::OnGizmos()
 
     Vec2 sidePoint = player->transform()->position();
 
-    sidePoint.x += Math::cos(angle * Math::deg2rad) * distance;
-    sidePoint.y += Math::sin(angle * Math::deg2rad) * distance;
+    sidePoint.x += Math::Cos(angle * Math::deg2rad) * distance;
+    sidePoint.y += Math::Sin(angle * Math::deg2rad) * distance;
     radar_foreground->transform()->angle(angle);
-    angle += 14;
-    /*
-        Gizmos::set_color(target_n ? Color::red : Color::green);
-        Gizmos::draw_line(player->transform()->position(), sidePoint);
-        Gizmos::draw_circle(player->transform()->position(), distance);
-    */
-    // Gizmos::draw_storm(Vec2::zero, Math::number(Math::ceil(distance)));
+    angle += 9;
+
+    Gizmos::DrawTextLegacy(Camera::ViewportToWorldPoint(Vec2::up / 2), "Apples: " + std::to_string(this->GetCulled()));
 }

@@ -67,10 +67,10 @@ void SnakePlayer::OnAwake()
     playerCamera = gameObject()->AddComponent<Camera2D>();
     // create head
     head = create_game_object("Head");
-    head->transform()->set_parent(transform());
+    head->transform()->setParent(transform());
     SpriteRenderer* sel = head->AddComponent<SpriteRenderer>();
     sel->renderOut = SpriteRenderOut::Origin;
-    sel->transform()->layer = 100;
+    sel->transform()->layer (100);
 
     std::string default_path = "./data/sprites/";
 

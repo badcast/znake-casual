@@ -47,7 +47,7 @@ void GameLevel::OnStart()
     snakeplayer = create_game_object("Player")->AddComponent<SnakePlayer>();
     snakeplayer->terrain = terrain;
     snakeplayer->transform()->position(Vec2::right);
-    auto _ = static_cast<Camera2D*>(Camera::main_camera());
+    auto _ = static_cast<Camera2D*>(Camera::mainCamera());
     _->visibleGrids = true;
     _->visibleBorders = true;
     _->visibleObjects = true;
@@ -58,7 +58,7 @@ void GameLevel::OnStart()
     ground->set_sprite(ResourceManager::make_sprite(ResourceManager::GetSurface(defpath + "concrete.jpg")));
     ground->size = Vec2::one * 12;
     ground->renderType = SpriteRenderType::Tile;
-    ground->transform()->layer = -1;
+    ground->transform()->layer (-1);
 }
 
 void GameLevel::OnUpdate()

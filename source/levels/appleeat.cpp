@@ -11,12 +11,13 @@ struct
 } mids;
 
 int maxWidth = 7;
-int createWith = 3;
-int createStart = 1000;
+int createWith = 10;
+int createStart = 5000;
 
 AppleEatGameLevel::AppleEatGameLevel() : World("Apple Eater")
 {
 }
+
 GUI *gui_instance;
 void callback(uid id, void *userData)
 {
@@ -24,11 +25,9 @@ void callback(uid id, void *userData)
         RoninSimulator::RequestQuit();
     else if(id == mids.clickButton)
     {
-        Rect rect = gui_instance->GetElementRect(id);
+        Rect rect = gui_instance->ElementGetRect(id);
         rect.w = 200;
-        gui_instance->SetElementRect(id, rect);
-        auto damaged = World::self()->matrix_check_damaged();
-        gui_instance->SetElementText(id, "Damaged: " + std::to_string(damaged.size()));
+        gui_instance->ElementSetRect(id, rect);
 
         if(mids.restore == -1)
         {
@@ -37,12 +36,11 @@ void callback(uid id, void *userData)
             mids.restore = gui_instance->PushButton("Restore", rect);
         }
 
-        gui_instance->SetElementVisible(mids.restore, true);
+        gui_instance->ElementSetVisible(mids.restore, true);
     }
     else if(id == mids.restore)
     {
-        gui_instance->SetElementVisible(mids.restore, false);
-        World::self()->matrix_restore();
+        gui_instance->ElementSetVisible(mids.restore, false);
     }
     else if(id == mids.reloadButton)
     {
@@ -50,92 +48,82 @@ void callback(uid id, void *userData)
     }
 }
 
-std::vector<GameObject *> apples;
-MoveController2D *player;
+std::vector<GameObjectRef> apples;
+MoveController2DRef player;
 
-Transform *radar_foreground;
+TransformRef radar_foreground;
 void AppleEatGameLevel::OnStart()
 {
     apples = {};
-    gui_instance = getGUI();
+    gui_instance = GetGUI();
     const std::string defpath = "./data/sprites/";
     // create a menu
     auto appleTexture = ResourceManager::GetSurface(defpath + "apple.png");
     Rect t(0, 0, 100, 32);
-    mids.quitButton = getGUI()->PushButton("Quit", t);
+    mids.quitButton = GetGUI()->PushButton("Quit", t);
     float y = t.y;
     t.y += t.y + t.h;
-    mids.reloadButton = getGUI()->PushButton("Reload world", t);
+    mids.reloadButton = GetGUI()->PushButton("Reload world", t);
     t.y = y;
     t.x += t.x + t.w;
-    mids.clickButton = getGUI()->PushButton("Check", t);
+    mids.clickButton = GetGUI()->PushButton("Check", t);
     t.x += t.x + t.w;
 
     t.w = t.h = 32;
 
     // guiInstance->Push_TextureStick(appleTexture, t);
 
-    getGUI()->SetGeneralCallback(callback, nullptr);
+    GetGUI()->SetGeneralCallback(callback, nullptr);
 
     Resolution res = RoninSimulator::GetCurrentResolution();
     t.w = 200;
     t.x = res.width - t.w;
-    mids.text = getGUI()->PushButton("", t);
+    mids.text = GetGUI()->PushButton("", t);
     t.y += 32;
-    getGUI()->PushButton(
-        "Clear matrix cache",
-        t,
-        [](uid id)
-        {
-            RoninSimulator::ShowMessage(
-                "Кэш очищен, ваша производительность может быть понижена.\nКэш: " + std::to_string(World::self()->matrix_clear_cache()) +
-                " блоков");
-        });
     // instance games
     auto floorTexture = ResourceManager::GetSurface(defpath + "concrete.jpg");
 
-    GameObject *floor = create_game_object("Floor");
-    SpriteRenderer *view = floor->AddComponent<SpriteRenderer>();
-    view->set_sprite(ResourceManager::make_sprite(floorTexture));
-    view->size = Vec2::one * 7;
+    GameObjectRef floor = Primitive::CreateEmptyGameObject("Floor");
+    SpriteRendererRef view = floor->AddComponent<SpriteRenderer>();
+    view->setSprite(ResourceManager::make_sprite(floorTexture));
+    view->setSize(Vec2::one * 7);
     // view->renderType = SpriteRenderType::Tile;
-    view->renderPresentMode = SpriteRenderPresentMode::Place;
-    floor->transform()->layer(-10);
+    view->setPresentMode(SpriteRenderPresentMode::Place);
+    floor->transform()->layer(-100);
     //  view->transform()->position(Vec2::infinity);
 
-    GameObject *playerGameObject = create_game_object("Player");
+    GameObjectRef playerGameObject = Primitive::CreateEmptyGameObject("Player");
     player = playerGameObject->AddComponent<MoveController2D>();
     player->AddComponent<SpriteRenderer>();
     player->spriteRenderer()->transform()->layer(100);
 
-    GameObject *radarObject = create_game_object("Radar");
+    GameObjectRef radarObject = Primitive::CreateEmptyGameObject("Radar");
     radarObject->transform()->setParent(player->transform());
-    SpriteRenderer *radar = radarObject->AddComponent<SpriteRenderer>();
+    SpriteRendererRef radar = radarObject->AddComponent<SpriteRenderer>();
     // radar->set_sprite(ResourceManager::make_sprite(ResourceManager::GetSurface(defpath + "radar_background.png")));
     Vec2 offset = radarObject->transform()->position();
     radarObject->transform()->position(offset);
     radarObject = Instantiate(radarObject);
     radarObject->transform()->setParent(radar->transform(), false);
-    radarObject->spriteRenderer()->set_sprite(ResourceManager::make_sprite(ResourceManager::GetSurface(defpath + "radar_foreground.png")));
+    radarObject->spriteRenderer()->setSprite(ResourceManager::make_sprite(ResourceManager::GetSurface(defpath + "radar_foreground.png")));
     radar_foreground = radarObject->transform();
-    create_game_object("Tail")->AddComponent<SpriteRenderer>();
+    Primitive::CreateEmptyGameObject("Tail")->AddComponent<SpriteRenderer>();
 
     // Создаем N яблоко
     int n = createStart;
     int x;
     float range = maxWidth;
-    GameObject *appleObject = create_game_object("apple");
+    GameObjectRef appleObject = Primitive::CreateEmptyGameObject("apple");
     appleObject->transform()->layer(1);
-    SpriteRenderer *view2 = appleObject->AddComponent<SpriteRenderer>();
-    view2->set_sprite(ResourceManager::make_sprite(appleTexture));
-    view2->size = Vec2::half;
-    apples.reserve(n + 1);
+    SpriteRendererRef view2 = appleObject->AddComponent<SpriteRenderer>();
+    view2->setSprite(ResourceManager::make_sprite(appleTexture));
+    view2->setSize(Vec2::half);
     apples.emplace_back(appleObject);
     for(x = 0; x < n; ++x)
     {
         appleObject = Instantiate(appleObject);
         appleObject->transform()->position(Vec2(Random::Range(-range, range), Random::Range(-range, range)));
-        apples.emplace_back(appleObject);
+        //apples.emplace_back(appleObject);
     }
 }
 
@@ -145,18 +133,18 @@ float distance = 3;
 void AppleEatGameLevel::OnUpdate()
 {
     int culled = this->GetCulled();
-    getGUI()->SetElementText(mids.text, "Render: " + std::to_string(culled));
+    GetGUI()->ElementSetText(mids.text, "Render: " + std::to_string(culled));
 
     std::string temp;
     temp = "Score: ";
     temp += std::to_string(score);
-    getGUI()->SetElementText(mids.text, temp);
+    GetGUI()->ElementSetText(mids.text, temp);
 
     Vec2 cameraPosition = Camera::mainCamera()->transform()->position();
 
-    Camera::mainCamera()->transform()->position(Vec2::Lerp(cameraPosition, player->transform()->position(), 9 * TimeEngine::deltaTime()));
+    Camera::mainCamera()->transform()->position(Vec2::Lerp(cameraPosition, player->transform()->position(), 9 * Time::deltaTime()));
 
-    std::vector<Transform *> finded = Physics2D::GetCircleCast<std::vector<Transform *>>(player->transform()->position(), distance, 1);
+    std::vector<Transform *> finded = Physics2D::GetCircleCast<std::vector<Transform *>>(player->transform()->position(), distance, 0);
     for(int x = 0, y = Math::Min<int>(128, finded.size()); x < y; ++x)
     {
         Transform *t;
@@ -165,13 +153,13 @@ void AppleEatGameLevel::OnUpdate()
             continue;
 
         f->transform()->position(
-            Vec2::MoveTowards(f->transform()->position(), player->transform()->position(), 15 * TimeEngine::deltaTime()));
+            Vec2::MoveTowards(f->transform()->position(), player->transform()->position(), 15 * Time::deltaTime()));
         if(Vec2::DistanceSqr(player->transform()->position(), f->position()) < 0.3f * 0.3f)
             t = f;
         else
             t = nullptr;
         // Draw point destroyer
-        // Gizmos::DrawLine(f->position(), player->transform()->position());
+        // RenderUtility::DrawLine(f->position(), player->transform()->position());
 
         if(t)
         {
@@ -191,9 +179,9 @@ void AppleEatGameLevel::OnUpdate()
         }
     }
 
-    static bool ___c = true;
+    static bool ___c = false;
 
-    if(Input::GetMouseUp(MouseState::MouseMiddle))
+    if(Input::GetMouseUp(MouseButton::MouseMiddle))
         ___c = !___c;
 
     for(int x = 0; ___c && x < createWith; ++x)
@@ -209,7 +197,7 @@ void AppleEatGameLevel::OnUpdate()
 
 void AppleEatGameLevel::OnGizmos()
 {
-    Gizmos::SetColor(0x88241dff);
+    RenderUtility::SetColor(0x88241dff);
 
     // draw line
 
@@ -225,5 +213,5 @@ void AppleEatGameLevel::OnGizmos()
     radar_foreground->transform()->angle(angle);
     angle += 9;
 
-    Gizmos::DrawTextLegacy(Camera::ViewportToWorldPoint(Vec2::up / 2), "Apples: " + std::to_string(this->GetCulled()));
+    RenderUtility::DrawTextLegacy(Camera::ViewportToWorldPoint(Vec2::up / 2), "Apples: " + std::to_string(this->GetCulled()));
 }

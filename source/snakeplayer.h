@@ -6,23 +6,34 @@ struct ZnakeBound {
     int boundIndex;
     Vec2 direction;
     Vec2 upperBound;
-    Transform* arroundGraphic;
+    TransformRef arroundGraphic;
 };
 
 class SnakePlayer : public RoninEngine::Runtime::Behaviour {
-   private:
+private:
     void updatePosition();
+    Vec2 currentAxis;
+    Vec2* headForward;
+    Vec2* headUpperBound;
+    Vec2 lastDirection;
+    float keepDistance = 0.64f;
+    float keepArroundDistance = 0.4f;
 
-   public:
+    float moveSpeed = 0.2f;
+    Vec2 targetPosition;
+    Vec2 startPosition;
+    float moveProgress;
+
+public:
     float speed;
-    Camera2D* playerCamera;
-    GameObject* head;
-    GameObject* body;
-    GameObject* arround;
-    GameObject* loopbackTile;
-    Terrain2D* terrain;
+    Camera2DRef playerCamera;
+    GameObjectRef head;
+    GameObjectRef body;
+    GameObjectRef arround;
+    GameObjectRef loopbackTile;
+    Terrain2DRef terrain;
 
-    std::vector<Transform*> znake_tiles;
+    std::vector<TransformRef> znake_tiles;
     std::list<ZnakeBound> znake_bounds;
 
     void OnAwake() override;

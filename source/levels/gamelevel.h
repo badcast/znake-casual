@@ -10,8 +10,9 @@ using namespace RoninEngine::UI;
 class GameLevel : public World
 {
 public:
+    Terrain2DRef terrain;
+    Ref<SnakePlayer> snakeplayer;
+
     GameLevel();
     void OnStart();
-    void OnUpdate();
-    void OnGizmos();
 };

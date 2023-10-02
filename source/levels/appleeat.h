@@ -21,7 +21,7 @@ class ResourceManager
 public:
     static SDL_Surface* GetSurface(const std::string& path)
     {
-        resource_id res = Resources::LoadImage(path, false);
+        ResId res = Resources::LoadImage(path, true);
 
         if (res == -1) {
             throw "Error";
@@ -30,9 +30,9 @@ public:
         return Resources::GetImageSource(res);
     }
 
-    static Sprite* make_sprite(SDL_Surface* surf)
+    static SpriteRef make_sprite(SDL_Surface* surf)
     {
-        Sprite* spr = Primitive::create_empty_sprite2D();
+        SpriteRef spr = Primitive::CreateEmptySprite();
         spr->setSurface(surf);
         return spr;
     }

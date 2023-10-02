@@ -11,8 +11,8 @@ struct
 } mids;
 
 int maxWidth = 7;
-int createWith = 3;
-int createStart = 1000;
+int createWith = 10;
+int createStart = 5000;
 
 AppleEatGameLevel::AppleEatGameLevel() : World("Apple Eater")
 {
@@ -100,7 +100,7 @@ void AppleEatGameLevel::OnStart()
     view->size = Vec2::one * 7;
     // view->renderType = SpriteRenderType::Tile;
     view->renderPresentMode = SpriteRenderPresentMode::Place;
-    floor->transform()->layer(-10);
+    floor->transform()->layer(-100);
     //  view->transform()->position(Vec2::infinity);
 
     GameObject *playerGameObject = create_game_object("Player");
@@ -129,13 +129,12 @@ void AppleEatGameLevel::OnStart()
     SpriteRenderer *view2 = appleObject->AddComponent<SpriteRenderer>();
     view2->set_sprite(ResourceManager::make_sprite(appleTexture));
     view2->size = Vec2::half;
-    apples.reserve(n + 1);
     apples.emplace_back(appleObject);
     for(x = 0; x < n; ++x)
     {
         appleObject = Instantiate(appleObject);
         appleObject->transform()->position(Vec2(Random::Range(-range, range), Random::Range(-range, range)));
-        apples.emplace_back(appleObject);
+        //apples.emplace_back(appleObject);
     }
 }
 
@@ -156,7 +155,7 @@ void AppleEatGameLevel::OnUpdate()
 
     Camera::mainCamera()->transform()->position(Vec2::Lerp(cameraPosition, player->transform()->position(), 9 * TimeEngine::deltaTime()));
 
-    std::vector<Transform *> finded = Physics2D::GetCircleCast<std::vector<Transform *>>(player->transform()->position(), distance, 1);
+    std::vector<Transform *> finded = Physics2D::GetCircleCast<std::vector<Transform *>>(player->transform()->position(), distance, 0);
     for(int x = 0, y = Math::Min<int>(128, finded.size()); x < y; ++x)
     {
         Transform *t;
@@ -191,7 +190,7 @@ void AppleEatGameLevel::OnUpdate()
         }
     }
 
-    static bool ___c = true;
+    static bool ___c = false;
 
     if(Input::GetMouseUp(MouseState::MouseMiddle))
         ___c = !___c;

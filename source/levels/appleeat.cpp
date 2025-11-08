@@ -144,11 +144,11 @@ void AppleEatGameLevel::OnUpdate()
 
     Camera::mainCamera()->transform()->position(Vec2::Lerp(cameraPosition, player->transform()->position(), 9 * Time::deltaTime()));
 
-    std::vector<Transform *> finded = Physics2D::GetCircleCast<std::vector<Transform *>>(player->transform()->position(), distance, 0);
+    std::vector<TransformRef> finded = Physics2D::GetCircleCast<std::vector<TransformRef>>(player->transform()->position(), distance, 0);
     for(int x = 0, y = Math::Min<int>(128, finded.size()); x < y; ++x)
     {
-        Transform *t;
-        Transform *f = finded.at(x);
+        TransformRef t;
+        TransformRef f = finded.at(x);
         if(f->gameObject()->name() != "apple (clone)")
             continue;
 
